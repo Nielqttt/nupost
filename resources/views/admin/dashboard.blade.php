@@ -253,16 +253,16 @@ body { background: var(--cream) !important; }
 .trop-count { font-size: 13px; font-weight: 700; color: var(--ink); width: 24px; text-align: right; flex-shrink: 0; }
 
 /* ── CATEGORY SECTION ────────────────────────────────── */
-.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 22px 22px; }
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; padding: 0 22px 22px; }
 .cat-pill {
-    background: var(--sand); border-radius: 12px; padding: 12px 14px;
-    display: flex; align-items: center; gap: 10px;
+    background: var(--sand); border-radius: 12px; padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px; min-height: 44px;
     transition: transform .15s;
 }
 .cat-pill:hover { transform: scale(1.02); }
 .cat-pill__dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.cat-pill__name { font-size: 12px; font-weight: 600; color: var(--ink); flex: 1; }
-.cat-pill__count { font-size: 13px; font-weight: 700; color: var(--ink); }
+.cat-pill__name { font-size: 11.5px; font-weight: 600; color: var(--ink); flex: 1; line-height: 1.2; white-space: normal; }
+.cat-pill__count { font-size: 13px; font-weight: 700; color: var(--ink); margin-left: 4px; }
 
 /* ── REPORTS SECTION ─────────────────────────────────── */
 .reports-row {
@@ -681,7 +681,7 @@ body { background: var(--cream) !important; }
         <div class="np">
             <div class="np__head">
                 <div>
-                    <div class="np__title">By Category</div>
+                    <div class="np__title">Category Breakdown</div>
                     <div class="np__sub">Request distribution</div>
                 </div>
             </div>
@@ -693,7 +693,7 @@ body { background: var(--cream) !important; }
                 @php $col = $cat_colors[$i % count($cat_colors)]; @endphp
                 <div class="cat-pill">
                     <span class="cat-pill__dot" style="background:{{ $col }};"></span>
-                    <span class="cat-pill__name">{{ $cat->category ?? 'Other' }}</span>
+                    <span class="cat-pill__name">{{ trim($cat->category ?? 'Other') }}</span>
                     <span class="cat-pill__count">{{ $cat->count }}</span>
                 </div>
                 @endforeach
