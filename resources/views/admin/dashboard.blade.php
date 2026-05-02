@@ -253,7 +253,7 @@ body { background: var(--cream) !important; }
 .trop-count { font-size: 13px; font-weight: 700; color: var(--ink); width: 24px; text-align: right; flex-shrink: 0; }
 
 /* ── CATEGORY SECTION ────────────────────────────────── */
-.cat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 22px 22px; }
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 22px 22px; }
 .cat-pill {
     background: var(--sand); border-radius: 12px; padding: 12px 14px;
     display: flex; align-items: center; gap: 10px;
@@ -693,7 +693,7 @@ body { background: var(--cream) !important; }
                 @php $col = $cat_colors[$i % count($cat_colors)]; @endphp
                 <div class="cat-pill">
                     <span class="cat-pill__dot" style="background:{{ $col }};"></span>
-                    <span class="cat-pill__name">{{ Str::limit($cat->category ?? 'Other',10) }}</span>
+                    <span class="cat-pill__name">{{ $cat->category ?? 'Other' }}</span>
                     <span class="cat-pill__count">{{ $cat->count }}</span>
                 </div>
                 @endforeach
