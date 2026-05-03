@@ -326,6 +326,109 @@ body { background: var(--cream) !important; }
 }
 .meta-chart-ph__title { font-size: 14px; font-weight: 600; color: #3b82f6; }
 .meta-chart-ph__sub { font-size: 11.5px; color: #93c5fd; text-align: center; max-width: 360px; }
+
+@media (max-width: 1024px) {
+    .db-wrap {
+        grid-template-columns: 1fr;
+    }
+
+    /* All grid items go single column */
+    .hero-card    { grid-column: 1; grid-row: auto; }
+    .calendar-card { grid-column: 1; grid-row: auto; }
+    .bubbles-card  { grid-column: 1; grid-row: auto; }
+    .mini-row      { grid-column: 1; grid-row: auto; }
+    .chart-row     { grid-column: 1; grid-row: auto; grid-template-columns: 1fr; }
+
+    /* Recent + Categories row */
+    .db-wrap > div[style*="grid-column:1/3;grid-row:5"] { grid-column: 1 !important; }
+    .db-wrap > div[style*="grid-column:1/3;grid-row:6"] { grid-column: 1 !important; }
+    .db-wrap > div[style*="grid-column:1/3;grid-row:7"] { grid-column: 1 !important; }
+
+    /* Calendar loses its row-span */
+    .calendar-card { cursor: default; }
+
+    /* Bubbles stacks chart + legend */
+    .bubbles-card { flex-direction: column; padding-top: 58px; }
+    .bubble-chart-wrap { width: 100%; }
+    .bubble-legend-wrap {
+        width: 100%; border-left: none;
+        border-top: 1.5px solid rgba(0,0,0,0.06);
+        padding-left: 0; padding-top: 16px;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .bubble-legend-title { grid-column: 1 / 3; }
+}
+
+@media (max-width: 768px) {
+    .db-wrap { padding: 0; gap: 12px; }
+
+    /* Hero */
+    .hero-card { padding: 22px 18px; min-height: unset; }
+    .hero-card__title { font-size: 24px; }
+    .hero-card__bottom { gap: 8px; }
+    .hero-stat { padding: 8px 12px; }
+    .hero-stat__num { font-size: 18px; }
+    /* Export button full width */
+    .hero-card__bottom > a { margin-left: 0 !important; width: 100%; justify-content: center; margin-top: 4px; }
+
+    /* Mini stats: 1 column */
+    .mini-row { grid-template-columns: 1fr !important; }
+    .mini-card { padding: 16px; }
+
+    /* Chart row already 1 col from 1024px breakpoint */
+    .chart-wrap { height: 160px; }
+
+    /* Recent + Categories stacks */
+    .db-wrap > div[style*="grid-template-columns:1fr 340px"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Reports row */
+    .rep-row-item {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .rep-row-item__name { width: auto; }
+    .rep-row-item__desc { width: 100%; order: 3; }
+    .rep-row-item__use  { display: none; }
+    .rep-row-item__dl   { margin-left: auto; }
+
+    /* Meta section: 2 columns instead of 4 */
+    .db-wrap > div[style*="grid-row:7"] > div > div[style*="grid-template-columns:repeat(4"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Meta full chart */
+    .meta-chart-ph { height: 120px; }
+    .meta-full { padding: 16px; }
+
+    /* Calendar card */
+    .calendar-card { padding: 16px 14px; }
+    .cal-grid-head span { font-size: 9px; }
+    .cal-day { font-size: 10.5px; }
+}
+
+@media (max-width: 480px) {
+    .hero-card__title { font-size: 20px; }
+    .mini-card__value { font-size: 20px; }
+
+    /* Bubble chart smaller on phones */
+    .bubble-chart-wrap { height: 160px; }
+    .bubble--total   { width: 90px; height: 90px; }
+    .bubble--pending { width: 64px; height: 64px; }
+    .bubble--review  { width: 54px; height: 54px; }
+    .bubble--approved{ width: 60px; height: 60px; }
+    .bubble--posted  { width: 50px; height: 50px; }
+    .bubble--rejected{ width: 44px; height: 44px; }
+
+    /* Reports: hide row count badge */
+    .rep-row-item__rows { display: none; }
+
+    /* Meta: 1 column */
+    .db-wrap > div[style*="grid-row:7"] > div > div[style*="grid-template-columns:repeat(4"] {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
 </style>
 @endsection
 
