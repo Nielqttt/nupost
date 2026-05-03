@@ -42,6 +42,15 @@ html, body { height: 100%; font-family: var(--font-inter); }
     border-radius: var(--radius-input); padding: 0 12px; font-size: 12px; outline: none; transition: border-color .15s;
 }
 .login__input:focus { border-color: var(--color-primary); }
+
+/* Hide browser-native password reveal button */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    display: none;
+}
+
 .login__input--password { font-family: var(--font-arimo); letter-spacing: 2px; }
 .remember-row { display: flex; align-items: center; gap: 8px; }
 .remember-row input[type="checkbox"] { display: none; }

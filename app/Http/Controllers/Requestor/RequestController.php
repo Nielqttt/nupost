@@ -326,66 +326,74 @@ class RequestController extends Controller
      * Calendar View
      */
     public function calendar(Request $request)
-    {
-        $user_name = session('name');
-        $month     = (int)($request->input('month', date('n')));
-        $year      = (int)($request->input('year',  date('Y')));
-        $is_public = (bool)session('cal_public', false);
+{
+    $user_name = session('name');
+    $month     = (int)($request->input('month', date('n')));
+    $year      = (int)($request->input('year',  date('Y')));
 
-        if ($month < 1)  { $month = 12; $year--; }
-        if ($month > 12) { $month = 1;  $year++; }
-
-        $prev_month = $month - 1; $prev_year = $year;
-        if ($prev_month < 1)  { $prev_month = 12; $prev_year--; }
-        $next_month = $month + 1; $next_year = $year;
-        if ($next_month > 12) { $next_month = 1;  $next_year++; }
-
-        // Query for calendar markers
-        $query = PostRequest::whereNotNull('preferred_date')
-                            ->whereMonth('preferred_date', $month)
-                            ->whereYear('preferred_date', $year);
-
-        if (!$is_public) {
-            $query->where('requester', $user_name);
-        }
-
-        $all_events = $query->orderBy('preferred_date')->get();
-
-        $events = [];
-        foreach ($all_events as $ev) {
-            $day = (int)date('j', strtotime($ev->preferred_date));
-            $events[$day][] = $ev;
-        }
-
-        // --- FIXED: ADDED UPCOMING VARIABLE ---
-        $upcoming_query = PostRequest::whereNotNull('preferred_date')
-            ->where('preferred_date', '>=', now()->startOfDay())
-            ->where('preferred_date', '<=', now()->addDays(7)->endOfDay());
-
-        if (!$is_public) {
-            $upcoming_query->where('requester', $user_name);
-        }
-
-        $upcoming = $upcoming_query->orderBy('preferred_date', 'asc')->get();
-        // --------------------------------------
-
-        $unread_count  = $this->getUnreadCount();
-        $today_day     = (int)date('j');
-        $today_month   = (int)date('n');
-        $today_year    = (int)date('Y');
-        $first_day     = (int)date('w', mktime(0, 0, 0, $month, 1, $year));
-        $days_in_month = (int)date('t', mktime(0, 0, 0, $month, 1, $year));
-        $days_in_prev  = (int)date('t', mktime(0, 0, 0, $prev_month, 1, $prev_year));
-        $month_name    = date('F Y', mktime(0, 0, 0, $month, 1, $year));
-
-        return view('requestor.calendar', compact(
-            'events', 'month', 'year', 'month_name',
-            'prev_month', 'prev_year', 'next_month', 'next_year',
-            'today_day', 'today_month', 'today_year',
-            'first_day', 'days_in_month', 'days_in_prev',
-            'is_public', 'unread_count', 'upcoming' // Isinama na ang 'upcoming' dito
-        ));
+    // Toggle public/private mode
+    if ($request->has('toggle_public')) {
+        $current = session('cal_public', false);
+        session(['cal_public' => !$current]);
+        return redirect()->route('requestor.calendar', [
+            'month' => $month,
+            'year'  => $year,
+        ]);
     }
+
+    $is_public = (bool)session('cal_public', false);
+
+    if ($month < 1)  { $month = 12; $year--; }
+    if ($month > 12) { $month = 1;  $year++; }
+
+    $prev_month = $month - 1; $prev_year = $year;
+    if ($prev_month < 1)  { $prev_month = 12; $prev_year--; }
+    $next_month = $month + 1; $next_year = $year;
+    if ($next_month > 12) { $next_month = 1;  $next_year++; }
+
+    $query = PostRequest::whereNotNull('preferred_date')
+                        ->whereMonth('preferred_date', $month)
+                        ->whereYear('preferred_date', $year);
+
+    if (!$is_public) {
+        $query->where('requester', $user_name);
+    }
+
+    $all_events = $query->orderBy('preferred_date')->get();
+
+    $events = [];
+    foreach ($all_events as $ev) {
+        $day = (int)date('j', strtotime($ev->preferred_date));
+        $events[$day][] = $ev;
+    }
+
+    $upcoming_query = PostRequest::whereNotNull('preferred_date')
+        ->where('preferred_date', '>=', now()->startOfDay())
+        ->where('preferred_date', '<=', now()->addDays(7)->endOfDay());
+
+    if (!$is_public) {
+        $upcoming_query->where('requester', $user_name);
+    }
+
+    $upcoming = $upcoming_query->orderBy('preferred_date', 'asc')->get();
+
+    $unread_count  = $this->getUnreadCount();
+    $today_day     = (int)date('j');
+    $today_month   = (int)date('n');
+    $today_year    = (int)date('Y');
+    $first_day     = (int)date('w', mktime(0, 0, 0, $month, 1, $year));
+    $days_in_month = (int)date('t', mktime(0, 0, 0, $month, 1, $year));
+    $days_in_prev  = (int)date('t', mktime(0, 0, 0, $prev_month, 1, $prev_year));
+    $month_name    = date('F Y', mktime(0, 0, 0, $month, 1, $year));
+
+    return view('requestor.calendar', compact(
+        'events', 'month', 'year', 'month_name',
+        'prev_month', 'prev_year', 'next_month', 'next_year',
+        'today_day', 'today_month', 'today_year',
+        'first_day', 'days_in_month', 'days_in_prev',
+        'is_public', 'unread_count', 'upcoming'
+    ));
+}
     /**
      * Get requests by specific date (AJAX)
      */
