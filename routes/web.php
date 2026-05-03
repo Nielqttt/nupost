@@ -84,7 +84,11 @@ Route::middleware('auth.nupost:requestor')->prefix('requestor')->name('requestor
     Route::get('/profile',              [ProfileController::class, 'index'])->name('profile');
     Route::get('/profile/edit',         [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile/edit',        [ProfileController::class, 'update'])->name('profile.update');
+
+    // Settings
     Route::get('/settings',             [ProfileController::class, 'settings'])->name('settings');
+    Route::post('/settings',            [ProfileController::class, 'saveSettings'])->name('settings.save');
+    Route::post('/settings/password',   [ProfileController::class, 'updatePassword'])->name('settings.password');
 });
 
 // ─── ADMIN ROUTES ──────────────────────────────────────────────────────────
@@ -166,21 +170,21 @@ Route::post('/api/generate-caption', function (Request $request) {
 
 
 Route::post('/api/bulldog-chat', function (Illuminate\Http\Request $request) {
- 
+
     $apiKey = env('GROQ_API_KEY');
- 
+
     if (!$apiKey) {
         return response()->json([
             'error' => 'GROQ_API_KEY is missing in .env — get a free key at https://console.groq.com'
         ], 500);
     }
- 
+
     $messages = $request->input('messages', []);
- 
+
     if (empty($messages)) {
         return response()->json(['error' => 'No messages provided.'], 400);
     }
- 
+
     try {
         $response = Illuminate\Support\Facades\Http::withHeaders([
             'Authorization' => 'Bearer ' . $apiKey,
@@ -194,20 +198,20 @@ Route::post('/api/bulldog-chat', function (Illuminate\Http\Request $request) {
             'max_tokens'  => 300,
             'temperature' => 0.7,
         ]);
- 
+
         $data = $response->json();
- 
+
         if ($response->successful() && isset($data['choices'][0]['message']['content'])) {
             return response()->json([
                 'reply' => trim($data['choices'][0]['message']['content'])
             ]);
         }
- 
+
         $errorMsg = $data['error']['message'] ?? 'Unknown Groq API error';
         return response()->json(['error' => 'Groq API Error: ' . $errorMsg], 400);
- 
+
     } catch (\Exception $e) {
         return response()->json(['error' => 'Connection error: ' . $e->getMessage()], 500);
     }
- 
+
 })->middleware('auth.nupost:admin');
