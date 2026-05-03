@@ -179,6 +179,9 @@
 .bl-name { font-size: 12.5px; color: var(--ink-mid); flex: 1; }
 .bl-num  { font-size: 12.5px; font-weight: 700; color: var(--ink); }
 
+/* Mobile bubble grid — hidden on desktop */
+.bubble-mobile-grid { display: none; }
+
 /* ── MINI STATS ROW ──────────────────── */
 .mini-row {
     display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
@@ -270,7 +273,7 @@
     }
 
     /* Stack all grid items into a single column */
-    .hero-card    { grid-column: 1; grid-row: auto; }
+    .hero-card     { grid-column: 1; grid-row: auto; }
     .calendar-card { grid-column: 1; grid-row: auto; }
     .bubbles-card  { grid-column: 1; grid-row: auto; }
     .mini-row      { grid-column: 1; grid-row: auto; grid-template-columns: 1fr; }
@@ -288,9 +291,46 @@
     .calendar-card { cursor: default; }
     .calendar-card:hover { transform: none; box-shadow: 0 8px 32px rgba(0,26,77,0.3); }
 
-    /* Bubbles: stack chart + legend vertically */
-    .bubble-inner { flex-direction: column; gap: 20px; }
-    .bubble-chart-wrap { width: 100%; height: 220px; }
+    /* ── BUBBLES MOBILE FIX ──
+       Hide the absolute-positioned chart, show a clean flex-wrap grid instead */
+    .bubble-inner { flex-direction: column; gap: 16px; }
+    .bubble-chart-wrap { display: none; }
+
+    .bubble-mobile-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        padding: 4px 0 8px;
+    }
+    .bubble-mobile-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 68px; height: 68px;
+        border-radius: 50%;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .bubble-mobile-item.b-total {
+        width: 90px; height: 90px;
+        background: linear-gradient(135deg,#1e4fd8,#002366);
+    }
+    .bubble-mobile-item.b-pending  { background: linear-gradient(135deg,#f59e0b,#d97706); }
+    .bubble-mobile-item.b-review   { background: linear-gradient(135deg,#38bdf8,#0284c7); }
+    .bubble-mobile-item.b-approved { background: linear-gradient(135deg,#10b981,#059669); }
+    .bubble-mobile-item.b-posted   { background: linear-gradient(135deg,#8b5cf6,#6d28d9); }
+    .bubble-mobile-item.b-rejected { background: linear-gradient(135deg,#ef4444,#dc2626); }
+    .bubble-mobile-item .bm-num {
+        font-size: 20px; font-weight: 700;
+        color: white; line-height: 1;
+    }
+    .bubble-mobile-item.b-total .bm-num { font-size: 26px; }
+    .bubble-mobile-item .bm-lbl {
+        font-size: 9px; font-weight: 500;
+        color: rgba(255,255,255,0.85); margin-top: 3px; text-align: center;
+    }
+
     .bubble-legend-wrap {
         width: 100%; border-left: none;
         border-top: 1.5px solid rgba(0,0,0,0.06);
@@ -430,7 +470,6 @@
             <div class="cal-legend-item"><span class="cal-legend-dot" style="background:#f59e0b;opacity:.6;"></span>Has request</div>
             <div class="cal-legend-item"><span class="cal-legend-dot" style="background:#ef4444;"></span>3+ requests</div>
         </div>
-        {{-- Public Calendar Button --}}
         <a href="{{ route('requestor.calendar', ['toggle_public' => 1]) }}"
            class="cal-public-btn" onclick="event.stopPropagation()">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -443,6 +482,8 @@
         <div class="bubbles-card__title">Request Status</div>
         <div class="bubbles-card__sub">Overview of all your submissions</div>
         <div class="bubble-inner">
+
+            {{-- Desktop: absolute-positioned bubble chart --}}
             <div class="bubble-chart-wrap">
                 <div class="bubble bubble--total">
                     <div class="bubble__num">{{ $total_all }}</div>
@@ -469,6 +510,35 @@
                     <div class="bubble__lbl">Rejected</div>
                 </div>
             </div>
+
+            {{-- Mobile: clean flex-wrap grid, no overlapping --}}
+            <div class="bubble-mobile-grid">
+                <div class="bubble-mobile-item b-total">
+                    <div class="bm-num">{{ $total_all }}</div>
+                    <div class="bm-lbl">Total</div>
+                </div>
+                <div class="bubble-mobile-item b-pending">
+                    <div class="bm-num">{{ $pending }}</div>
+                    <div class="bm-lbl">Pending</div>
+                </div>
+                <div class="bubble-mobile-item b-review">
+                    <div class="bm-num">{{ $review }}</div>
+                    <div class="bm-lbl">Review</div>
+                </div>
+                <div class="bubble-mobile-item b-approved">
+                    <div class="bm-num">{{ $approved }}</div>
+                    <div class="bm-lbl">Approved</div>
+                </div>
+                <div class="bubble-mobile-item b-posted">
+                    <div class="bm-num">{{ $posted }}</div>
+                    <div class="bm-lbl">Posted</div>
+                </div>
+                <div class="bubble-mobile-item b-rejected">
+                    <div class="bm-num">{{ $rejected }}</div>
+                    <div class="bm-lbl">Rejected</div>
+                </div>
+            </div>
+
             <div class="bubble-legend-wrap">
                 <div class="bubble-legend-title">Breakdown</div>
                 @foreach([
