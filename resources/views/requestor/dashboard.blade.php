@@ -124,7 +124,6 @@
 .cal-legend-item { display: flex; align-items: center; gap: 5px; font-size: 9.5px; color: rgba(255,255,255,0.4); }
 .cal-legend-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-/* Public calendar toggle */
 .cal-public-btn {
     display: flex; align-items: center; justify-content: center; gap: 7px;
     margin-top: 14px; padding: 9px 14px;
@@ -260,6 +259,53 @@
 .empty-state { padding: 40px 20px; text-align: center; color: #9ca3af; }
 .empty-state p { font-size: 13px; margin-top: 10px; }
 .empty-state a { color: #1e4fd8; font-weight: 600; text-decoration: none; }
+
+/* ── RESPONSIVE ──────────────────────── */
+@media (max-width: 768px) {
+
+    .db-wrap {
+        padding: 16px 14px 40px;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+
+    /* Stack all grid items into a single column */
+    .hero-card    { grid-column: 1; grid-row: auto; }
+    .calendar-card { grid-column: 1; grid-row: auto; }
+    .bubbles-card  { grid-column: 1; grid-row: auto; }
+    .mini-row      { grid-column: 1; grid-row: auto; grid-template-columns: 1fr; }
+    .bottom-row    { grid-column: 1; grid-row: auto; grid-template-columns: 1fr; }
+
+    /* Hero adjustments */
+    .hero-card { padding: 22px 20px; min-height: unset; }
+    .hero-card__title { font-size: 24px; }
+    .hero-card__bottom { gap: 8px; }
+    .hero-stat { padding: 8px 12px; }
+    .hero-stat__num { font-size: 18px; }
+    .hero-card__btn { margin-left: 0; width: 100%; justify-content: center; margin-top: 4px; }
+
+    /* Calendar: show as a compact strip, no row-span */
+    .calendar-card { cursor: default; }
+    .calendar-card:hover { transform: none; box-shadow: 0 8px 32px rgba(0,26,77,0.3); }
+
+    /* Bubbles: stack chart + legend vertically */
+    .bubble-inner { flex-direction: column; gap: 20px; }
+    .bubble-chart-wrap { width: 100%; height: 220px; }
+    .bubble-legend-wrap {
+        width: 100%; border-left: none;
+        border-top: 1.5px solid rgba(0,0,0,0.06);
+        padding-left: 0; padding-top: 16px;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .bubble-legend-title { grid-column: 1 / 3; }
+
+    /* Mini stats: 1 column */
+    .mini-card { padding: 16px; }
+    .mini-card__value { font-size: 22px; }
+
+    /* Bottom row panels full width */
+    .panel, .qa-panel { border-radius: 16px; }
+}
 </style>
 @endsection
 
