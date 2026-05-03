@@ -566,12 +566,34 @@
 // ── FIXED FOOTER ──────────────────────────────────────────────────
 const FIXED_FOOTER = "\n\nApply now and secure your place for the upcoming academic year: https://onlineapp.nu-lipa.edu.ph/quest/register.php\nExperience \u{1D60C}\u{1D625}\u{1D636}\u{1D624}\u{1D622}\u{1D635}\u{1D62A}\u{1D630}\u{1D62F} \u{1D61B}\u{1D629}\u{1D622}\u{1D635} \u{1D61E}\u{1D630}\u{1D633}\u{1D62C}\u{1D634}.\n#NULipa\n#EducationThatWorks";
 
-document.getElementById('create-form').addEventListener('submit', function() {
+document.getElementById('create-form').addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('.btn-submit');
+
+    // Prevent double submission
+    if (submitBtn.dataset.submitted === 'true') {
+        e.preventDefault();
+        return;
+    }
+
+    // Append fixed footer to caption
     const box     = document.getElementById('caption-field');
     const current = box.value.trim();
     if (current && !current.includes('onlineapp.nu-lipa.edu.ph')) {
         box.value = current + FIXED_FOOTER;
     }
+
+    // Lock the button
+    submitBtn.dataset.submitted = 'true';
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.6';
+    submitBtn.style.cursor = 'not-allowed';
+    submitBtn.innerHTML = `
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" 
+             viewBox="0 0 24 24" style="animation:spin 1s linear infinite;display:inline-block;">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Submitting...`;
 });
 
 // ── PLATFORM BUTTONS ──────────────────────────────────────────────
