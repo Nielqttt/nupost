@@ -58,11 +58,13 @@
     color: var(--text-faint); margin-bottom: 7px;
     text-transform: uppercase; letter-spacing: 0.4px;
 }
-.field input[type="password"] {
+.field input[type="password"],
+.field input[type="text"] {
     width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
     padding: 12px 16px; font-size: 14px; font-family: var(--font);
     color: var(--text); background: #fafbfd; outline: none;
     transition: border-color .15s, box-shadow .15s, background .15s;
+    box-sizing: border-box;
 }
 .field input:focus {
     border-color: #3b6ef5; background: white;
@@ -179,27 +181,16 @@
             @csrf
             <div class="field">
                 <label>Current Password</label>
-
-                <input type="password" name="current_password" placeholder="Enter your current password" autocomplete="current-password">
-
                 <div style="position:relative;">
                     <input type="password" name="current_password" id="current_password" placeholder="Enter your current password" autocomplete="current-password" style="padding-right:40px;">
                     <button type="button" onclick="togglePassword('current_password', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#6b7280; display:flex; align-items:center; padding:0;">
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
                 </div>
-
             </div>
             <div class="field-row">
                 <div class="field">
                     <label>New Password</label>
-
-                    <input type="password" name="new_password" placeholder="Minimum 8 characters" autocomplete="new-password">
-                </div>
-                <div class="field">
-                    <label>Confirm New Password</label>
-                    <input type="password" name="confirm_password" placeholder="Re-enter new password" autocomplete="new-password">
-
                     <div style="position:relative;">
                         <input type="password" name="new_password" id="new_password" placeholder="Minimum 8 characters" autocomplete="new-password" style="padding-right:40px;">
                         <button type="button" onclick="togglePassword('new_password', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#6b7280; display:flex; align-items:center; padding:0;">
@@ -215,7 +206,6 @@
                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                     </div>
-
                 </div>
             </div>
             <button type="submit" class="btn-primary">
@@ -349,6 +339,5 @@ function togglePassword(id, btn) {
         svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
     }
 }
-
 </script>
 @endsection
