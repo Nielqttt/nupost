@@ -206,7 +206,91 @@
 .req-tag--mine    { background:#ffedd5; color:#c2410c; }
 .req-tag--others  { background:#f1f5f9; color:#64748b; }
 
+@media (max-width: 900px) {
+    .main { padding: 16px 14px 36px; }
 
+    /* Page header stacks vertically */
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .toggle-wrap { margin-top: 0; }
+
+    /* Calendar layout: single column */
+    .cal-layout {
+        grid-template-columns: 1fr;
+    }
+
+    /* Toolbar stacks on small screens */
+    .cal-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 14px 16px;
+    }
+    .cal-toolbar-left {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .cal-today-btn { text-align: center; }
+
+    /* Shrink calendar cells so they fit */
+    .cal-grid tbody td {
+        height: 60px;
+        padding: 4px 3px;
+    }
+    .cal-grid thead th {
+        padding: 8px 2px;
+        font-size: 9px;
+    }
+    .cal-day-num {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        margin-bottom: 1px;
+    }
+    .cal-event {
+        font-size: 8.5px;
+        padding: 1px 4px;
+    }
+    .day-load { height: 2px; margin-bottom: 2px; }
+    .day-count { font-size: 8px; }
+
+    /* Legend wraps */
+    .cal-legend {
+        gap: 10px;
+        padding: 10px 14px;
+        flex-wrap: wrap;
+    }
+    .legend-item { font-size: 10px; }
+
+    /* Side panel: goes below calendar, loses sticky */
+    .side-col {
+        position: static;
+    }
+    .dp__body { max-height: 300px; }
+
+    /* Upcoming card */
+    .upcoming-card { padding: 16px 16px; }
+}
+
+@media (max-width: 480px) {
+    /* Even smaller cells on phones */
+    .cal-grid tbody td { height: 48px; padding: 3px 2px; }
+    .cal-grid thead th { font-size: 8px; letter-spacing: 0; }
+    .cal-day-num { width: 18px; height: 18px; font-size: 9px; }
+    .cal-event { display: none; } /* hide pills, rely on load bar only */
+    .day-count { font-size: 8px; }
+
+    /* Public banner wraps nicely */
+    .public-banner { font-size: 11.5px; padding: 10px 12px; }
+
+    /* Upcoming items */
+    .upcoming-title { font-size: 12px; }
+    .upcoming-meta  { font-size: 10.5px; }
+}
 </style>
 @endsection
 
