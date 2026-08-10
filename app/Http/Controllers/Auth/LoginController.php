@@ -34,7 +34,19 @@ class LoginController extends Controller
         // Database login check
         $user = User::where('email', $email)->first();
 
-        if ($user && (Hash::check($password, $user->password) || $user->password === $password)) {
+        $pwHash = (string) ($user->password ?? '');
+        $pwMatch = false;
+
+        if ($user) {
+            $info = password_get_info($pwHash);
+            if ($info && isset($info['algoName']) && $info['algoName'] !== 'unknown') {
+                $pwMatch = Hash::check($password, $pwHash);
+            } else {
+                $pwMatch = ($pwHash === $password);
+            }
+        }
+
+        if ($user && $pwMatch) {
             // Check role
             if ($user->role === 'admin') {
                 LoginAttempt::create(['email' => $email, 'ip_address' => $request->ip(), 'success' => true, 'attempted_at' => now()]);
@@ -44,6 +56,7 @@ class LoginController extends Controller
                     'admin_email' => $user->email,
                     'admin_name'  => $user->name,
                 ]);
+                \App\Models\AuditLog::record('admin_login', $user->id);
                 return redirect()->route('admin.dashboard');
             }
 
@@ -55,7 +68,17 @@ class LoginController extends Controller
                 $existingOtp = \App\Models\OtpCode::where('user_id', $user->id)
                     ->where('is_used', false)
                     ->where('expires_at', '>', now())
+                    ->orderByDesc('id')
                     ->first();
+
+                // Store user details in session so they can verify via the form
+                session([
+                    'reg_user_id'  => $user->id,
+                    'reg_email'    => $user->email,
+                    'reg_name'     => $user->name,
+                    'otp_sent'     => true,
+                    'masked_email' => $this->maskEmail($user->email),
+                ]);
 
                 if (!$existingOtp) {
                     $otp        = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
@@ -78,10 +101,10 @@ class LoginController extends Controller
                         \Log::error('[NUPost] Login auto-resend OTP failed: ' . $e->getMessage());
                     }
 
-                    return back()->withInput()->with('error', 'Please verify your email first. A new verification link has been sent to your inbox.');
+                    return redirect()->route('otp.index')->with('error', 'Please verify your email first. A new verification code has been sent to your inbox.');
                 }
 
-                return back()->withInput()->with('error', 'Please verify your email first. Check your inbox for the verification link.');
+                return redirect()->route('otp.index')->with('error', 'Please verify your email first. We sent a verification code to your inbox.');
             }
 
             LoginAttempt::create(['email' => $email, 'ip_address' => $request->ip(), 'success' => true, 'attempted_at' => now()]);
@@ -91,6 +114,8 @@ class LoginController extends Controller
                 'user_id' => $user->id,
                 'name'    => $user->name,
             ]);
+
+            \App\Models\AuditLog::record('user_login', $user->id);
 
             // Remember Me
             if ($request->has('remember_me')) {
@@ -111,6 +136,16 @@ class LoginController extends Controller
 
     public function destroy(Request $request)
     {
+        $role = session('role');
+        if ($role === 'admin') {
+            $user = User::where('email', session('admin_email'))->first();
+            if ($user) {
+                \App\Models\AuditLog::record('admin_logout', $user->id);
+            }
+        } elseif ($role === 'requestor' && session('user_id')) {
+            \App\Models\AuditLog::record('user_logout', session('user_id'));
+        }
+
         if ($request->cookie('remember_token')) {
             RememberedDevice::where('token', $request->cookie('remember_token'))->delete();
             cookie()->queue(cookie()->forget('remember_token'));
@@ -119,5 +154,12 @@ class LoginController extends Controller
         session()->invalidate();
         session()->regenerateToken();
         return redirect()->route('login');
+    }
+
+    private function maskEmail(string $email): string
+    {
+        [$local, $domain] = explode('@', $email);
+        $masked = substr($local, 0, 2) . str_repeat('*', max(strlen($local) - 3, 2)) . substr($local, -1);
+        return $masked . '@' . $domain;
     }
 }

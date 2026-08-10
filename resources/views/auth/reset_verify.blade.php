@@ -69,6 +69,9 @@ html, body { height: 100%; font-family: var(--font); }
         @if(session('error'))
             <div class="alert alert--error">{{ session('error') }}</div>
         @endif
+        @if(session('success'))
+            <div class="alert alert--success">{{ session('success') }}</div>
+        @endif
 
         <form method="POST" action="{{ route('password.verify.store') }}" id="otp-form" style="width:100%;">
             @csrf
@@ -82,7 +85,7 @@ html, body { height: 100%; font-family: var(--font); }
         </form>
 
         <div class="resend-row">
-            Didn't receive it? <a href="{{ route('password.forgot') }}">Request new code</a>
+            Didn't receive it? <a href="{{ route('password.resend') }}">Resend Code</a>
         </div>
         <a href="{{ route('login') }}" class="back-link">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
@@ -102,6 +105,8 @@ boxes.forEach((box, i) => {
     });
     box.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' && !box.value && i > 0) { boxes[i - 1].focus(); boxes[i - 1].value = ''; boxes[i - 1].classList.remove('filled'); }
+        if (e.key === 'ArrowLeft'  && i > 0)                boxes[i - 1].focus();
+        if (e.key === 'ArrowRight' && i < boxes.length - 1) boxes[i + 1].focus();
     });
     box.addEventListener('paste', (e) => {
         e.preventDefault();

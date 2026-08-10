@@ -96,6 +96,10 @@
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             Notifications
         </button>
+        <button class="settings-nav__item" onclick="navScrollTo(event,'kaye-token')">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            Ms. Kaye's Token
+        </button>
         <button class="settings-nav__item" onclick="navScrollTo(event,'system')">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             System Info
@@ -187,6 +191,76 @@
             </div>
         </div>
 
+        {{-- MS KAYE'S ACCESS TOKEN --}}
+        <div class="sp" id="kaye-token">
+            <div class="sp__head">
+                <div class="sp__title">Ms. Kaye's Access Token</div>
+                <div class="sp__sub">Generate and manage secure dashboard access tokens (60-day validity)</div>
+            </div>
+            <div class="sp__body">
+                <div style="background:var(--navy-pale);border:1.5px solid rgba(0,35,102,0.15);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--navy);line-height:1.5;">
+                    Ms. Kaye's access is token-based with a strict <strong>60-day validity</strong>. This allows passwordless access to a dedicated dashboard. Once expired, she will be prompted to request a new token from this settings page.
+                </div>
+
+                @if($kayeToken)
+                    @php
+                        $isExpired = !$kayeToken->isValid();
+                        $loginUrl = url('/kaye/login/' . $kayeToken->token);
+                    @endphp
+
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:18px; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Active Token Link</span>
+                            </div>
+                            <div>
+                                @if($isExpired)
+                                    <span style="font-size:11px; padding:2px 8px; background:#fee2e2; color:#dc2626; border-radius:20px; font-weight:700;">EXPIRED</span>
+                                @else
+                                    <span style="font-size:11px; padding:2px 8px; background:#dcfce7; color:#16a34a; border-radius:20px; font-weight:700;">ACTIVE</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:10px; margin-bottom:14px;">
+                            <input type="text" id="kayeLinkInput" value="{{ $loginUrl }}" readonly style="background:#f1f5f9; cursor:text; flex-grow:1; font-family:monospace; font-size:12.5px;">
+                            <button type="button" onclick="copyKayeLink()" style="background:var(--navy); color:white; border:none; border-radius:10px; padding:0 16px; font-size:13px; font-weight:600; cursor:pointer;">Copy Link</button>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:12.5px; color:#475569; padding-top:12px; border-top:1px dashed #e2e8f0;">
+                            <div>
+                                <strong>Generated on:</strong> {{ $kayeToken->created_at->format('M j, Y g:i A') }}
+                            </div>
+                            <div>
+                                <strong>Expires:</strong> {{ $kayeToken->expires_at->format('M j, Y g:i A') }} 
+                                <span style="color:#64748b; font-size:11.5px;">({{ \Carbon\Carbon::parse($kayeToken->expires_at)->diffForHumans() }})</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <form action="{{ route('admin.settings.kaye-token.generate') }}" method="POST">
+                            @csrf
+                            <button type="submit" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer;">Generate New Token</button>
+                        </form>
+                        <form action="{{ route('admin.settings.kaye-token.revoke') }}" method="POST">
+                            @csrf
+                            <button type="submit" style="background:#ef4444; color:white; border:none; padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer;">Revoke Access</button>
+                        </form>
+                    </div>
+                @else
+                    <div style="text-align:center; padding:30px 20px; border:1.5px dashed #cbd5e1; border-radius:12px; margin-bottom:20px; color:#64748b; font-size:13.5px;">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin:0 auto 10px; color:#94a3b8; display:block;"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                        No active token generated yet.
+                    </div>
+                    <form action="{{ route('admin.settings.kaye-token.generate') }}" method="POST">
+                        @csrf
+                        <button type="submit" style="background:var(--navy); color:white; border:none; padding:10px 20px; border-radius:10px; font-size:13.5px; font-weight:600; cursor:pointer;">Generate Ms. Kaye's Access Token</button>
+                    </form>
+                @endif
+            </div>
+        </div>
+
         {{-- SYSTEM INFO --}}
         <div class="sp" id="system">
             <div class="sp__head">
@@ -236,6 +310,18 @@ function navScrollTo(e, id){
     }
     document.querySelectorAll('.settings-nav__item').forEach(el => el.classList.remove('active'));
     e.currentTarget.classList.add('active');
+}
+function copyKayeLink() {
+    const input = document.getElementById('kayeLinkInput');
+    if (input) {
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value).then(() => {
+            alert('Ms. Kaye\'s access link copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
 }
 setTimeout(()=>document.getElementById('toast')?.remove(), 3000);
 </script>

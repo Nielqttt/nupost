@@ -90,7 +90,7 @@ class LegacyMobileApiController extends Controller
         }
 
         $user = DB::table('users')
-            ->select('id', 'name', 'email', 'password', 'is_verified')
+            ->select('id', 'name', 'email', 'password', 'is_verified', 'role')
             ->where('email', $email)
             ->first();
 
@@ -102,7 +102,14 @@ class LegacyMobileApiController extends Controller
         }
 
         $pwHash = (string) ($user->password ?? '');
-        $pwMatch = $pwHash === $password || Hash::check($password, $pwHash);
+        $pwMatch = false;
+
+        $info = password_get_info($pwHash);
+        if ($info && isset($info['algoName']) && $info['algoName'] !== 'unknown') {
+            $pwMatch = Hash::check($password, $pwHash);
+        } else {
+            $pwMatch = ($pwHash === $password);
+        }
 
         if (!$pwMatch) {
             return response()->json([
@@ -117,6 +124,9 @@ class LegacyMobileApiController extends Controller
                 'message' => 'Please verify your email first',
             ], 403);
         }
+
+        $actionType = ($user->role ?? '') === 'admin' ? 'admin_login' : 'user_login';
+        \App\Models\AuditLog::record($actionType, $user->id);
 
         return response()->json([
             'success' => true,
@@ -319,6 +329,12 @@ class LegacyMobileApiController extends Controller
 
         $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         
+        // Invalidate previous unused codes
+        DB::table('otp_codes')
+            ->where('user_id', $user->id)
+            ->where('is_used', 0)
+            ->update(['is_used' => 1]);
+
         DB::table('otp_codes')->insert([
             'user_id' => $user->id,
             'email' => $email,
@@ -421,7 +437,10 @@ class LegacyMobileApiController extends Controller
         }
 
         $table = $this->requestsTable();
-        $query = DB::table($table)->where('requester', (string) ($user->name ?? ''));
+        $query = DB::table($table);
+        if (($user->role ?? '') !== 'admin') {
+            $query->where('requester', (string) ($user->name ?? ''));
+        }
         if ($status !== '' && strtolower($status) !== 'all') {
             if (strtolower($status) === 'pending') {
                 $query->where(function ($q) {
@@ -546,6 +565,12 @@ class LegacyMobileApiController extends Controller
 
                 $newName = uniqid('media_', true) . ($ext !== '' ? ".{$ext}" : '');
                 $file->move($uploadDir, $newName);
+
+                // Image Optimization
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+                    \App\Services\ImageOptimizer::optimize($uploadDir . '/' . $newName);
+                }
+
                 $mediaNames[] = $newName;
             }
         }
@@ -576,6 +601,9 @@ class LegacyMobileApiController extends Controller
         if (Schema::hasColumn($table, 'request_id')) {
             DB::table($table)->where('id', $newId)->update(['request_id' => $reqCode]);
         }
+
+        // Audit Log
+        \App\Models\AuditLog::record('post_request_created', $user->id);
 
         return response()->json([
             'success' => true,
@@ -1115,6 +1143,7 @@ class LegacyMobileApiController extends Controller
                     'id' => (int) $requestRow->id,
                     'request_id' => (string) ($requestRow->request_id ?? ''),
                     'title' => (string) ($requestRow->title ?? ''),
+                    'requester' => (string) ($requestRow->requester ?? ''),
                     'status' => trim((string) ($requestRow->status ?? '')) !== ''
                         ? (string) $requestRow->status
                         : 'Pending',
@@ -1123,6 +1152,9 @@ class LegacyMobileApiController extends Controller
                     'preferred_date' => (string) ($requestRow->preferred_date ?? ''),
                     'priority' => (string) ($requestRow->priority ?? ''),
                     'category' => (string) ($requestRow->category ?? ''),
+                    'platform' => (string) ($requestRow->platform ?? ''),
+                    'caption' => (string) ($requestRow->caption ?? ''),
+                    'media_file' => (string) ($requestRow->media_file ?? ''),
                 ],
                 'activities' => $activities,
             ],
@@ -1385,6 +1417,341 @@ class LegacyMobileApiController extends Controller
 
         // Logic moved to local app storage to avoid database column dependencies
         return response()->json(['success' => true]);
+    }
+
+    private function getStatusEmailHtml(string $name, string $title, string $status, string $note): string
+    {
+        $noteHtml = $note !== '' ? "<p style='margin:16px 0;padding:12px;background:#f8fafc;border-left:4px solid #002366;font-size:14px;color:#334155;font-style:italic;'>\"$note\"</p>" : '';
+        return "<!DOCTYPE html><html><body style='margin:0;padding:0;background:#f5f6fa;font-family:Arial,sans-serif;'>
+        <table width='100%' cellpadding='0' cellspacing='0' style='background:#f5f6fa;padding:40px 0;'>
+        <tr><td align='center'>
+        <table width='520' cellpadding='0' cellspacing='0' style='background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);'>
+        <tr><td style='background:#002366;padding:32px 40px;text-align:center;'>
+            <div style='font-size:22px;font-weight:700;color:white;'>NUPost</div>
+            <div style='font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;'>NU Lipa Social Media Request System</div>
+        </td></tr>
+        <tr><td style='padding:36px 40px;'>
+            <h1 style='font-size:18px;font-weight:700;color:#111827;margin:0 0 16px;'>Request Status Updated</h1>
+            <p style='font-size:14px;color:#4b5563;line-height:1.6;'>Hi <strong>$name</strong>,</p>
+            <p style='font-size:14px;color:#4b5563;line-height:1.6;'>The status of your request <strong>\"$title\"</strong> has been updated to <strong style='color:#002366;'>$status</strong>.</p>
+            $noteHtml
+            <p style='font-size:14px;color:#4b5563;line-height:1.6;margin-top:20px;'>Log in to the system to track the progress or view comments.</p>
+        </td></tr>
+        <tr><td style='background:#f5f6fa;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;'>
+            <p style='font-size:12px;color:#9ca3af;margin:0;'>&copy; " . date('Y') . " NUPost &mdash; NU Lipa. Automated message, do not reply.</p>
+        </td></tr>
+        </table></td></tr></table></body></html>";
+    }
+
+    private function getNotifData(string $status, string $title, string $note): array
+    {
+        return match ($status) {
+            'Under Review' => [
+                'title'   => 'Request Under Review',
+                'message' => "Your request \"$title\" is now under review by the admin." . ($note ? " Note: $note" : ''),
+                'type'    => 'review',
+            ],
+            'Approved' => [
+                'title'   => 'Request Approved 🎉',
+                'message' => "Your request \"$title\" has been approved! It will be posted on the scheduled date." . ($note ? " Note: $note" : ''),
+                'type'    => 'approved',
+            ],
+            'Posted' => [
+                'title'   => 'Request Posted 🚀',
+                'message' => "Your request \"$title\" has been posted on the target social media platform." . ($note ? " Note: $note" : ''),
+                'type'    => 'posted',
+            ],
+            'Rejected' => [
+                'title'   => 'Request Returned / Rejected',
+                'message' => "Your request \"$title\" requires revision or was rejected." . ($note ? " Reason: $note" : ''),
+                'type'    => 'rejected',
+            ],
+            default => [
+                'title'   => 'Request Status Update',
+                'message' => "Your request \"$title\" status has been updated to $status." . ($note ? " Note: $note" : ''),
+                'type'    => 'status_update',
+            ],
+        };
+    }
+
+    public function updateRequestStatus(Request $request): JsonResponse
+    {
+        $userId = (int) $request->input('user_id', 0);
+        $requestId = (int) $request->input('request_id', 0);
+        $newStatus = trim((string) $request->input('status', ''));
+        $note = trim((string) $request->input('note', ''));
+
+        if ($userId <= 0 || $requestId <= 0 || $newStatus === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'user_id, request_id, and status are required',
+            ], 422);
+        }
+
+        $user = DB::table('users')->where('id', $userId)->first();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        if (($user->role ?? '') !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Admin role required.',
+            ], 403);
+        }
+
+        if ($err = $this->ensureRequestsTableExists()) {
+            return $err;
+        }
+
+        $table = $this->requestsTable();
+        $req = DB::table($table)->where('id', $requestId)->first();
+        if (!$req) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Request not found',
+            ], 404);
+        }
+
+        $allowed = ['Pending Review', 'Under Review', 'Approved', 'Posted', 'Rejected'];
+        $normalizedStatus = $this->normalizeRequestStatus($newStatus);
+        if (!in_array($normalizedStatus, $allowed, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid status. Allowed values are: ' . implode(', ', $allowed),
+            ], 400);
+        }
+
+        $oldStatus = $req->status;
+
+        // Update request status
+        DB::table($table)->where('id', $requestId)->update([
+            'status' => $normalizedStatus,
+            'updated_at' => now(),
+        ]);
+
+        // Register Activity status change
+        if (Schema::hasTable('request_activity')) {
+            DB::table('request_activity')->insert([
+                'request_id' => $requestId,
+                'actor' => $user->name ?? 'Admin',
+                'action' => "Status changed from \"$oldStatus\" to \"$normalizedStatus\"",
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            if ($note !== '') {
+                DB::table('request_activity')->insert([
+                    'request_id' => $requestId,
+                    'actor' => $user->name ?? 'Admin',
+                    'action' => "Admin note: $note",
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        // Register comment if note is present
+        if ($note !== '' && Schema::hasTable('request_comments')) {
+            DB::table('request_comments')->insert([
+                'request_id' => $requestId,
+                'sender_role' => 'admin',
+                'sender_name' => $user->name ?? 'Admin',
+                'message' => $note,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Send notifications to requester user
+        $requesterName = $req->requester;
+        $requesterUser = DB::table('users')->where('name', $requesterName)->first();
+        if ($requesterUser) {
+            $notifData = $this->getNotifData($normalizedStatus, $req->title, $note);
+            if (Schema::hasTable('notifications')) {
+                DB::table('notifications')->insert([
+                    'user_id' => $requesterUser->id,
+                    'title' => $notifData['title'],
+                    'message' => $notifData['message'],
+                    'type' => $notifData['type'],
+                    'is_read' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Send email
+            if (!empty($requesterUser->email)) {
+                try {
+                    $html = $this->getStatusEmailHtml($requesterUser->name, $req->title, $normalizedStatus, $note);
+                    \Illuminate\Support\Facades\Mail::html($html, function ($message) use ($requesterUser, $normalizedStatus) {
+                        $message->to($requesterUser->email, $requesterUser->name)
+                                ->subject("NUPost: Your request has been $normalizedStatus");
+                    });
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to send status update email via API: ' . $e->getMessage());
+                }
+            }
+        }
+
+        // Audit Logging
+        if ($normalizedStatus === 'Approved' || $normalizedStatus === 'Posted') {
+            \App\Models\AuditLog::record('post_request_approved', $user->id);
+        } elseif ($normalizedStatus === 'Rejected') {
+            \App\Models\AuditLog::record('post_request_rejected', $user->id);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Request status successfully updated to $normalizedStatus",
+        ], 200);
+    }
+
+    public function updateRequest(Request $request): JsonResponse
+    {
+        $userId = (int) $request->input('user_id', 0);
+        $requestId = (int) $request->input('request_id', 0);
+
+        $title = trim((string) $request->input('title', ''));
+        $description = trim((string) $request->input('description', ''));
+        $category = trim((string) $request->input('category', ''));
+        $priority = trim((string) $request->input('priority', ''));
+        $preferredDate = trim((string) $request->input('preferred_date', ''));
+        $caption = trim((string) $request->input('caption', ''));
+
+        if ($request->has('platforms') && is_array($request->input('platforms'))) {
+            $platforms = $request->input('platforms');
+        } elseif ($request->has('platforms_json')) {
+            $decoded = json_decode((string) $request->input('platforms_json'), true);
+            $platforms = is_array($decoded) ? $decoded : [];
+        } else {
+            $platforms = [];
+        }
+
+        if ($userId <= 0 || $requestId <= 0 || $title === '' || $description === '' || $category === '' || $priority === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Missing required fields',
+            ], 422);
+        }
+
+        $user = DB::table('users')->where('id', $userId)->first();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        if ($err = $this->ensureRequestsTableExists()) {
+            return $err;
+        }
+
+        $table = $this->requestsTable();
+        $req = DB::table($table)->where('id', $requestId)->first();
+        if (!$req) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Request not found',
+            ], 404);
+        }
+
+        if ($req->requester !== ($user->name ?? '')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. You do not own this request.',
+            ], 403);
+        }
+
+        $unacceptable = ['Approved', 'Posted'];
+        if (in_array($req->status, $unacceptable, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot edit this request as it is already approved or posted.',
+            ], 400);
+        }
+
+        $payload = [
+            'title' => $title,
+            'description' => $description,
+            'category' => $category,
+            'priority' => $priority,
+            'platform' => is_array($platforms) ? implode(',', $platforms) : '',
+            'caption' => $caption,
+            'preferred_date' => $preferredDate !== '' ? $preferredDate : null,
+            'updated_at' => now(),
+        ];
+
+        $files = $request->file('media', []);
+        if ($files instanceof UploadedFile) {
+            $files = [$files];
+        }
+        if (!is_array($files)) {
+            $files = [];
+        }
+
+        if (!empty($files)) {
+            $uploadDir = public_path('uploads');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $allowedTypes = [
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+                'video/mp4', 'video/quicktime'
+            ];
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov'];
+            $maxSize = 10 * 1024 * 1024;
+            $mediaNames = [];
+
+            foreach (array_slice($files, 0, 4) as $file) {
+                if (!$file instanceof UploadedFile) continue;
+                if (!$file->isValid()) continue;
+                if ($file->getSize() > $maxSize) continue;
+
+                $ext = strtolower((string) $file->getClientOriginalExtension());
+                $type = (string) $file->getMimeType();
+                if (!in_array($type, $allowedTypes, true) && !in_array($ext, $allowedExtensions, true)) {
+                    continue;
+                }
+
+                $newName = uniqid('media_', true) . ($ext !== '' ? ".{$ext}" : '');
+                $file->move($uploadDir, $newName);
+
+                // Image Optimization
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+                    \App\Services\ImageOptimizer::optimize($uploadDir . '/' . $newName);
+                }
+
+                $mediaNames[] = $newName;
+            }
+
+            if (!empty($mediaNames)) {
+                $payload['media_file'] = implode(',', $mediaNames);
+            }
+        }
+
+        DB::table($table)->where('id', $requestId)->update($payload);
+
+        if (Schema::hasTable('request_activity')) {
+            DB::table('request_activity')->insert([
+                'request_id' => $requestId,
+                'actor' => $user->name ?? 'User',
+                'action' => 'Request details updated via Mobile',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        \App\Models\AuditLog::record('post_request_edited', $user->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Request updated successfully',
+        ], 200);
     }
 }
 

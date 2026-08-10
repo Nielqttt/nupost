@@ -89,6 +89,13 @@ class RequestController extends Controller
                 if (!$file->isValid()) continue;
                 $filename  = 'media_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->move($upload_dir, $filename);
+
+                // Image Optimization
+                $ext = strtolower($file->getClientOriginalExtension());
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                    \App\Services\ImageOptimizer::optimize($upload_dir . '/' . $filename);
+                }
+
                 $uploaded[] = $filename;
             }
             $media_file = implode(',', $uploaded);
@@ -106,6 +113,8 @@ class RequestController extends Controller
             'preferred_date' => $request->post_date ?: null,
             'media_file'     => $media_file,
         ]);
+
+        \App\Models\AuditLog::record('post_request_created');
 
         RequestActivity::create([
             'request_id' => $req->id,
@@ -219,6 +228,13 @@ class RequestController extends Controller
                 if ($file->isValid()) {
                     $filename = 'media_' . uniqid() . '.' . $file->getClientOriginalExtension();
                     $file->move(public_path('uploads'), $filename);
+
+                    // Image Optimization
+                    $ext = strtolower($file->getClientOriginalExtension());
+                    if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                        \App\Services\ImageOptimizer::optimize(public_path('uploads/' . $filename));
+                    }
+
                     $uploaded[] = $filename;
                 }
             }
@@ -230,6 +246,8 @@ class RequestController extends Controller
 
         // Execute Update
         $req->update($data);
+
+        \App\Models\AuditLog::record('post_request_edited');
 
         // Record Activity
         RequestActivity::create([

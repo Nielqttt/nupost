@@ -21,3 +21,5 @@ Route::get('/request_details.php', [LegacyMobileApiController::class, 'requestDe
 Route::get('/messages.php', [LegacyMobileApiController::class, 'messageThreads']);
 Route::get('/message_thread.php', [LegacyMobileApiController::class, 'messageThread']);
 Route::post('/message_thread.php', [LegacyMobileApiController::class, 'sendMessage']);
+Route::post('/update_request_status.php', [LegacyMobileApiController::class, 'updateRequestStatus']);
+Route::post('/update_request.php', [LegacyMobileApiController::class, 'updateRequest']);

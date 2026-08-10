@@ -42,6 +42,7 @@ Route::middleware('guest.nupost')->group(function () {
     Route::post('/forgot-password',        [ForgotPasswordController::class, 'sendOtp'])->name('password.send');
     Route::get('/forgot-password/verify',  [ForgotPasswordController::class, 'verifyIndex'])->name('password.verify');
     Route::post('/forgot-password/verify', [ForgotPasswordController::class, 'verifyOtp'])->name('password.verify.store');
+    Route::get('/forgot-password/resend',  [ForgotPasswordController::class, 'resendOtp'])->name('password.resend');
     Route::get('/forgot-password/reset',   [ForgotPasswordController::class, 'resetIndex'])->name('password.reset');
     Route::post('/forgot-password/reset',  [ForgotPasswordController::class, 'resetPassword'])->name('password.reset.store');
 });
@@ -109,6 +110,8 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     Route::get('/reports/export',     [ReportsController::class, 'export'])->name('reports.export');
     Route::get('/settings',           [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings/profile',  [SettingsController::class, 'updateProfile'])->name('settings.profile');
+    Route::post('/settings/kaye-token/generate', [SettingsController::class, 'generateKayeToken'])->name('settings.kaye-token.generate');
+    Route::post('/settings/kaye-token/revoke', [SettingsController::class, 'revokeKayeToken'])->name('settings.kaye-token.revoke');
 
     // Notifications
     Route::get('/notifications',        [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications');
@@ -213,5 +216,14 @@ Route::post('/api/bulldog-chat', function (Illuminate\Http\Request $request) {
     } catch (\Exception $e) {
         return response()->json(['error' => 'Connection error: ' . $e->getMessage()], 500);
     }
-
 })->middleware('auth.nupost:admin');
+
+// ─── MS KAYE'S ROUTES ──────────────────────────────────────────────
+use App\Http\Controllers\Kaye\DashboardController as KayeDashboardController;
+
+Route::get('/kaye/login/{token}', [KayeDashboardController::class, 'login'])->name('kaye.login');
+Route::get('/kaye/login-expired', [KayeDashboardController::class, 'loginExpired'])->name('kaye.login.expired');
+
+Route::middleware('auth.kaye')->group(function () {
+    Route::get('/kaye/dashboard', [KayeDashboardController::class, 'index'])->name('kaye.dashboard');
+});

@@ -113,6 +113,12 @@ class RequestManagementController extends Controller
 
         $req->update(['status' => $new_status]);
 
+        if ($new_status === 'Approved' || $new_status === 'Posted') {
+            \App\Models\AuditLog::record('post_request_approved');
+        } elseif ($new_status === 'Rejected') {
+            \App\Models\AuditLog::record('post_request_rejected');
+        }
+
         RequestActivity::create([
             'request_id' => $id,
             'actor'      => session('admin_name', session('admin_email', 'Admin')),

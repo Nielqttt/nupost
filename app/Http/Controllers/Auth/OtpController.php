@@ -49,6 +49,7 @@ class OtpController extends Controller
         $otp_row = OtpCode::where('user_id', $user_id)
             ->where('is_used', false)
             ->where('expires_at', '>', now())
+            ->orderByDesc('id')
             ->first();
 
         if ($otp_row && hash_equals($otp_row->otp_code, $entered_otp)) {
@@ -83,6 +84,7 @@ class OtpController extends Controller
             ->where('otp_code', $token)
             ->where('is_used', false)
             ->where('expires_at', '>', now())
+            ->orderByDesc('id')
             ->first();
 
         if ($otp_row) {
@@ -110,6 +112,9 @@ class OtpController extends Controller
 
         $otp        = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $expires_at = now()->addMinutes(10);
+
+        // Invalidate previous unused OTP codes
+        OtpCode::where('user_id', $user_id)->where('is_used', false)->update(['is_used' => true]);
 
         OtpCode::create([
             'user_id'    => $user_id,
