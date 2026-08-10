@@ -1,0 +1,19 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 145.223.108.216
+          username: u201439943
+          password: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
+          port: 65002
+          script: bash ~/domains/nupost.site/deploy.sh
