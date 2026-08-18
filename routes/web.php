@@ -128,14 +128,13 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
 
 // ─── GEMINI AI API ────────────────────────────────────────────────────────
 Route::post('/api/generate-caption', function (Request $request) {
-    $apiKey = env('GEMINI_API_KEY');
+    $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
 
     if (!$apiKey) {
         return response()->json(['error' => 'API Key is missing in .env file.'], 500);
     }
 
-    // ✅ FIXED: gemini-2.0-flash retired March 2026. Using gemini-2.5-flash-lite (highest free quota: 1,000 req/day)
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" . $apiKey;
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=" . $apiKey;
 
     $promptText = "Write a short, engaging social media caption for this university post:
     Title: {$request->title}

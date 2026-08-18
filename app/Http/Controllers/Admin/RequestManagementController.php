@@ -177,7 +177,7 @@ class RequestManagementController extends Controller
         $title       = $httpRequest->input('title', $postRequest->title);
         $description = $httpRequest->input('description', $postRequest->description ?? '');
 
-        $apiKey = config('services.gemini.key');
+        $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
         if (!$apiKey) {
             return response()->json(['error' => 'Gemini API key not configured. Add GEMINI_API_KEY to .env'], 500);
         }
@@ -196,8 +196,8 @@ class RequestManagementController extends Controller
         $basePrompt .= "Return ONLY the caption text with hashtags. No explanations, no quotes.";
 
         try {
-            $response = Http::post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={$apiKey}",
+            $response = Http::withoutVerifying()->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={$apiKey}",
                 [
                     'contents' => [
                         ['parts' => [['text' => $basePrompt]]]

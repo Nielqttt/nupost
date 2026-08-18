@@ -621,7 +621,7 @@ class LegacyMobileApiController extends Controller
             return response()->json(['error' => 'No data received']);
         }
 
-        $apiKey = (string) env('GEMINI_API_KEY', '');
+        $apiKey = (string) (config('services.gemini.key') ?: env('GEMINI_API_KEY', ''));
         if ($apiKey === '') {
             return response()->json(['error' => 'API key is missing']);
         }
@@ -639,9 +639,9 @@ class LegacyMobileApiController extends Controller
             . "Description: {$description}\n"
             . "Category: {$category}\n"
             . "Target Platforms: {$platforms}\n\n"
-            . "Reply with ONLY the caption text. No explanations, no labels, just the caption.";
+            . "Reply with ONLY the caption text. No labels, no explanations, just the caption.";
 
-        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=' . $apiKey;
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=' . $apiKey;
 
         try {
             $response = Http::withHeaders(['Content-Type' => 'application/json'])
