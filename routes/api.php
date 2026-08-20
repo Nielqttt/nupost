@@ -1,5 +1,5 @@
 <?php
-use Illuminate\Http\Request;
+
 use App\Http\Controllers\Api\LegacyMobileApiController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +10,7 @@ Route::post('/resend_otp.php', [LegacyMobileApiController::class, 'resendOtp']);
 Route::get('/profile.php', [LegacyMobileApiController::class, 'profile']);
 Route::get('/requests.php', [LegacyMobileApiController::class, 'requests']);
 Route::post('/create_request.php', [LegacyMobileApiController::class, 'createRequest']);
+Route::post('/update_request.php', [LegacyMobileApiController::class, 'updateRequest']);
 Route::post('/generate_caption.php', [LegacyMobileApiController::class, 'generateCaption']);
 Route::get('/calendar.php', [LegacyMobileApiController::class, 'calendar']);
 Route::post('/update_profile.php', [LegacyMobileApiController::class, 'updateProfile']);
@@ -21,5 +22,8 @@ Route::get('/request_details.php', [LegacyMobileApiController::class, 'requestDe
 Route::get('/messages.php', [LegacyMobileApiController::class, 'messageThreads']);
 Route::get('/message_thread.php', [LegacyMobileApiController::class, 'messageThread']);
 Route::post('/message_thread.php', [LegacyMobileApiController::class, 'sendMessage']);
+
+// Admin Endpoints
+Route::get('/admin_requests.php', [LegacyMobileApiController::class, 'adminRequests']);
 Route::post('/update_request_status.php', [LegacyMobileApiController::class, 'updateRequestStatus']);
-Route::post('/update_request.php', [LegacyMobileApiController::class, 'updateRequest']);
+Route::get('/admin_stats.php', [LegacyMobileApiController::class, 'adminStats']);
