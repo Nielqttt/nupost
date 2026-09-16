@@ -1296,28 +1296,54 @@
             gap: 12px;
         }
 
-        /* ── Responsive Rules ── */
-        @media (max-width: 1100px) {
+        /* ── Comprehensive Responsive System (Phones & Tablets) ── */
+        @media (max-width: 1200px) {
+            .hero-container {
+                gap: 40px;
+            }
             .float-tag-1 {
-                right: -8px;
-                top: -10px;
+                right: -6px;
+                top: -8px;
             }
             .float-tag-2 {
-                left: -8px;
-                bottom: -10px;
+                left: -6px;
+                bottom: -8px;
+            }
+        }
+
+        /* ── Tablets (Landscape & Portrait: 641px - 1024px) ── */
+        @media (max-width: 1024px) {
+            .nav-menu {
+                gap: 16px;
+            }
+            .nav-link {
+                font-size: 0.85rem;
             }
         }
 
         @media (max-width: 992px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .nav-container {
+                padding: 12px 20px;
+            }
+
+            .hero {
+                padding: 110px 20px 48px;
+            }
+
             .hero-container {
                 grid-template-columns: 1fr;
                 text-align: center;
-                gap: 40px;
+                gap: 36px;
             }
 
             .hero-lead {
                 margin-left: auto;
                 margin-right: auto;
+                max-width: 560px;
             }
 
             .hero-cta-group, .trust-pills {
@@ -1325,68 +1351,424 @@
             }
 
             .hero-right {
-                max-width: 540px;
+                max-width: 520px;
                 margin: 0 auto;
                 width: 100%;
-                padding: 24px 12px;
+                padding: 18px 10px;
             }
 
             .float-tag {
-                transform: scale(0.9);
+                transform: scale(0.88);
             }
             .float-tag-1 {
-                right: -4px;
+                right: -2px;
                 top: -6px;
             }
             .float-tag-2 {
-                left: -4px;
+                left: -2px;
                 bottom: -6px;
+            }
+
+            .stats-section {
+                padding: 10px 20px;
             }
 
             .stats-card-wrapper {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 24px;
+                gap: 20px;
+                padding: 24px 20px;
             }
 
             .stat-box:nth-child(2)::after {
                 display: none;
             }
 
+            .features-section, .process-section, .faq-section {
+                padding: 60px 20px;
+            }
+
+            .section-headline {
+                font-size: 2.1rem;
+            }
+
+            .bento-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
             .bento-col-8, .bento-col-4 {
-                grid-column: span 12;
+                grid-column: span 1;
             }
 
             .steps-container {
                 grid-template-columns: 1fr;
-                max-width: 460px;
+                max-width: 480px;
+                margin: 0 auto;
+                gap: 18px;
+            }
+
+            .cta-wrapper {
+                padding: 40px 20px;
+            }
+
+            .cta-box {
+                padding: 44px 28px;
+                text-align: center;
+            }
+
+            .cta-box h2 {
+                font-size: 2.1rem;
+            }
+
+            .footer-modern {
+                padding: 48px 20px 28px;
+            }
+
+            .footer-top {
+                flex-direction: column;
+                gap: 32px;
+            }
+
+            .footer-nav-groups {
+                gap: 40px;
             }
         }
 
+        /* ── Mobile Phones (320px - 640px) ── */
         @media (max-width: 640px) {
-            .nav-menu {
-                display: none;
+            .nav-container {
+                padding: 10px 14px;
+            }
+
+            .nav-brand img {
+                height: 36px;
+            }
+
+            .nav-actions {
+                gap: 6px;
+            }
+
+            .theme-toggle-btn {
+                width: 34px;
+                height: 34px;
+            }
+
+            .btn-sm {
+                padding: 6px 12px;
+                font-size: 0.775rem;
             }
 
             .hero {
-                padding: 95px 18px 30px;
+                padding: 85px 16px 36px;
+            }
+
+            .badge-live {
+                font-size: 0.75rem;
+                padding: 4px 10px;
+                margin-bottom: 14px;
+            }
+
+            .hero-title {
+                font-size: 2.1rem;
+                line-height: 1.15;
+                letter-spacing: -0.02em;
+                margin-bottom: 14px;
+            }
+
+            .hero-lead {
+                font-size: 0.925rem;
+                line-height: 1.55;
+                margin-bottom: 22px;
+            }
+
+            .hero-cta-group {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+                margin-bottom: 24px;
+            }
+
+            .hero-cta-group .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 12px 20px;
+                font-size: 0.95rem;
+            }
+
+            .trust-pills {
+                gap: 8px 12px;
+                justify-content: center;
+                font-size: 0.75rem;
+            }
+
+            .trust-item {
+                font-size: 0.75rem;
+            }
+
+            .hero-right {
+                padding: 10px 0;
+                max-width: 100%;
             }
 
             .float-tag {
-                display: none; /* Hide floating corner badges only on narrow mobile screens to avoid overflow */
+                display: none;
+            }
+
+            .demo-window {
+                border-radius: var(--radius-md);
+            }
+
+            .demo-body {
+                padding: 14px 12px;
+            }
+
+            .demo-tabs-label {
+                font-size: 0.7rem;
+                margin-bottom: 6px;
+            }
+
+            .demo-tabs {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 4px;
+                padding: 3px;
+                margin-bottom: 12px;
+            }
+
+            .demo-tab-btn {
+                padding: 6px 4px;
+                font-size: 0.725rem;
+            }
+
+            .demo-card-preview {
+                padding: 14px 12px;
+                border-radius: 12px;
+            }
+
+            .preview-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.75rem;
+            }
+
+            .preview-org-meta h5 {
+                font-size: 0.8rem;
+                line-height: 1.25;
+            }
+
+            .preview-org-meta p {
+                font-size: 0.675rem;
+            }
+
+            .status-chip {
+                font-size: 0.65rem;
+                padding: 2px 7px;
+            }
+
+            .preview-caption-box {
+                padding: 10px 12px;
+                font-size: 0.78rem;
+                line-height: 1.45;
+                margin: 10px 0;
+            }
+
+            .preview-bottom-bar {
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            .platform-pill {
+                font-size: 0.675rem;
+                padding: 2px 6px;
+            }
+
+            .preview-media-badge {
+                font-size: 0.675rem;
+            }
+
+            .demo-interactive-action {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .demo-interactive-action span {
+                font-size: 0.725rem;
+            }
+
+            .btn-sparkle {
+                width: 100%;
+                padding: 8px 12px;
+                font-size: 0.75rem;
+            }
+
+            .stats-section {
+                padding: 10px 14px;
+                margin-bottom: 24px;
             }
 
             .stats-card-wrapper {
-                grid-template-columns: 1fr;
-                padding: 20px 16px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px 10px;
+                padding: 18px 12px;
+                border-radius: var(--radius-md);
+            }
+
+            .stat-value {
+                font-size: 1.7rem;
+            }
+
+            .stat-name {
+                font-size: 0.725rem;
             }
 
             .stat-box::after {
                 display: none !important;
             }
 
+            .features-section, .process-section, .faq-section {
+                padding: 45px 16px;
+            }
+
+            .section-tag {
+                font-size: 0.725rem;
+                padding: 3px 10px;
+            }
+
+            .section-headline {
+                font-size: 1.75rem;
+                line-height: 1.2;
+            }
+
+            .section-desc {
+                font-size: 0.9rem;
+            }
+
+            .bento-card {
+                padding: 20px 16px;
+                border-radius: var(--radius-md);
+            }
+
+            .bento-title {
+                font-size: 1.15rem;
+            }
+
+            .bento-text {
+                font-size: 0.85rem;
+                line-height: 1.5;
+            }
+
+            .bento-visual-ai {
+                padding: 12px;
+            }
+
+            .ai-prompt-chip {
+                font-size: 0.675rem;
+            }
+
+            .ai-output-stream {
+                font-size: 0.78rem;
+            }
+
+            .bento-calendar-preview {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .step-card-modern {
+                padding: 22px 16px;
+                border-radius: var(--radius-md);
+            }
+
+            .step-card-title {
+                font-size: 1.15rem;
+            }
+
+            .step-card-text {
+                font-size: 0.85rem;
+            }
+
+            .faq-list {
+                gap: 10px;
+            }
+
+            .faq-question {
+                padding: 14px 16px;
+                font-size: 0.875rem;
+            }
+
+            .faq-answer {
+                padding: 0 16px 14px;
+                font-size: 0.825rem;
+            }
+
+            .cta-wrapper {
+                padding: 36px 16px;
+            }
+
+            .cta-box {
+                padding: 32px 18px;
+                border-radius: var(--radius-md);
+                text-align: center;
+            }
+
+            .cta-box h2 {
+                font-size: 1.65rem;
+                line-height: 1.25;
+            }
+
+            .cta-box p {
+                font-size: 0.9rem;
+                margin-bottom: 22px;
+            }
+
+            .cta-actions {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .cta-actions .btn {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 0.95rem;
+                justify-content: center;
+            }
+
+            .footer-modern {
+                padding: 36px 16px 20px;
+            }
+
             .footer-top {
                 flex-direction: column;
-                gap: 28px;
+                gap: 24px;
+            }
+
+            .footer-nav-groups {
+                flex-direction: column;
+                gap: 18px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+                font-size: 0.725rem;
+            }
+        }
+
+        /* ── Extra Small Phones (<= 380px) ── */
+        @media (max-width: 380px) {
+            .nav-actions .btn-subtle {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 1.85rem;
+            }
+
+            .stat-value {
+                font-size: 1.45rem;
             }
         }
     </style>
