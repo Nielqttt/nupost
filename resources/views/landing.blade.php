@@ -39,8 +39,8 @@
             --nav-scrolled: #ffffff;
 
             --stat-border: #e2e8f0;
-            --shadow-card: 0 2px 8px rgba(0, 26, 78, 0.06);
-            --shadow-hover: 0 10px 25px -5px rgba(0, 26, 78, 0.08);
+            --shadow-card: 0 4px 14px rgba(0, 26, 78, 0.06);
+            --shadow-hover: 0 14px 30px -5px rgba(0, 26, 78, 0.12);
 
             --navy-950: #030d24;
             --navy-900: #001a4e;
@@ -82,8 +82,8 @@
             --nav-scrolled: #06122d;
 
             --stat-border: rgba(255, 255, 255, 0.08);
-            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
-            --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(30, 79, 216, 0.15);
+            --shadow-card: 0 6px 24px rgba(0, 0, 0, 0.4);
+            --shadow-hover: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 25px rgba(30, 79, 216, 0.2);
 
             --navy-50: rgba(13, 56, 140, 0.3);
             --navy-950: #f8fafc;
@@ -113,6 +113,7 @@
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
+        /* Ambient Gradients */
         .ambient-bg {
             position: absolute;
             top: 0;
@@ -136,7 +137,7 @@
             right: -100px;
             width: 600px;
             height: 600px;
-            background: radial-gradient(circle, rgba(29, 78, 216, 0.12) 0%, rgba(245, 158, 11, 0.05) 50%, transparent 70%);
+            background: radial-gradient(circle, rgba(29, 78, 216, 0.14) 0%, rgba(245, 158, 11, 0.06) 50%, transparent 70%);
         }
 
         .glow-bottom {
@@ -144,7 +145,7 @@
             left: -150px;
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(13, 56, 140, 0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(13, 56, 140, 0.12) 0%, transparent 70%);
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -316,7 +317,7 @@
 
         /* ── Hero Section ── */
         .hero {
-            padding: 120px 24px 60px;
+            padding: 130px 24px 70px;
             position: relative;
         }
 
@@ -324,8 +325,8 @@
             max-width: 1240px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
-            gap: 48px;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 56px;
             align-items: center;
         }
 
@@ -397,9 +398,11 @@
             font-weight: 800;
         }
 
-        /* ── Interactive Hero Simulator ── */
+        /* ── Hero Right & Floating Showcase Window ── */
         .hero-right {
             position: relative;
+            padding: 30px 20px;
+            perspective: 1000px;
         }
 
         .demo-window {
@@ -409,7 +412,28 @@
             box-shadow: var(--shadow-card);
             overflow: hidden;
             position: relative;
-            transform: translateZ(0);
+            z-index: 2;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+            animation: heroWindowFloat 6s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+
+        .demo-window:hover {
+            transform: translateY(-8px) scale(1.012);
+            box-shadow: 0 25px 55px -12px rgba(0, 0, 0, 0.5), 0 0 35px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.45);
+        }
+
+        @keyframes heroWindowFloat {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-7px) rotate(0.35deg);
+            }
+            100% {
+                transform: translateY(-13px) rotate(-0.35deg);
+            }
         }
 
         .demo-header {
@@ -647,32 +671,85 @@
             transform: scale(1.03);
         }
 
-        /* Floating Badges */
+        /* ── Floating Badges (Fluid Levitation + Interactive Hover Reaction) ── */
         .float-tag {
             position: absolute;
             background: var(--bg-surface);
             border-radius: var(--radius-md);
-            padding: 10px 14px;
-            box-shadow: var(--shadow-card);
+            padding: 10px 18px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
             border: 1px solid var(--border-card);
             display: flex;
             align-items: center;
-            gap: 10px;
-            pointer-events: none;
-            transform: translateZ(0);
+            gap: 12px;
+            z-index: 4;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+            will-change: transform;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
-        .float-tag-1 { top: -18px; right: -14px; }
-        .float-tag-2 { bottom: -16px; left: -14px; }
+        .float-tag:hover {
+            animation-play-state: paused !important;
+            transform: translateY(-8px) scale(1.08) !important;
+            box-shadow: 0 20px 42px rgba(0, 0, 0, 0.5), 0 0 24px rgba(234, 179, 8, 0.28);
+            border-color: var(--gold-400);
+        }
+
+        /* Top Right Badge - Floating Levitation */
+        .float-tag-1 {
+            top: 4px;
+            right: -20px;
+            animation: floatLevitate1 4.2s ease-in-out infinite alternate;
+        }
+
+        /* Bottom Left Badge - Floating Levitation */
+        .float-tag-2 {
+            bottom: 4px;
+            left: -20px;
+            animation: floatLevitate2 4.8s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes floatLevitate1 {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(-3px, -8px) rotate(1.2deg);
+            }
+            66% {
+                transform: translate(3px, -15px) rotate(-1deg);
+            }
+            100% {
+                transform: translate(0, -20px) rotate(1.6deg);
+            }
+        }
+
+        @keyframes floatLevitate2 {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(4px, 7px) rotate(-1.2deg);
+            }
+            66% {
+                transform: translate(-3px, 14px) rotate(1deg);
+            }
+            100% {
+                transform: translate(0, 18px) rotate(-1.6deg);
+            }
+        }
 
         .float-icon {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
 
         .float-meta h6 {
@@ -791,12 +868,12 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
             box-shadow: var(--shadow-card);
         }
 
         .bento-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-6px);
             border-color: var(--gold-400);
             box-shadow: var(--shadow-hover);
         }
@@ -1006,11 +1083,11 @@
             border-radius: var(--radius-lg);
             padding: 32px 26px;
             box-shadow: var(--shadow-card);
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
         }
 
         .step-card-modern:hover {
-            transform: translateY(-4px);
+            transform: translateY(-6px);
             border-color: var(--gold-400);
         }
 
@@ -1220,6 +1297,17 @@
         }
 
         /* ── Responsive Rules ── */
+        @media (max-width: 1100px) {
+            .float-tag-1 {
+                right: -8px;
+                top: -10px;
+            }
+            .float-tag-2 {
+                left: -8px;
+                bottom: -10px;
+            }
+        }
+
         @media (max-width: 992px) {
             .hero-container {
                 grid-template-columns: 1fr;
@@ -1237,9 +1325,22 @@
             }
 
             .hero-right {
-                max-width: 500px;
+                max-width: 540px;
                 margin: 0 auto;
                 width: 100%;
+                padding: 24px 12px;
+            }
+
+            .float-tag {
+                transform: scale(0.9);
+            }
+            .float-tag-1 {
+                right: -4px;
+                top: -6px;
+            }
+            .float-tag-2 {
+                left: -4px;
+                bottom: -6px;
             }
 
             .stats-card-wrapper {
@@ -1270,6 +1371,10 @@
                 padding: 95px 18px 30px;
             }
 
+            .float-tag {
+                display: none; /* Hide floating corner badges only on narrow mobile screens to avoid overflow */
+            }
+
             .stats-card-wrapper {
                 grid-template-columns: 1fr;
                 padding: 20px 16px;
@@ -1288,7 +1393,6 @@
 </head>
 <body>
 
-    <!-- Ambient Subtle Glows -->
     <div class="ambient-bg" aria-hidden="true">
         <div class="ambient-glow glow-top"></div>
         <div class="ambient-glow glow-bottom"></div>
@@ -1309,9 +1413,7 @@
             </nav>
 
             <div class="nav-actions">
-                <!-- Theme Toggle (Dark Midnight / Light) -->
                 <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Dark/Light Mode">
-                    <!-- Sun Icon (Shown in Dark Mode) -->
                     <svg class="sun-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="5"></circle>
                         <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -1323,7 +1425,6 @@
                         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
-                    <!-- Moon Icon (Shown in Light Mode) -->
                     <svg class="moon-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
@@ -1340,7 +1441,6 @@
         <section class="hero" id="hero">
             <div class="hero-container">
                 
-                <!-- Left Column -->
                 <div class="hero-left">
                     <div class="badge-live">
                         <span class="pulse-dot"></span>
@@ -1382,8 +1482,18 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Interactive Simulator -->
+                <!-- Right Column: Interactive Simulator with Levitating Floating Badges -->
                 <div class="hero-right" id="demo">
+                    <!-- Floating Badge 1 (Top-Right Floating Levitation) -->
+                    <div class="float-tag float-tag-1">
+                        <div class="float-icon" style="background:rgba(34,197,94,0.15);color:#4ade80;">⚡</div>
+                        <div class="float-meta">
+                            <h6>Rapid Review</h6>
+                            <p>Average < 24h turnaround</p>
+                        </div>
+                    </div>
+
+                    <!-- Simulator Window -->
                     <div class="demo-window">
                         <div class="demo-header">
                             <div class="demo-dots">
@@ -1397,7 +1507,6 @@
                         </div>
 
                         <div class="demo-body">
-                            <!-- Category Buttons -->
                             <div class="demo-tabs-label">
                                 <span>Select Post Template</span>
                                 <span class="hint">Click to test live preview 👇</span>
@@ -1440,7 +1549,6 @@
                                 </div>
                             </div>
 
-                            <!-- Interactive Action Simulator -->
                             <div class="demo-interactive-action">
                                 <span id="demoActionHint">Need captions? Let AI write it for you:</span>
                                 <button type="button" class="btn-sparkle" id="btnGenCaption">
@@ -1450,15 +1558,7 @@
                         </div>
                     </div>
 
-                    <!-- Floating Mini Badges -->
-                    <div class="float-tag float-tag-1">
-                        <div class="float-icon" style="background:rgba(34,197,94,0.15);color:#4ade80;">⚡</div>
-                        <div class="float-meta">
-                            <h6>Rapid Review</h6>
-                            <p>Average < 24h turnaround</p>
-                        </div>
-                    </div>
-
+                    <!-- Floating Badge 2 (Bottom-Left Floating Levitation) -->
                     <div class="float-tag float-tag-2">
                         <div class="float-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;">🔒</div>
                         <div class="float-meta">
@@ -1502,7 +1602,6 @@
             </div>
 
             <div class="bento-grid">
-                <!-- Bento 1: AI Assistant (Wide) -->
                 <div class="bento-card bento-col-8">
                     <div>
                         <div class="bento-icon" style="background:rgba(245,158,11,0.15);color:#fbbf24;">✨</div>
@@ -1517,7 +1616,6 @@
                     </div>
                 </div>
 
-                <!-- Bento 2: Status Tracking (4 cols) -->
                 <div class="bento-card bento-col-4">
                     <div>
                         <div class="bento-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;">📡</div>
@@ -1532,7 +1630,6 @@
                     </div>
                 </div>
 
-                <!-- Bento 3: Admin Chat (4 cols) -->
                 <div class="bento-card bento-col-4">
                     <div>
                         <div class="bento-icon" style="background:rgba(168,85,247,0.15);color:#c084fc;">💬</div>
@@ -1545,7 +1642,6 @@
                     </div>
                 </div>
 
-                <!-- Bento 4: Visual Calendar (Wide 8 cols) -->
                 <div class="bento-card bento-col-8">
                     <div>
                         <div class="bento-icon" style="background:rgba(34,197,94,0.15);color:#4ade80;">📅</div>
@@ -1658,7 +1754,7 @@
                 <p>Join student leaders and department officers who organize and schedule social media campaigns seamlessly with NUPost.</p>
                 <div class="cta-actions">
                     <a href="{{ route('register') }}" class="btn btn-lg btn-gold">Create an Account</a>
-                    <a href="{{ route('login') }}" class="btn btn-lg btn-subtle">Sign In to Platform</a>
+                    <a href="{{ route('login') }}" class="btn btn-lg btn-subtle" style="color:#ffffff;background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2);">Sign In to Platform</a>
                 </div>
             </div>
         </section>
@@ -1701,10 +1797,8 @@
         </div>
     </footer>
 
-    <!-- Interactive Logic & Theme Switcher -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Theme Switcher
             const themeToggle = document.getElementById('themeToggle');
             themeToggle.addEventListener('click', () => {
                 const current = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -1713,7 +1807,6 @@
                 localStorage.setItem('nupost-theme', next);
             });
 
-            // 2. Navbar Scroll
             const navbar = document.getElementById('navbar');
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 30) {
@@ -1723,7 +1816,6 @@
                 }
             }, { passive: true });
 
-            // 3. Interactive Simulator Data
             const demoData = {
                 event: {
                     avatar: "CS",
@@ -1816,7 +1908,6 @@
                 });
             }
 
-            // 4. FAQ Accordion
             const faqItems = document.querySelectorAll('.faq-item');
             faqItems.forEach(item => {
                 const question = item.querySelector('.faq-question');
@@ -1828,6 +1919,31 @@
                     }
                 });
             });
+
+            // ── Interactive 3D Parallax & Mouse Hover Drift ──
+            const heroRight = document.querySelector('.hero-right');
+            const demoWindow = document.querySelector('.demo-window');
+            const floatTag1 = document.querySelector('.float-tag-1');
+            const floatTag2 = document.querySelector('.float-tag-2');
+
+            if (heroRight && demoWindow) {
+                heroRight.addEventListener('mousemove', (e) => {
+                    if (window.innerWidth <= 992) return;
+                    const rect = heroRight.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width - 0.5;
+                    const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+                    demoWindow.style.transform = `perspective(1000px) rotateY(${x * 7}deg) rotateX(${-y * 7}deg) translateY(-8px) scale(1.015)`;
+                    if (floatTag1) floatTag1.style.transform = `translate(${x * 22}px, ${y * 22 - 8}px) scale(1.05)`;
+                    if (floatTag2) floatTag2.style.transform = `translate(${x * -18}px, ${y * -18 + 8}px) scale(1.05)`;
+                });
+
+                heroRight.addEventListener('mouseleave', () => {
+                    demoWindow.style.transform = '';
+                    if (floatTag1) floatTag1.style.transform = '';
+                    if (floatTag2) floatTag2.style.transform = '';
+                });
+            }
         });
     </script>
 </body>
