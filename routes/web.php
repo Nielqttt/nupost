@@ -47,7 +47,7 @@ Route::middleware('guest.nupost')->group(function () {
     Route::post('/forgot-password/reset',  [ForgotPasswordController::class, 'resetPassword'])->name('password.reset.store');
 });
 
-Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+Route::match(['get', 'post'], '/logout', [LoginController::class, 'destroy'])->name('logout');
 
 // ─── REQUESTOR ROUTES ──────────────────────────────────────────────────────
 Route::middleware('auth.nupost:requestor')->prefix('requestor')->name('requestor.')->group(function () {

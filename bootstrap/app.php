@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
 ->withMiddleware(function (Middleware $middleware): void {
+    $middleware->validateCsrfTokens(except: [
+        'logout',
+        '/logout',
+    ]);
+
     $middleware->alias([
         'guest.nupost' => \App\Http\Middleware\GuestNupost::class,
         'auth.nupost'  => \App\Http\Middleware\AuthNupost::class,
@@ -19,5 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ]);
 })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            return redirect('/');
+        });
     })->create();
