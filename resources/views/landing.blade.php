@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NUPost | Social Media Request System</title>
     <meta name="description" content="The official social media request platform for National University Lipa. Submit, track, and manage content requests seamlessly.">
+    
+    <!-- Prevent Flash of Unstyled Theme -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('nupost-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
@@ -12,7 +21,7 @@
 </head>
 <body>
 
-    <!-- Ambient Subtle Glows (Hardware Accelerated, No Heavy Runtime Blurs) -->
+    <!-- Ambient Subtle Glows -->
     <div class="ambient-bg" aria-hidden="true">
         <div class="ambient-glow glow-top"></div>
         <div class="ambient-glow glow-bottom"></div>
@@ -24,13 +33,35 @@
             <a href="/" class="nav-brand">
                 <img src="/assets/nupostlogo.png" alt="NUPost Logo" width="130" height="42">
             </a>
+            
             <nav class="nav-menu">
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#how-it-works" class="nav-link">Process</a>
                 <a href="#demo" class="nav-link">Interactive Demo</a>
                 <a href="#faq" class="nav-link">FAQ</a>
             </nav>
+
             <div class="nav-actions">
+                <!-- Theme Toggle (Dark Midnight / Light) -->
+                <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Dark/Light Mode">
+                    <!-- Sun Icon (Shown in Dark Mode) -->
+                    <svg class="sun-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <!-- Moon Icon (Shown in Light Mode) -->
+                    <svg class="moon-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+
                 <a href="{{ route('login') }}" class="btn btn-sm btn-subtle">Sign In</a>
                 <a href="{{ route('register') }}" class="btn btn-sm btn-gold">Get Started</a>
             </div>
@@ -154,7 +185,7 @@
 
                     <!-- Floating Mini Badges -->
                     <div class="float-tag float-tag-1">
-                        <div class="float-icon" style="background:#dcfce7;color:#16a34a;">⚡</div>
+                        <div class="float-icon" style="background:rgba(34,197,94,0.15);color:#4ade80;">⚡</div>
                         <div class="float-meta">
                             <h6>Rapid Review</h6>
                             <p>Average < 24h turnaround</p>
@@ -162,7 +193,7 @@
                     </div>
 
                     <div class="float-tag float-tag-2">
-                        <div class="float-icon" style="background:#dbeafe;color:#2563eb;">🔒</div>
+                        <div class="float-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;">🔒</div>
                         <div class="float-meta">
                             <h6>Verified NU Accounts</h6>
                             <p>Role-based access control</p>
@@ -207,7 +238,7 @@
                 <!-- Bento 1: AI Assistant (Wide) -->
                 <div class="bento-card bento-col-8">
                     <div>
-                        <div class="bento-icon" style="background:#fef3c7;color:#d97706;">✨</div>
+                        <div class="bento-icon" style="background:rgba(245,158,11,0.15);color:#fbbf24;">✨</div>
                         <h3 class="bento-title">AI-Powered Social Media Captioning</h3>
                         <p class="bento-text">Stuck on what to write? Our integrated Gemini AI crafts tailored, engaging captions with relevant hashtags and event highlights in seconds.</p>
                     </div>
@@ -222,7 +253,7 @@
                 <!-- Bento 2: Status Tracking (4 cols) -->
                 <div class="bento-card bento-col-4">
                     <div>
-                        <div class="bento-icon" style="background:#dbeafe;color:#2563eb;">📡</div>
+                        <div class="bento-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;">📡</div>
                         <h3 class="bento-title">Live Tracking</h3>
                         <p class="bento-text">Know exactly when your post is queued, in review, or published.</p>
                     </div>
@@ -237,7 +268,7 @@
                 <!-- Bento 3: Admin Chat (4 cols) -->
                 <div class="bento-card bento-col-4">
                     <div>
-                        <div class="bento-icon" style="background:#ede9fe;color:#7c3aed;">💬</div>
+                        <div class="bento-icon" style="background:rgba(168,85,247,0.15);color:#c084fc;">💬</div>
                         <h3 class="bento-title">Admin Feedback</h3>
                         <p class="bento-text">Direct 1-on-1 comments per request for fast revisions and creative approval.</p>
                     </div>
@@ -250,7 +281,7 @@
                 <!-- Bento 4: Visual Calendar (Wide 8 cols) -->
                 <div class="bento-card bento-col-8">
                     <div>
-                        <div class="bento-icon" style="background:#dcfce7;color:#16a34a;">📅</div>
+                        <div class="bento-icon" style="background:rgba(34,197,94,0.15);color:#4ade80;">📅</div>
                         <h3 class="bento-title">Conflict-Free Visual Calendar</h3>
                         <p class="bento-text">Prevent overlapping promotions and schedule posts strategically across official social channels with our interactive schedule grid.</p>
                     </div>
@@ -360,7 +391,7 @@
                 <p>Join student leaders and department officers who organize and schedule social media campaigns seamlessly with NUPost.</p>
                 <div class="cta-actions">
                     <a href="{{ route('register') }}" class="btn btn-lg btn-gold">Create an Account</a>
-                    <a href="{{ route('login') }}" class="btn btn-lg btn-subtle" style="color:#ffffff;background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2);">Sign In to Platform</a>
+                    <a href="{{ route('login') }}" class="btn btn-lg btn-subtle">Sign In to Platform</a>
                 </div>
             </div>
         </section>
@@ -403,10 +434,19 @@
         </div>
     </footer>
 
-    <!-- Lightweight Native Script (Zero Heavy Libraries, Ultra Fast & Smooth) -->
+    <!-- Interactive Logic & Theme Switcher -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Navbar Scroll state
+            // 1. Dark Midnight Blue Theme Toggle
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                const next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('nupost-theme', next);
+            });
+
+            // 2. Navbar Scroll effect
             const navbar = document.getElementById('navbar');
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 30) {
@@ -416,7 +456,7 @@
                 }
             }, { passive: true });
 
-            // 2. Interactive Simulator Dataset
+            // 3. Interactive Simulator Dataset
             const demoData = {
                 event: {
                     avatar: "CS",
@@ -478,7 +518,6 @@
                 demoStatus.textContent = data.status;
                 demoStatus.className = 'status-chip ' + data.statusClass;
                 
-                // Animate text typing
                 typeWriterText(demoCaption, data.captions[0]);
             }
 
@@ -510,7 +549,7 @@
                 });
             }
 
-            // 3. Lightweight FAQ Accordion
+            // 4. FAQ Accordion
             const faqItems = document.querySelectorAll('.faq-item');
             faqItems.forEach(item => {
                 const question = item.querySelector('.faq-question');
