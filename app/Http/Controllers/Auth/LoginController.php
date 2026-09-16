@@ -153,7 +153,7 @@ class LoginController extends Controller
         session()->flush();
         session()->invalidate();
         session()->regenerateToken();
-        return redirect()->route('login');
+        return redirect()->route('landing');
     }
 
     private function maskEmail(string $email): string

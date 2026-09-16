@@ -166,7 +166,7 @@ class NupostFeatureTest extends TestCase
             'name' => $requestor->name
         ])->post(route('logout'));
         
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('landing'));
         $this->assertDatabaseHas('audit_logs', [
             'user_id' => $requestor->id,
             'action_type' => 'user_logout',

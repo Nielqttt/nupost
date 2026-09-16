@@ -19,10 +19,10 @@ use App\Http\Controllers\Admin\FacebookAnalyticsController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ReportsController;
 
-// Default Redirect
+// Default Landing Page
 Route::get('/', function () {
     return view('landing');
-});
+})->name('landing');
 
 // Authentication Routes
 Route::middleware('guest.nupost')->group(function () {
