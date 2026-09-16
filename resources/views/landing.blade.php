@@ -7,281 +7,521 @@
     <meta name="description" content="The official social media request platform for National University Lipa. Submit, track, and manage content requests seamlessly.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/landing.css">
 </head>
 <body>
 
+    <!-- Ambient Subtle Glows (Hardware Accelerated, No Heavy Runtime Blurs) -->
+    <div class="ambient-bg" aria-hidden="true">
+        <div class="ambient-glow glow-top"></div>
+        <div class="ambient-glow glow-bottom"></div>
+    </div>
+
     <!-- ── NAVBAR ── -->
-    <nav class="navbar" id="navbar">
-        <a href="/" class="nav-brand">
-            <img src="/assets/nupostlogo.png" alt="NUPost Logo" style="height:70px;">
-        </a>
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#how-it-works">How It Works</a>
-
-            <a href="{{ route('login') }}" class="btn-login">Sign In</a>
-        </div>
-    </nav>
-
-    <!-- ── HERO ── -->
-    <section class="hero">
-        <div class="hero-bg"></div>
-        <div class="blob blob-1" id="blob-1"></div>
-        <div class="blob blob-2" id="blob-2"></div>
-        <div class="blob blob-3" id="blob-3"></div>
-
-        <div class="hero-inner">
-            <div class="hero-content">
-                <div class="hero-badge gs-hero"><span class="hero-badge-dot"></span> Official NU Lipa Platform</div>
-                <h1 class="hero-title gs-hero">Request. Track.<br><span>Post. <span style="color:var(--amber);">NU</span>Post.</span></h1>
-                <p class="hero-subtitle gs-hero" style="margin-bottom:16px;">Submit your social media requests and follow every step in one place.</p>
-                <p class="hero-subtitle gs-hero" style="font-size:1rem;opacity:.75;margin-bottom:40px;">Create requests, upload your content, and get AI-assisted captions in seconds. Track progress from review to posting and receive real-time updates—so you always know the status of your request.</p>
-                <div class="hero-cta gs-hero">
-                    <a href="{{ route('login') }}" class="btn-primary">
-                        Get Started
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
-                    <a href="#features" class="btn-outline">Explore Features</a>
-                </div>
-            </div>
-
-            <div class="hero-visual">
-                <div class="hero-float-card hfc-1 gs-float">
-                    <div class="hfc-title">📋 New Post Request</div>
-                    <div class="hfc-sub">Event Coverage — May 2026</div>
-                    <div class="hfc-bar"><div class="hfc-bar-fill" style="width:75%;background:var(--navy-light);"></div></div>
-                </div>
-                <div class="hero-float-card hfc-2 gs-float">
-                    <div class="hfc-title">✅ Status Update</div>
-                    <div class="hfc-status" style="background:#dcfce7;color:#16a34a;">Approved</div>
-                </div>
-                <div class="hero-float-card hfc-3 gs-float">
-                    <div class="hfc-title">📊 This Week's Reach</div>
-                    <div style="font-size:28px;font-weight:800;color:var(--navy);margin-top:6px;">12,847</div>
-                    <div class="hfc-sub" style="color:#10b981;">↑ 23% from last week</div>
-                </div>
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <img src="/assets/nupostlogo.png" alt="NUPost Logo" width="130" height="42">
+            </a>
+            <nav class="nav-menu">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">Process</a>
+                <a href="#demo" class="nav-link">Interactive Demo</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+            </nav>
+            <div class="nav-actions">
+                <a href="{{ route('login') }}" class="btn btn-sm btn-subtle">Sign In</a>
+                <a href="{{ route('register') }}" class="btn btn-sm btn-gold">Get Started</a>
             </div>
         </div>
-    </section>
+    </header>
 
-    <!-- ── FEATURES ── -->
-    <section class="features" id="features">
-        <div class="section-header">
-            <div class="section-eyebrow gs-up">Features</div>
-            <h2 class="section-title gs-up">Everything You Need</h2>
-            <p class="section-subtitle gs-up">Designed specifically for the Marketing Office and student organizations.</p>
-        </div>
-
-        <div class="features-grid">
-            <div class="feature-card gs-card">
-                <div class="feature-icon" style="background:#dbeafe;color:#2563eb;">
-                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    <main>
+        <!-- ── HERO SECTION ── -->
+        <section class="hero" id="hero">
+            <div class="hero-container">
+                
+                <!-- Left Column -->
+                <div class="hero-left">
+                    <div class="badge-live">
+                        <span class="pulse-dot"></span>
+                        <span>Official NU Lipa Platform</span>
+                    </div>
+                    
+                    <h1 class="hero-title">
+                        Request. Track.<br>
+                        <span class="gradient-text">Post. NU Post.</span>
+                    </h1>
+                    
+                    <p class="hero-lead">
+                        The all-in-one social media request platform built for NU Lipa departments and student organizations. From idea to approved publication in minutes.
+                    </p>
+                    
+                    <div class="hero-cta-group">
+                        <a href="{{ route('login') }}" class="btn btn-lg btn-navy">
+                            <span>Submit a Request</span>
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                        <a href="#demo" class="btn btn-lg btn-subtle">
+                            <span>Try Live Simulator</span>
+                        </a>
+                    </div>
+                    
+                    <div class="trust-pills">
+                        <div class="trust-item">
+                            <span class="trust-check">✓</span>
+                            <span>AI Caption Generation</span>
+                        </div>
+                        <div class="trust-item">
+                            <span class="trust-check">✓</span>
+                            <span>Direct Admin Feedback</span>
+                        </div>
+                        <div class="trust-item">
+                            <span class="trust-check">✓</span>
+                            <span>Live Status Tracking</span>
+                        </div>
+                    </div>
                 </div>
-                <h3 class="feature-title">Submit Requests</h3>
-                <p class="feature-desc">Easily submit social media posting requests with your content, preferred date, target platforms, and media uploads — all in one simple form.</p>
-            </div>
-            <div class="feature-card gs-card">
-                <div class="feature-icon" style="background:#fef3c7;color:#d97706;">
-                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                </div>
-                <h3 class="feature-title">Track Your Status</h3>
-                <p class="feature-desc">Monitor your requests in real-time — from Pending to Under Review, Approved, and Posted. Always know exactly where things stand.</p>
-            </div>
-            <div class="feature-card gs-card">
-                <div class="feature-icon" style="background:#dcfce7;color:#16a34a;">
-                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2.5"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </div>
-                <h3 class="feature-title">Visual Calendar</h3>
-                <p class="feature-desc">View your scheduled posts on an interactive calendar. Plan ahead, avoid date conflicts, and see when your content goes live.</p>
-            </div>
-            <div class="feature-card gs-card">
-                <div class="feature-icon" style="background:#ede9fe;color:#7c3aed;">
-                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                </div>
-                <h3 class="feature-title">Chat with Admin</h3>
-                <p class="feature-desc">Communicate directly with administrators on each request. Get feedback, discuss changes, and resolve issues without leaving the platform.</p>
-            </div>
-            <div class="feature-card gs-card">
-                <div class="feature-icon" style="background:#fce7f3;color:#db2777;">
-                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                </div>
-                <h3 class="feature-title">Instant Notifications</h3>
-                <p class="feature-desc">Get notified the moment your request is reviewed, approved, or posted. Never miss an update on your submissions.</p>
-            </div>
-            <div class="feature-card gs-card">
-                <div class="feature-icon" style="background:#fef2f2;color:#dc2626;">
-                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                </div>
-                <h3 class="feature-title">Secure & Private</h3>
-                <p class="feature-desc">Your data is protected with verified email accounts and role-based access. Only you can see your own requests and conversations.</p>
-            </div>
-        </div>
-    </section>
 
-    <!-- ── HOW IT WORKS ── -->
-    <section class="how-it-works" id="how-it-works">
-        <div class="section-header">
-            <div class="section-eyebrow gs-up">Process</div>
-            <h2 class="section-title gs-up">How It Works</h2>
-            <p class="section-subtitle gs-up">Three simple steps from request to publication.</p>
-        </div>
+                <!-- Right Column: Interactive Simulator -->
+                <div class="hero-right" id="demo">
+                    <div class="demo-window">
+                        <div class="demo-header">
+                            <div class="demo-dots">
+                                <span class="demo-dot red"></span>
+                                <span class="demo-dot yellow"></span>
+                                <span class="demo-dot green"></span>
+                            </div>
+                            <div class="demo-badge-interactive">
+                                <span>✨ Interactive Playground</span>
+                            </div>
+                        </div>
 
-        <div class="steps-grid">
-            <div class="step-card gs-step">
-                <div class="step-num">1</div>
-                <h3 class="step-title">Submit Request</h3>
-                <p class="step-desc">Fill out a simple form with your content, preferred date, target platforms, and upload any media files.</p>
-                <div class="step-connector"></div>
+                        <div class="demo-body">
+                            <!-- Category Buttons -->
+                            <div class="demo-tabs-label">
+                                <span>Select Post Template</span>
+                                <span class="hint">Click to test live preview 👇</span>
+                            </div>
+
+                            <div class="demo-tabs">
+                                <button class="demo-tab-btn active" data-type="event">🎓 Event</button>
+                                <button class="demo-tab-btn" data-type="sports">🏆 Sports</button>
+                                <button class="demo-tab-btn" data-type="org">📢 Notice</button>
+                            </div>
+
+                            <!-- Live Card Preview -->
+                            <div class="demo-card-preview">
+                                <div class="preview-top">
+                                    <div class="preview-org">
+                                        <div class="preview-avatar" id="demoAvatar">NU</div>
+                                        <div class="preview-org-meta">
+                                            <h5 id="demoTitle">College of Computing — Tech Summit 2026</h5>
+                                            <p id="demoOrg">Target Date: May 24, 2026 • 2:00 PM</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-chip chip-approved" id="demoStatus">Approved</span>
+                                </div>
+
+                                <div class="preview-caption-box">
+                                    <span class="ai-tag">✨ Gemini AI Assist</span>
+                                    <p id="demoCaption" class="demo-caption-text">
+                                        "Gear up for innovation! Join us at the NU Lipa Tech Summit 2026. Explore hands-on AI workshops and keynote talks from industry leaders. 🚀💡 #NULipa #TechSummit2026 #NationalUniversity"
+                                    </p>
+                                </div>
+
+                                <div class="preview-bottom-bar">
+                                    <div class="preview-platforms">
+                                        <span class="platform-pill">📱 Facebook</span>
+                                        <span class="platform-pill">📸 Instagram</span>
+                                    </div>
+                                    <div class="preview-media-badge">
+                                        📎 3 Assets Attached
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Action Simulator -->
+                            <div class="demo-interactive-action">
+                                <span id="demoActionHint">Need captions? Let AI write it for you:</span>
+                                <button type="button" class="btn-sparkle" id="btnGenCaption">
+                                    ✨ Regenerate AI Caption
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Mini Badges -->
+                    <div class="float-tag float-tag-1">
+                        <div class="float-icon" style="background:#dcfce7;color:#16a34a;">⚡</div>
+                        <div class="float-meta">
+                            <h6>Rapid Review</h6>
+                            <p>Average < 24h turnaround</p>
+                        </div>
+                    </div>
+
+                    <div class="float-tag float-tag-2">
+                        <div class="float-icon" style="background:#dbeafe;color:#2563eb;">🔒</div>
+                        <div class="float-meta">
+                            <h6>Verified NU Accounts</h6>
+                            <p>Role-based access control</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <div class="step-card gs-step">
-                <div class="step-num">2</div>
-                <h3 class="step-title">Review & Approve</h3>
-                <p class="step-desc">Administrators review your submission, provide feedback via chat, and approve the content for publishing.</p>
-                <div class="step-connector"></div>
+        </section>
+
+        <!-- ── STATS SECTION ── -->
+        <section class="stats-section">
+            <div class="stats-card-wrapper">
+                <div class="stat-box">
+                    <div class="stat-value">100<span>%</span></div>
+                    <div class="stat-name">Paperless Requests</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">< <span>24h</span></div>
+                    <div class="stat-name">Fast Turnaround</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">3<span>+</span></div>
+                    <div class="stat-name">Channels Published</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">24<span>/7</span></div>
+                    <div class="stat-name">Real-Time Tracking</div>
+                </div>
             </div>
-            <div class="step-card gs-step">
-                <div class="step-num">3</div>
-                <h3 class="step-title">Published & Tracked</h3>
-                <p class="step-desc">Your content goes live on the selected platforms. Track reach, engagement, and performance in real-time.</p>
+        </section>
+
+        <!-- ── BENTO FEATURES SECTION ── -->
+        <section class="features-section" id="features">
+            <div class="section-head">
+                <div class="section-tag">Powerful Features</div>
+                <h2 class="section-headline">Everything needed to streamline campus communication</h2>
+                <p class="section-desc">Designed specifically for the NU Lipa Marketing Office, student council, and recognized student organizations.</p>
             </div>
-        </div>
-    </section>
 
+            <div class="bento-grid">
+                <!-- Bento 1: AI Assistant (Wide) -->
+                <div class="bento-card bento-col-8">
+                    <div>
+                        <div class="bento-icon" style="background:#fef3c7;color:#d97706;">✨</div>
+                        <h3 class="bento-title">AI-Powered Social Media Captioning</h3>
+                        <p class="bento-text">Stuck on what to write? Our integrated Gemini AI crafts tailored, engaging captions with relevant hashtags and event highlights in seconds.</p>
+                    </div>
+                    <div class="bento-visual-ai">
+                        <span class="ai-prompt-chip">Prompt: Campus Intramurals 2026 Announcement</span>
+                        <div class="ai-output-stream">
+                            "Unleash the Bulldog spirit! 🐶🔥 Are you ready to champion your college? Intramurals 2026 kickstarts this Monday at the Main Gymnasium. Be there, be proud!"<span class="cursor"></span>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Bento 2: Status Tracking (4 cols) -->
+                <div class="bento-card bento-col-4">
+                    <div>
+                        <div class="bento-icon" style="background:#dbeafe;color:#2563eb;">📡</div>
+                        <h3 class="bento-title">Live Tracking</h3>
+                        <p class="bento-text">Know exactly when your post is queued, in review, or published.</p>
+                    </div>
+                    <div class="bento-visual-timeline">
+                        <div class="timeline-step-dot done" title="Submitted">✓</div>
+                        <div class="timeline-step-dot done" title="Review">✓</div>
+                        <div class="timeline-step-dot active" title="Approved">●</div>
+                        <div class="timeline-step-dot" title="Posted">4</div>
+                    </div>
+                </div>
 
-    <!-- ── CTA BANNER ── -->
-    <section class="cta-banner">
-        <div class="blob" style="top:-50%;left:20%;width:400px;height:400px;background:var(--amber);"></div>
-        <div class="blob" style="bottom:-40%;right:10%;width:350px;height:350px;background:#8b5cf6;"></div>
-        <h2 class="cta-title gs-up">Ready to Request, Track, and Post?</h2>
-        <p class="cta-sub gs-up">Join the departments and organizations already using NUPost to submit request for social media posting.</p>
-        <a href="{{ route('login') }}" class="btn-primary gs-up">
-            Get Started Now
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-    </section>
+                <!-- Bento 3: Admin Chat (4 cols) -->
+                <div class="bento-card bento-col-4">
+                    <div>
+                        <div class="bento-icon" style="background:#ede9fe;color:#7c3aed;">💬</div>
+                        <h3 class="bento-title">Admin Feedback</h3>
+                        <p class="bento-text">Direct 1-on-1 comments per request for fast revisions and creative approval.</p>
+                    </div>
+                    <div class="bento-visual-chat">
+                        <div class="chat-bubble-mini admin">"Please upload the high-res poster format!"</div>
+                        <div class="chat-bubble-mini user">"Done! Attached the 4K PNG file."</div>
+                    </div>
+                </div>
+
+                <!-- Bento 4: Visual Calendar (Wide 8 cols) -->
+                <div class="bento-card bento-col-8">
+                    <div>
+                        <div class="bento-icon" style="background:#dcfce7;color:#16a34a;">📅</div>
+                        <h3 class="bento-title">Conflict-Free Visual Calendar</h3>
+                        <p class="bento-text">Prevent overlapping promotions and schedule posts strategically across official social channels with our interactive schedule grid.</p>
+                    </div>
+                    <div class="bento-calendar-preview">
+                        <div class="cal-mini-day active">
+                            <span class="day-num">18</span>
+                            <span class="day-dot bg-amber"></span>
+                            <span class="day-label">General Assembly</span>
+                        </div>
+                        <div class="cal-mini-day">
+                            <span class="day-num">19</span>
+                            <span class="day-dot bg-blue"></span>
+                            <span class="day-label">Quiz Bee</span>
+                        </div>
+                        <div class="cal-mini-day">
+                            <span class="day-num">20</span>
+                            <span class="day-dot bg-green"></span>
+                            <span class="day-label">Bulldog Sports</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 3-STEP PROCESS SECTION ── -->
+        <section class="process-section" id="how-it-works">
+            <div class="section-head">
+                <div class="section-tag">Streamlined Flow</div>
+                <h2 class="section-headline">From Submission to Social Media in 3 Steps</h2>
+                <p class="section-desc">No complicated paper forms. Everything is tracked digitally in real time.</p>
+            </div>
+
+            <div class="steps-container">
+                <div class="step-card-modern">
+                    <div class="step-number-badge">
+                        <span>01</span>
+                        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    </div>
+                    <h3 class="step-card-title">Create Request</h3>
+                    <p class="step-card-text">Provide event details, select posting dates, target channels, and upload your graphic assets or pubmats.</p>
+                </div>
+
+                <div class="step-card-modern">
+                    <div class="step-number-badge">
+                        <span>02</span>
+                        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    </div>
+                    <h3 class="step-card-title">Review & Refine</h3>
+                    <p class="step-card-text">The Marketing Office verifies brand guidelines, polishes captions with AI, and coordinates via direct chat.</p>
+                </div>
+
+                <div class="step-card-modern">
+                    <div class="step-number-badge">
+                        <span>03</span>
+                        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                    </div>
+                    <h3 class="step-card-title">Publish & Monitor</h3>
+                    <p class="step-card-text">Content goes live on scheduled channels. Monitor post reach, engagement, and confirmed status.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── FAQ SECTION ── -->
+        <section class="faq-section" id="faq">
+            <div class="section-head">
+                <div class="section-tag">Frequently Asked Questions</div>
+                <h2 class="section-headline">Got Questions? We have answers.</h2>
+            </div>
+
+            <div class="faq-list">
+                <div class="faq-item open">
+                    <div class="faq-question">
+                        <span>Who can submit posting requests?</span>
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">
+                        Any recognized student organization, academic department, faculty member, or office head with a verified NU Lipa email address can submit and manage requests.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How far in advance should I submit my post request?</span>
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">
+                        We recommend submitting requests at least 3–5 business days before your target posting date to ensure proper marketing review, branding compliance, and optimal scheduling.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How does the AI caption generator work?</span>
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">
+                        When creating or editing a request, simply click "Generate AI Caption". Our integrated AI analyzes your title, event context, and target platforms to produce catchy, professional captions and hashtags in seconds.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── CTA BANNER ── -->
+        <section class="cta-wrapper">
+            <div class="cta-box">
+                <h2>Ready to publish your next campus event?</h2>
+                <p>Join student leaders and department officers who organize and schedule social media campaigns seamlessly with NUPost.</p>
+                <div class="cta-actions">
+                    <a href="{{ route('register') }}" class="btn btn-lg btn-gold">Create an Account</a>
+                    <a href="{{ route('login') }}" class="btn btn-lg btn-subtle" style="color:#ffffff;background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2);">Sign In to Platform</a>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <!-- ── FOOTER ── -->
-    <footer class="footer">
-        <div class="footer-inner">
-            <div class="footer-brand">
-                <div class="footer-logo">
-                    <img src="/assets/Title.png" alt="NUPost Logo" style="height:100px;">
+    <footer class="footer-modern">
+        <div class="footer-top">
+            <div class="footer-brand-block">
+                <div class="footer-logo-wrap">
+                    <img src="/assets/Title.png" alt="NUPost Title Logo" height="50">
                 </div>
-                <p class="footer-text">The official social media request platform for National University Lipa.</p>
+                <p class="footer-tagline">The official social media request and management system for National University Lipa.</p>
             </div>
-            <div class="footer-col">
-                <h4>Platform</h4>
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How It Works</a>
-            </div>
-            <div class="footer-col">
-                <h4>Access</h4>
-                <a href="{{ route('login') }}">Sign In</a>
-                <a href="{{ route('register') }}">Register</a>
+            
+            <div class="footer-nav-groups">
+                <div class="footer-group">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="#hero">Overview</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">Process Flow</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-group">
+                    <h4>Account</h4>
+                    <ul>
+                        <li><a href="{{ route('login') }}">Sign In</a></li>
+                        <li><a href="{{ route('register') }}">Create Account</a></li>
+                        <li><a href="{{ route('password.forgot') }}">Forgot Password</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
+
         <div class="footer-bottom">
-            &copy; {{ date('Y') }} NU Lipa Marketing Office. All rights reserved.
+            <span>&copy; {{ date('Y') }} NU Lipa Marketing Office. All rights reserved.</span>
+            <span>National University Lipa • Education That Works</span>
         </div>
     </footer>
 
-    <!-- GSAP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- Lightweight Native Script (Zero Heavy Libraries, Ultra Fast & Smooth) -->
     <script>
-        gsap.registerPlugin(ScrollTrigger);
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Navbar Scroll state
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 30) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }, { passive: true });
 
-        // ── Hero entrance
-        const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-        tl.from(".nav-brand", { opacity:0, y:-20, duration:.7 })
-          .from(".nav-links a", { opacity:0, y:-15, duration:.5, stagger:.08 }, "-=.4")
-          .from(".gs-hero", { opacity:0, y:50, duration:1, stagger:.18 }, "-=.5")
-          .from(".gs-float", { opacity:0, y:40, scale:.9, duration:.8, stagger:.2, ease:"back.out(1.4)" }, "-=.6");
+            // 2. Interactive Simulator Dataset
+            const demoData = {
+                event: {
+                    avatar: "CS",
+                    title: "College of Computing — Tech Summit 2026",
+                    org: "Target Date: May 24, 2026 • 2:00 PM",
+                    status: "Approved",
+                    statusClass: "chip-approved",
+                    captions: [
+                        '"Gear up for innovation! Join us at the NU Lipa Tech Summit 2026. Explore hands-on AI workshops and keynote talks from industry leaders. 🚀💡 #NULipa #TechSummit2026"',
+                        '"Code, build, and lead! 💻 The future of technology unfolds at NU Lipa Tech Summit 2026. Free admission for all students! #BulldogPride #CCIT"',
+                        '"Level up your digital skills! Join our interactive workshop tracks this May 24th at the Multipurpose Hall. Register now! 🔥✨ #NUPost #NULipa"'
+                    ]
+                },
+                sports: {
+                    avatar: "ATH",
+                    title: "Bulldogs Athletics — University Games 2026",
+                    org: "Target Date: June 02, 2026 • 9:00 AM",
+                    status: "Scheduled",
+                    statusClass: "chip-scheduled",
+                    captions: [
+                        '"Hear the Bulldogs roar! 🐶🏆 Catch our varsity teams in action at the Southern Luzon University Games. Let\'s bring home the championship! #GoBulldogs #NUAthletics"',
+                        '"Game day ready! Support our athletes as they defend the court this Tuesday. Gates open at 8:00 AM. Wear your Gold & Blue! 💙💛 #BulldogPride"',
+                        '"Unstoppable spirit, unmatched energy! Watch the livestreams right here on our official Facebook page. 🔥🏀 #NULipaSports"'
+                    ]
+                },
+                org: {
+                    avatar: "SSC",
+                    title: "Supreme Student Council — General Assembly",
+                    org: "Target Date: May 28, 2026 • 10:00 AM",
+                    status: "Under Review",
+                    statusClass: "chip-review",
+                    captions: [
+                        '"Your voice, your council! 📢 Join the SSC Year-End General Assembly. Submit your agenda items and hear key project updates. See you there! #SSC2026 #OneNU"',
+                        '"Transparency in action! All student leaders and org representatives are invited to our term review this Thursday. 🤝✨ #NULipaSSC"',
+                        '"Lead the change! Check the link in bio for the complete assembly agenda and open forum guidelines. 📋🇵🇭 #StudentLeadership"'
+                    ]
+                }
+            };
 
-        // ── Floating blobs
-        gsap.to("#blob-1", { y:60, x:30, rotation:10, duration:7, repeat:-1, yoyo:true, ease:"sine.inOut" });
-        gsap.to("#blob-2", { y:-50, x:-35, rotation:-12, duration:8, repeat:-1, yoyo:true, ease:"sine.inOut", delay:1 });
-        gsap.to("#blob-3", { y:40, x:25, duration:9, repeat:-1, yoyo:true, ease:"sine.inOut", delay:2 });
+            let currentType = 'event';
+            let captionIndex = 0;
 
-        // ── Floating cards gentle hover
-        gsap.utils.toArray(".gs-float").forEach((el, i) => {
-            gsap.to(el, { y: "+=12", duration: 2.5 + i*.4, repeat:-1, yoyo:true, ease:"sine.inOut", delay: i*.3 });
-        });
+            const tabButtons = document.querySelectorAll('.demo-tab-btn');
+            const demoAvatar = document.getElementById('demoAvatar');
+            const demoTitle = document.getElementById('demoTitle');
+            const demoOrg = document.getElementById('demoOrg');
+            const demoStatus = document.getElementById('demoStatus');
+            const demoCaption = document.getElementById('demoCaption');
+            const btnGenCaption = document.getElementById('btnGenCaption');
 
-        // ── Stats counter
-        ScrollTrigger.create({
-            trigger: ".stats-bar",
-            start: "top 90%",
-            onEnter: () => {
-                document.querySelectorAll(".counter").forEach(el => {
-                    const target = +el.dataset.target;
-                    gsap.to(el, {
-                        innerText: target,
-                        duration: 2,
-                        snap: { innerText: 1 },
-                        ease: "power2.out"
-                    });
+            function updateDemo(type) {
+                currentType = type;
+                captionIndex = 0;
+                const data = demoData[type];
+                
+                demoAvatar.textContent = data.avatar;
+                demoTitle.textContent = data.title;
+                demoOrg.textContent = data.org;
+                demoStatus.textContent = data.status;
+                demoStatus.className = 'status-chip ' + data.statusClass;
+                
+                // Animate text typing
+                typeWriterText(demoCaption, data.captions[0]);
+            }
+
+            function typeWriterText(element, text) {
+                element.style.opacity = '0.5';
+                setTimeout(() => {
+                    element.textContent = text;
+                    element.style.opacity = '1';
+                }, 150);
+            }
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateDemo(btn.dataset.type);
                 });
-            },
-            once: true
-        });
-
-        // ── Helper: animate a group of elements on scroll
-        function revealOnScroll(selector, triggerSelector, props) {
-            const els = document.querySelectorAll(selector);
-            if (!els.length) return;
-            const trigger = document.querySelector(triggerSelector || selector);
-            if (!trigger) return;
-
-            // Set initial hidden state
-            gsap.set(els, { opacity: 0, y: props.y || 40 });
-
-            ScrollTrigger.create({
-                trigger: trigger,
-                start: "top 92%",
-                onEnter: () => {
-                    gsap.to(els, {
-                        opacity: 1,
-                        y: 0,
-                        duration: props.duration || 0.7,
-                        stagger: props.stagger || 0,
-                        ease: props.ease || "power3.out",
-                        overwrite: true
-                    });
-                },
-                once: true
             });
-        }
 
-        revealOnScroll(".gs-stat", ".stats-bar", { y:30, duration:.7, stagger:.15 });
-        revealOnScroll(".gs-card", ".features-grid", { y:50, duration:.7, stagger:.12, ease:"back.out(1.4)" });
-        revealOnScroll(".gs-step", ".steps-grid", { y:50, duration:.8, stagger:.2, ease:"back.out(1.5)" });
-        revealOnScroll(".gs-testi", ".testimonials-grid", { y:40, duration:.7, stagger:.15 });
+            if (btnGenCaption) {
+                btnGenCaption.addEventListener('click', () => {
+                    const data = demoData[currentType];
+                    captionIndex = (captionIndex + 1) % data.captions.length;
+                    btnGenCaption.classList.add('btn-sparkle-active');
+                    typeWriterText(demoCaption, data.captions[captionIndex]);
+                    setTimeout(() => {
+                        btnGenCaption.classList.remove('btn-sparkle-active');
+                    }, 400);
+                });
+            }
 
-        // Section headers
-        gsap.utils.toArray(".gs-up").forEach(el => {
-            gsap.set(el, { opacity: 0, y: 40 });
-            ScrollTrigger.create({
-                trigger: el,
-                start: "top 92%",
-                onEnter: () => {
-                    gsap.to(el, { opacity:1, y:0, duration:.7, ease:"power3.out", overwrite:true });
-                },
-                once: true
+            // 3. Lightweight FAQ Accordion
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                question.addEventListener('click', () => {
+                    const isOpen = item.classList.contains('open');
+                    faqItems.forEach(other => other.classList.remove('open'));
+                    if (!isOpen) {
+                        item.classList.add('open');
+                    }
+                });
             });
-        });
-
-        // ── Navbar scroll
-        window.addEventListener("scroll", () => {
-            document.getElementById("navbar").classList.toggle("scrolled", window.scrollY > 50);
-        });
-
-        // Force ScrollTrigger to recalculate after page fully loads (handles #hash navigation)
-        window.addEventListener("load", () => {
-            ScrollTrigger.refresh(true);
         });
     </script>
 </body>
