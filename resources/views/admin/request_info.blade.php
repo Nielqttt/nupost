@@ -568,7 +568,8 @@
 
     {{-- RIGHT COLUMN --}}
     <div>
-        <div class="card">
+        {{-- Request Info card --}}
+        <div class="card" style="margin-bottom:16px;">
             <div class="card__head"><div class="card__title">Request Info</div></div>
             <div class="card__body" style="padding-top:8px;">
                 <div class="info-row"><span class="info-row__label">Submitted by</span><span class="info-row__value">{{ $request->requester }}</span></div>
@@ -578,6 +579,35 @@
                 <div class="info-row"><span class="info-row__label">Preferred Date</span><span class="info-row__value">{{ $request->preferred_date ? \Carbon\Carbon::parse($request->preferred_date)->format('M j, Y') : '—' }}</span></div>
                 <div class="info-row"><span class="info-row__label">Media Files</span><span class="info-row__value">{{ count($mediaFiles) }} file(s)</span></div>
                 <div class="info-row"><span class="info-row__label">Status</span><span class="info-row__value">{{ $request->status }}</span></div>
+            </div>
+        </div>
+
+        {{-- Comments card --}}
+        <div class="card">
+            <div class="card__head"><div class="card__title">💬 Comments</div></div>
+            <div class="card__body">
+                <div class="comment-list" id="comment-list">
+                    @forelse($comments as $c)
+                        <div class="comment-bubble-wrap {{ $c->sender_role === 'admin' ? 'comment-bubble-wrap--admin' : '' }}">
+                            <div class="comment-av {{ $c->sender_role === 'admin' ? 'comment-av--admin' : 'comment-av--user' }}">{{ strtoupper(substr($c->sender_name, 0, 1)) }}</div>
+                            <div class="comment-bubble {{ $c->sender_role === 'admin' ? 'comment-bubble--admin' : 'comment-bubble--user' }}">
+                                {{ $c->message }}
+                                <div class="comment-meta">{{ $c->sender_name }} · {{ $c->created_at->format('M j, g:i A') }}</div>
+                            </div>
+                        </div>
+                    @empty
+                        <p style="font-size:13px;color:var(--ink-faint);text-align:center;padding:16px 0;">No comments yet. Start the conversation below.</p>
+                    @endforelse
+                </div>
+                <div class="comment-form-area">
+                    <textarea class="comment-textarea" id="comment-input" placeholder="Write a comment… (Ctrl+Enter to send)"></textarea>
+                    <div class="comment-form-footer">
+                        <button class="btn-send" onclick="sendComment()">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            Send
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>{{-- end right column --}}
@@ -767,7 +797,7 @@ async function sendComment() {
         }
     } catch {}
 }
-document.getElementById('comment-input').addEventListener('keydown', e => { if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();sendComment();} });
+document.getElementById('comment-input')?.addEventListener('keydown', e => { if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();sendComment();} });
 
 /* CANVAS EDITOR */
 let editorImg = null, currentFilter = 'normal', adjustments = { brightness:100, contrast:100, saturate:100, blur:0 }, textOverlays = [];
