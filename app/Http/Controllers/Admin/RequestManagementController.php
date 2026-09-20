@@ -238,6 +238,32 @@ class RequestManagementController extends Controller
         return response()->json(['success' => true]);
     }
 
+    // ── DOWNLOAD MEDIA FILE ──────────────────────────────────────
+    public function downloadFile(Request $httpRequest, $id, $filename)
+    {
+        // Sanitize filename — prevent path traversal
+        $filename = basename($filename);
+
+        // Verify the file belongs to this request
+        $postRequest = PostRequest::findOrFail($id);
+        $mediaFiles  = array_map('trim', explode(',', $postRequest->media_file ?? ''));
+        if (!in_array($filename, $mediaFiles)) {
+            abort(404, 'File not found on this request.');
+        }
+
+        $path = public_path('uploads/' . $filename);
+        if (!file_exists($path)) {
+            $altPath = base_path('public_html/uploads/' . $filename);
+            if (file_exists($altPath)) {
+                $path = $altPath;
+            } else {
+                abort(404, 'File not found on server.');
+            }
+        }
+
+        return response()->download($path, $filename);
+    }
+
     // ── COMMENTS ─────────────────────────────────────────────────
     public function postComment(Request $request)
     {

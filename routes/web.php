@@ -124,6 +124,7 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     Route::get('/requests/{id}/brand',      [RequestManagementController::class, 'brandingEditor'])->name('requests.brand');
     Route::post('/requests/{id}/generate-caption', [RequestManagementController::class, 'generateCaption'])->name('requests.generate-caption');
     Route::post('/requests/{id}/save-caption',     [RequestManagementController::class, 'saveCaption'])->name('requests.save-caption');
+    Route::get('/requests/{id}/download/{filename}', [RequestManagementController::class, 'downloadFile'])->name('requests.download')->where('filename', '.*');
 });
 
 // ─── GEMINI AI API ────────────────────────────────────────────────────────

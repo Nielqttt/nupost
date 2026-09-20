@@ -674,9 +674,12 @@ function toggleSelectAll(cb) {
 }
 
 function downloadFile(url, filename) {
+    filename = filename || (url ? url.split('/').pop() : 'file');
+    // Route through authenticated Laravel endpoint — direct /uploads/ access fails on live server
+    const dlUrl = '/admin/requests/' + REQ_ID + '/download/' + encodeURIComponent(filename);
     const a = document.createElement('a');
-    a.href     = url;
-    a.download = filename || url.split('/').pop();
+    a.href     = dlUrl;
+    a.download = filename;
     a.rel      = 'noopener';
     document.body.appendChild(a);
     a.click();
