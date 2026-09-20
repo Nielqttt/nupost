@@ -655,10 +655,10 @@
 
 @section('scripts')
 <script>
-const REQ_ID    = {{ $request->id }};
-const REQ_TITLE = @json($request->title);
-const REQ_DESC  = @json($request->description ?? '');
-const CSRF      = '{{ csrf_token() }}';
+var REQ_ID    = {{ $request->id }};
+var REQ_TITLE = @json($request->title);
+var REQ_DESC  = @json($request->description ?? '');
+// CSRF is already declared globally in the admin layout — do not redeclare
 
 function switchTab(tab, btn) {
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
