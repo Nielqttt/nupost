@@ -580,8 +580,8 @@
                 <div class="info-row"><span class="info-row__label">Status</span><span class="info-row__value">{{ $request->status }}</span></div>
             </div>
         </div>
-
-        
+    </div>{{-- end right column --}}
+</div>{{-- end req-layout --}}
 
 {{-- CAPTION EDITOR MODAL --}}
 <div class="modal-overlay" id="caption-modal">
@@ -644,16 +644,25 @@ function toggleSelectAll(cb) {
 }
 
 function downloadFile(url, filename) {
-    const a = document.createElement('a'); a.href = url; a.download = filename; a.target = '_blank';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    const a = document.createElement('a');
+    a.href     = url;
+    a.download = filename || url.split('/').pop();
+    a.rel      = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 function downloadSelected() {
-    const selected = document.querySelectorAll('.media-item.selected');
+    const selected = [...document.querySelectorAll('.media-item.selected')];
     if (!selected.length) { showToast('Select at least one file first.', 'error'); return; }
-    selected.forEach(item => setTimeout(() => downloadFile(item.dataset.url, item.dataset.file), 100));
+    showToast('Downloading ' + selected.length + ' file(s)…', 'success');
+    selected.forEach((item, i) => setTimeout(() => downloadFile(item.dataset.url, item.dataset.file), i * 300));
 }
 function downloadAll() {
-    document.querySelectorAll('.media-item').forEach(item => setTimeout(() => downloadFile(item.dataset.url, item.dataset.file), 100));
+    const items = [...document.querySelectorAll('.media-item')];
+    if (!items.length) { showToast('No files to download.', 'error'); return; }
+    showToast('Downloading all ' + items.length + ' file(s)…', 'success');
+    items.forEach((item, i) => setTimeout(() => downloadFile(item.dataset.url, item.dataset.file), i * 300));
 }
 
 function openCaptionEditor(i, filename, url) {
