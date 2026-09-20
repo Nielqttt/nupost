@@ -1216,8 +1216,8 @@ if(chip && dd){
 
 // ── NOTIFICATION SYSTEM ───────────────────────────────────────────
 const NOTIF_FETCH_URL = '{{ route("admin.notifications.fetch") }}';
-const NOTIF_READ_URL  = '{{ route("admin.notifications.read") }}';
-const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+var CSRF = window.CSRF || document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+window.CSRF = CSRF;
 
 let notifOpen = false;
 

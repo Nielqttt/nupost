@@ -127,6 +127,15 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     Route::get('/requests/{id}/download/{filename}', [RequestManagementController::class, 'downloadFile'])->name('requests.download')->where('filename', '.*');
 });
 
+// Cache Clearing Helper for Deployment
+Route::get('/clear-cache', function () {
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('route:clear');
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    return '<h3>All caches (view, route, config, app cache) have been cleared successfully!</h3><p><a href="/admin/requests/1">Go back to Request 1</a></p>';
+});
+
 // ─── GEMINI AI API ────────────────────────────────────────────────────────
 Route::post('/api/generate-caption', function (Request $request) {
     $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
