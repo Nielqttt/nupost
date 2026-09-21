@@ -436,7 +436,7 @@
                             $ext       = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                             $isImage   = in_array($ext, ['jpg','jpeg','png','gif','webp']);
                             $caption   = $captions[$filename] ?? '';
-                            $fileUrl   = '/uploads/' . $filename;
+                            $fileUrl   = '/admin/requests/' . $request->id . '/media/' . $filename;
                         @endphp
                         <div class="media-item" id="media-item-{{ $i }}" data-file="{{ $filename }}" data-url="{{ $fileUrl }}" onclick="toggleSelect({{ $i }})">
                             <div class="media-item__check">
@@ -500,7 +500,7 @@
                             @foreach($mediaFiles as $f)
                             @php $ext3 = strtolower(pathinfo(trim($f), PATHINFO_EXTENSION)); @endphp
                             @if(in_array($ext3, ['jpg','jpeg','png','gif','webp']))
-                            <option value="/uploads/{{ trim($f) }}">{{ trim($f) }}</option>
+                            <option value="/admin/requests/{{ $request->id }}/media/{{ trim($f) }}">{{ trim($f) }}</option>
                             @endif
                             @endforeach
                         </select>
@@ -530,7 +530,7 @@
                             @foreach($filterNames as $fi => $fn)
                             <div class="filter-swatch {{ $fi===0?'active':'' }}" id="filter-{{ $fi }}" onclick="applyFilter('{{ strtolower($fn) }}', {{ $fi }})">
                                 @if($firstImage)
-                                <img src="/uploads/{{ $firstImage }}" alt="{{ $fn }}">
+                                <img src="/admin/requests/{{ $request->id }}/media/{{ $firstImage }}" alt="{{ $fn }}">
                                 @else
                                 <div style="background:var(--cream-dark);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:18px;">🖼️</div>
                                 @endif

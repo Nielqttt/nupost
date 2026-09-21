@@ -125,6 +125,7 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     Route::post('/requests/{id}/generate-caption', [RequestManagementController::class, 'generateCaption'])->name('requests.generate-caption');
     Route::post('/requests/{id}/save-caption',     [RequestManagementController::class, 'saveCaption'])->name('requests.save-caption');
     Route::get('/requests/{id}/download/{filename}', [RequestManagementController::class, 'downloadFile'])->name('requests.download')->where('filename', '.*');
+    Route::get('/requests/{id}/media/{filename}', [RequestManagementController::class, 'serveFile'])->name('requests.media')->where('filename', '.*');
 });
 
 // Cache Clearing Helper for Deployment
