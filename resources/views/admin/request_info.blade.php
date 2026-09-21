@@ -444,7 +444,8 @@
                             </div>
                             <div class="media-img-wrap">
                                 @if($isImage)
-                                    <img src="{{ $fileUrl }}" alt="{{ $filename }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'no-img\'>🖼️</div>'">
+                                    <div class="no-img" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:36px;">🖼️</div>
+                                    <img src="{{ $fileUrl }}" alt="{{ $filename }}" style="position:relative;z-index:1;" onerror="this.style.opacity='0';var img=this;setTimeout(function(){img.src=img.src.split('?')[0]+'?r='+Date.now();img.onerror=null;img.onload=function(){img.style.opacity='1'};},2000);">
                                 @else
                                     <div class="no-img">📄</div>
                                 @endif
