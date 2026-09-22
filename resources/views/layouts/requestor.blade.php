@@ -309,6 +309,13 @@ html[data-theme="dark"],
     color: #f8fafc !important;
 }
 
+[data-theme="dark"] .empty-state__icon {
+    background: #0b1a3d !important;
+    border: 1.5px solid rgba(30, 79, 216, 0.3) !important;
+    color: #60a5fa !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
 /* Tables */
 [data-theme="dark"] table th {
     background-color: #06112a !important;
