@@ -121,7 +121,6 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     // Dynamic Admin Routes
     Route::get('/requests/{id}',            [RequestManagementController::class, 'show'])->name('requests.show');
     Route::get('/requests/{id}/comments',   [RequestManagementController::class, 'getComments'])->name('requests.comments');
-    Route::get('/requests/{id}/brand',      [RequestManagementController::class, 'brandingEditor'])->name('requests.brand');
     Route::post('/requests/{id}/generate-caption', [RequestManagementController::class, 'generateCaption'])->name('requests.generate-caption');
     Route::post('/requests/{id}/save-caption',     [RequestManagementController::class, 'saveCaption'])->name('requests.save-caption');
     Route::get('/requests/{id}/download/{filename}', [RequestManagementController::class, 'downloadFile'])->name('requests.download')->where('filename', '.*');

@@ -80,13 +80,6 @@ class RequestManagementController extends Controller
         return view('admin.request_info', compact('req', 'request', 'comments', 'activities'));
     }
 
-    // ── BRANDING EDITOR ──────────────────────────────────────────
-    public function brandingEditor($id)
-    {
-        $request = PostRequest::findOrFail($id);
-        return view('admin.branding-editor', compact('request'));
-    }
-
     // ── UPDATE STATUS ────────────────────────────────────────────
     public function updateStatus(Request $request)
     {

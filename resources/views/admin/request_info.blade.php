@@ -418,11 +418,7 @@
                                 Select All ({{ count($mediaFiles) }} files)
                             </label>
                         </div>
-                        <div style="display:flex;gap:8px;">
-                            <a href="{{ route('admin.requests.brand', $request->id) }}" class="btn-sm btn-sm--navy">
-                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                🖼 Templates
-                            </a>
+                        <div>
                             <button class="btn-sm btn-sm--amber" onclick="generateAllCaptions()">
                                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zM8 12h8M12 8v8"/></svg>
                                 Generate All Captions
@@ -459,15 +455,6 @@
                                     <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                     Caption
                                 </button>
-                                @if($isImage)
-                                <a class="media-action-btn"
-                                   href="{{ route('admin.requests.brand', $request->id) }}?photo={{ urlencode($filename) }}"
-                                   onclick="event.stopPropagation()"
-                                   style="background:rgba(0,46,122,0.85);color:white;text-decoration:none;flex:1;padding:6px 8px;border-radius:8px;border:none;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:4px;">
-                                    <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                    Template
-                                </a>
-                                @endif
                             </div>
                             <div class="media-caption">
                                 <div class="media-caption__text" id="caption-display-{{ $i }}">
