@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NUPost – @yield('title', 'Dashboard')</title>
+
+<!-- Prevent Flash of Unstyled Theme -->
+<script>
+    (function() {
+        const savedTheme = localStorage.getItem('nupost-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
@@ -31,6 +40,174 @@
     --sb-inner:     56px;
     --amber:        #f59e0b;
 }
+
+:root[data-theme="dark"],
+html[data-theme="dark"],
+[data-theme="dark"] {
+    --page-bg:      #040c1e;
+    --card-bg:      #081636;
+    --border:       rgba(30, 79, 216, 0.25);
+    --text:         #f8fafc;
+    --text-muted:   #94a3b8;
+    --text-faint:   #64748b;
+    --navy-pale:    rgba(30, 79, 216, 0.25);
+
+    --card:         #081636;
+    --stroke:       rgba(30, 79, 216, 0.25);
+    --ink:          #f8fafc;
+    --ink-mid:      #cbd5e1;
+    --ink-soft:     #94a3b8;
+    --sand:         #0a1b42;
+}
+
+/* ── DARK THEME COMPONENT OVERRIDES ── */
+[data-theme="dark"] .main-wrapper,
+[data-theme="dark"] .page-content,
+[data-theme="dark"] .page-outer {
+    background: var(--page-bg) !important;
+}
+
+[data-theme="dark"] .topbar {
+    background: var(--card-bg);
+    border-bottom-color: var(--border);
+}
+[data-theme="dark"] .topbar__title {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .topbar__user {
+    background: #0b1a3d;
+    border-color: var(--border);
+    color: #f8fafc;
+}
+[data-theme="dark"] .topbar__user:hover {
+    background: #0f2250;
+    border-color: #f59e0b;
+}
+
+[data-theme="dark"] .notif-btn {
+    background: #0b1a3d;
+    border-color: var(--border);
+    color: var(--text-muted);
+}
+[data-theme="dark"] .notif-btn:hover {
+    background: #0f2250;
+    color: #f8fafc;
+}
+[data-theme="dark"] .notif-dropdown {
+    background: var(--card-bg);
+    border-color: var(--border);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+[data-theme="dark"] .notif-head,
+[data-theme="dark"] .notif-footer {
+    background: #06112a;
+    border-color: var(--border);
+}
+[data-theme="dark"] .notif-head__title {
+    color: #f8fafc;
+}
+[data-theme="dark"] .notif-item {
+    color: #f8fafc;
+    border-bottom-color: rgba(255,255,255,0.05);
+}
+[data-theme="dark"] .notif-item:hover {
+    background: rgba(30, 79, 216, 0.15);
+}
+[data-theme="dark"] .notif-icon--default {
+    background: #0d214d;
+}
+
+/* Forms & Inputs in Dark Mode */
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    background-color: #0b1a3d !important;
+    color: #f8fafc !important;
+    border-color: rgba(30, 79, 216, 0.3) !important;
+}
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* Cards, Panels, Sections */
+[data-theme="dark"] .form-section,
+[data-theme="dark"] .form-card,
+[data-theme="dark"] .form-actions,
+[data-theme="dark"] .profile-card,
+[data-theme="dark"] .action-item,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .white-box,
+[data-theme="dark"] .settings-card,
+[data-theme="dark"] .table-wrap,
+[data-theme="dark"] .db-card {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .section-head,
+[data-theme="dark"] .profile-member,
+[data-theme="dark"] .stat-box {
+    background: #06112a !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+}
+
+[data-theme="dark"] .btn-cancel {
+    background: #0b1a3d !important;
+    border-color: rgba(30, 79, 216, 0.3) !important;
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .btn-cancel:hover {
+    background: #0f2250 !important;
+    color: #f8fafc !important;
+}
+
+/* Tables */
+[data-theme="dark"] table th {
+    background-color: #06112a !important;
+    color: #94a3b8 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] table td {
+    border-color: rgba(30, 79, 216, 0.15) !important;
+    color: #f8fafc !important;
+}
+[data-theme="dark"] table tr:hover td {
+    background-color: rgba(30, 79, 216, 0.08) !important;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #f4f6fb; border: 1.5px solid var(--border);
+    color: var(--text); display: flex; align-items: center;
+    justify-content: center; cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    flex-shrink: 0;
+}
+.theme-toggle-btn:hover {
+    background: #e8ecf4; border-color: #f59e0b;
+    transform: rotate(15deg);
+}
+.sun-icon { display: none; color: #fbbf24; }
+.moon-icon { display: block; color: #002366; }
+[data-theme="dark"] .theme-toggle-btn {
+    background: #0b1a3d; border-color: rgba(30, 79, 216, 0.35);
+    color: #f8fafc;
+}
+[data-theme="dark"] .theme-toggle-btn:hover {
+    background: #0f2250; border-color: #f59e0b;
+}
+[data-theme="dark"] .sun-icon { display: block; }
+[data-theme="dark"] .moon-icon { display: none; }
 .sb-create {
     width: 44px; height: 44px; border-radius: 14px;
     background: var(--accent); color: white;
@@ -184,7 +361,7 @@ html, body {
 
 /* ── MAIN WRAPPER ──────────────────────────── */
 .main-wrapper {
-    flex: 1; background: #e8ecf4; border-radius: var(--radius-xl);
+    flex: 1; background: var(--page-bg); border-radius: var(--radius-xl);
     margin: 10px 10px 10px 0;
     display: flex; flex-direction: column; overflow: hidden; min-width: 0;
 }
@@ -296,7 +473,7 @@ html, body {
 .topbar__username { font-size: 13px; font-weight: 600; }
 
 /* ── PAGE CONTENT ──────────────────────── */
-.page-content { flex: 1; overflow-y: auto; background: #e8ecf4; }
+.page-content { flex: 1; overflow-y: auto; background: var(--page-bg); }
 
 /* ── GLOBAL BADGES ──────────────────────── */
 .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
@@ -430,6 +607,24 @@ html, body {
         <header class="topbar">
             <div class="topbar__title">@yield('page-title', 'Dashboard')</div>
             <div class="topbar__actions">
+
+                {{-- ── THEME TOGGLE ── --}}
+                <button class="theme-toggle-btn" id="themeToggle" title="Toggle color mode" aria-label="Toggle color mode">
+                    <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
 
                 <!-- NOTIFICATION BELL -->
                 <div class="notif-wrap" id="notif-wrap">
@@ -579,6 +774,17 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // Poll every 30s
 loadNotifications();
 setInterval(loadNotifications, 30000);
+
+// ── THEME TOGGLE ──
+const themeToggle = document.getElementById('themeToggle');
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('nupost-theme', next);
+    });
+}
 </script>
 @yield('scripts')
 </body>

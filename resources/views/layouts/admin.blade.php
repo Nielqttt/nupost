@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>NUPost Admin – @yield('title', 'Dashboard')</title>
+
+<!-- Prevent Flash of Unstyled Theme -->
+<script>
+    (function() {
+        const savedTheme = localStorage.getItem('nupost-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&family=Syne:wght@700;800&display=swap" rel="stylesheet">
@@ -37,6 +46,249 @@
     --shadow:      0 6px 24px rgba(0,0,0,0.08);
     --shadow-lg:   0 12px 40px rgba(0,0,0,0.12);
 }
+
+:root[data-theme="dark"],
+html[data-theme="dark"],
+[data-theme="dark"] {
+    --cream:       #040c1e;
+    --cream-dark:  #081636;
+    --card:        #081636;
+    --card2:       #0b1a3d;
+    --card-border: rgba(30, 79, 216, 0.25);
+    --sand:        #0a1b42;
+    --stroke:      rgba(30, 79, 216, 0.25);
+    --navy:        #002366;
+    --navy-mid:    #0d388c;
+    --navy-light:  #3b82f6;
+    --navy-pale:   rgba(30, 79, 216, 0.25);
+    --ink:         #f8fafc;
+    --ink-mid:     #94a3b8;
+    --ink-soft:    #64748b;
+    --ink-faint:   #475569;
+    --shadow-sm:   0 2px 8px rgba(0,0,0,0.3);
+    --shadow:      0 6px 24px rgba(0,0,0,0.4);
+    --shadow-lg:   0 12px 40px rgba(0,0,0,0.5);
+}
+
+/* ── DARK THEME COMPONENT OVERRIDES ── */
+[data-theme="dark"] body {
+    background: #040c1e !important;
+    color: var(--ink) !important;
+}
+
+[data-theme="dark"] .main-wrapper,
+[data-theme="dark"] .page-content {
+    background: var(--cream) !important;
+}
+
+[data-theme="dark"] .card {
+    background: var(--card) !important;
+    border-color: var(--card-border) !important;
+    color: var(--ink) !important;
+}
+[data-theme="dark"] .card__head {
+    background: #06112a !important;
+    border-bottom-color: var(--card-border) !important;
+}
+[data-theme="dark"] .card__title {
+    color: var(--ink) !important;
+}
+[data-theme="dark"] .req-field-value {
+    color: var(--ink-mid) !important;
+}
+[data-theme="dark"] .back-btn {
+    background: var(--card) !important;
+    border-color: var(--card-border) !important;
+    color: var(--ink-mid) !important;
+}
+[data-theme="dark"] .back-btn:hover {
+    background: #0b1a3d !important;
+    color: var(--ink) !important;
+}
+[data-theme="dark"] .tabs {
+    background: #06112a !important;
+}
+[data-theme="dark"] .tab-btn {
+    color: var(--ink-soft) !important;
+}
+[data-theme="dark"] .tab-btn.active {
+    background: #0b1a3d !important;
+    color: var(--ink) !important;
+}
+[data-theme="dark"] .plat-pill {
+    background: rgba(30, 79, 216, 0.25) !important;
+    color: #93c5fd !important;
+}
+[data-theme="dark"] .comment-bubble--user {
+    background: #0b1a3d !important;
+    border-color: var(--card-border) !important;
+    color: var(--ink) !important;
+}
+[data-theme="dark"] .comment-form-area {
+    background: #0b1a3d !important;
+    border-color: var(--card-border) !important;
+}
+[data-theme="dark"] .comment-textarea {
+    color: var(--ink) !important;
+}
+[data-theme="dark"] .modal {
+    background: var(--card) !important;
+    border: 1px solid var(--card-border) !important;
+}
+[data-theme="dark"] .modal__head {
+    background: var(--card) !important;
+    border-bottom-color: var(--card-border) !important;
+}
+[data-theme="dark"] .modal__title {
+    color: var(--ink) !important;
+}
+[data-theme="dark"] .modal__close {
+    background: #0b1a3d !important;
+    color: var(--ink-soft) !important;
+}
+[data-theme="dark"] .caption-textarea,
+[data-theme="dark"] .prompt-input {
+    background: #0b1a3d !important;
+    color: var(--ink) !important;
+    border-color: var(--card-border) !important;
+}
+
+[data-theme="dark"] .topbar {
+    background: var(--card);
+    border-bottom-color: var(--card-border);
+}
+[data-theme="dark"] .topbar__date {
+    background: #0b1a3d;
+    border-color: var(--card-border);
+    color: var(--ink-mid);
+}
+
+[data-theme="dark"] .notif-btn {
+    background: #0b1a3d;
+    border-color: var(--card-border);
+    color: var(--ink-soft);
+}
+[data-theme="dark"] .notif-btn:hover {
+    background: #0f2250;
+    color: var(--ink);
+}
+[data-theme="dark"] .notif-dropdown {
+    background: var(--card);
+    border-color: var(--card-border);
+    box-shadow: var(--shadow-lg);
+}
+[data-theme="dark"] .notif-head {
+    background: #06112a;
+    border-bottom-color: var(--card-border);
+}
+[data-theme="dark"] .notif-head__title {
+    color: var(--ink);
+}
+[data-theme="dark"] .notif-item {
+    color: var(--ink);
+    border-bottom-color: rgba(255,255,255,0.05);
+}
+[data-theme="dark"] .notif-item:hover {
+    background: rgba(30, 79, 216, 0.12);
+}
+[data-theme="dark"] .notif-icon--default {
+    background: #0d214d;
+}
+[data-theme="dark"] .notif-footer {
+    background: #06112a;
+    border-top-color: var(--card-border);
+}
+
+[data-theme="dark"] .admin-dropdown {
+    background: var(--card);
+    border-color: var(--card-border);
+}
+[data-theme="dark"] .admin-dropdown__header {
+    background: #06112a;
+    border-bottom-color: var(--card-border);
+}
+[data-theme="dark"] .admin-dropdown__name {
+    color: var(--ink);
+}
+[data-theme="dark"] .admin-dropdown__item {
+    color: var(--ink-mid);
+}
+[data-theme="dark"] .admin-dropdown__item:hover {
+    background: rgba(30, 79, 216, 0.12);
+    color: var(--ink);
+}
+
+[data-theme="dark"] .panel,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .white-box,
+[data-theme="dark"] .table-card,
+[data-theme="dark"] .report-card {
+    background: var(--card) !important;
+    border-color: var(--card-border) !important;
+    color: var(--ink) !important;
+}
+[data-theme="dark"] .panel__head {
+    border-bottom-color: var(--card-border);
+}
+[data-theme="dark"] .panel__title {
+    color: var(--ink);
+}
+
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    background-color: #0b1a3d !important;
+    color: #f8fafc !important;
+    border-color: rgba(30, 79, 216, 0.3) !important;
+}
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+    color: #64748b !important;
+}
+
+[data-theme="dark"] table th {
+    background-color: #06112a !important;
+    color: #94a3b8 !important;
+    border-color: var(--card-border) !important;
+}
+[data-theme="dark"] table td {
+    border-color: rgba(30, 79, 216, 0.15) !important;
+    color: var(--ink) !important;
+}
+[data-theme="dark"] table tr:hover td {
+    background-color: rgba(30, 79, 216, 0.08) !important;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #f4f6fb; border: 1.5px solid rgba(0,0,0,0.08);
+    color: var(--ink); display: flex; align-items: center;
+    justify-content: center; cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    flex-shrink: 0;
+}
+.theme-toggle-btn:hover {
+    background: #e8ecf4; border-color: #f59e0b;
+    transform: rotate(15deg);
+}
+.sun-icon { display: none; color: #fbbf24; }
+.moon-icon { display: block; color: #002366; }
+[data-theme="dark"] .theme-toggle-btn {
+    background: #0b1a3d; border-color: rgba(30, 79, 216, 0.35);
+    color: #f8fafc;
+}
+[data-theme="dark"] .theme-toggle-btn:hover {
+    background: #0f2250; border-color: #f59e0b;
+}
+[data-theme="dark"] .sun-icon { display: block; }
+[data-theme="dark"] .moon-icon { display: none; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
     height: 100%; width: 100%;
@@ -942,6 +1194,24 @@ html, body {
         <div class="topbar__right">
             <div class="topbar__date" id="topbar-date"></div>
 
+            {{-- ── THEME TOGGLE ── --}}
+            <button class="theme-toggle-btn" id="themeToggle" title="Toggle color mode" aria-label="Toggle color mode">
+                <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+
             {{-- ── NOTIFICATION BELL ── --}}
             <div class="notif-wrap" id="notif-wrap">
                 <button class="notif-btn" id="notif-btn" onclick="toggleNotif(event)">
@@ -1587,6 +1857,19 @@ RULES:
     }, 1500);
 
 })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('nupost-theme', next);
+        });
+    }
+});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @yield('scripts')
