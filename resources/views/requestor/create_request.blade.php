@@ -355,11 +355,298 @@
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+
+/* ── SLA POLICY MODAL ──────────────── */
+.sla-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: slaFadeIn .25s ease;
+}
+@keyframes slaFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.sla-modal {
+    width: 100%; max-width: 520px;
+    max-height: 90vh;
+    background: linear-gradient(170deg, #0d1526 0%, #111b33 60%, #162040 100%);
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    animation: slaSlideUp .3s cubic-bezier(.34,1.3,.64,1);
+}
+@keyframes slaSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.96); } to { opacity: 1; transform: none; } }
+.sla-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sla-header-icon {
+    width: 44px; height: 44px; border-radius: 14px;
+    background: rgba(59,110,245,0.15);
+    border: 1px solid rgba(59,110,245,0.25);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.sla-header-text h2 {
+    font-size: 18px; font-weight: 800; color: white;
+    letter-spacing: -0.3px; margin: 0;
+    display: flex; align-items: center; gap: 8px;
+}
+.sla-badge-policy {
+    font-size: 9px; font-weight: 800; letter-spacing: 0.6px;
+    text-transform: uppercase;
+    background: rgba(16,185,129,0.18); color: #6ee7b7;
+    border: 1px solid rgba(16,185,129,0.3);
+    padding: 3px 10px; border-radius: 20px;
+}
+.sla-header-text p {
+    font-size: 12.5px; color: rgba(255,255,255,0.45);
+    margin: 4px 0 0; line-height: 1.5;
+}
+.sla-body {
+    flex: 1; overflow-y: auto; padding: 8px 16px 16px;
+}
+.sla-body::-webkit-scrollbar { width: 4px; }
+.sla-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.sla-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 16px; margin-bottom: 6px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: background .15s, border-color .15s;
+}
+.sla-item:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.1);
+}
+.sla-item-icon {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 16px;
+}
+.sla-item-icon--check   { background: rgba(16,185,129,0.14); }
+.sla-item-icon--post    { background: rgba(14,165,233,0.14); }
+.sla-item-icon--tmpl    { background: rgba(168,85,247,0.14); }
+.sla-item-icon--std     { background: rgba(245,158,11,0.14); }
+.sla-item-icon--multi   { background: rgba(239,68,68,0.14); }
+.sla-item-icon--campaign{ background: rgba(99,102,241,0.14); }
+.sla-item-icon--event   { background: rgba(239,68,68,0.14); }
+.sla-item-info { flex: 1; min-width: 0; }
+.sla-item-title {
+    font-size: 13.5px; font-weight: 700; color: white;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 2px;
+}
+.sla-turnaround {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px;
+    padding: 3px 10px; border-radius: 20px;
+    white-space: nowrap;
+}
+.sla-ta--green  { background: rgba(16,185,129,0.18); color: #6ee7b7; }
+.sla-ta--yellow { background: rgba(245,158,11,0.18); color: #fcd34d; }
+.sla-ta--orange { background: rgba(249,115,22,0.18); color: #fdba74; }
+.sla-ta--red    { background: rgba(239,68,68,0.18); color: #fca5a5; }
+.sla-ta--purple { background: rgba(168,85,247,0.18); color: #d8b4fe; }
+.sla-item-note {
+    font-size: 11.5px; color: rgba(255,255,255,0.4);
+    line-height: 1.55; margin-top: 2px;
+}
+.sla-item-warn {
+    font-size: 11px; color: #fcd34d; margin-top: 4px;
+    font-weight: 600;
+}
+.sla-context-note {
+    margin: 8px 16px 0;
+    padding: 12px 16px;
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.15);
+    border-radius: 12px;
+    font-size: 11.5px; color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+    display: flex; align-items: flex-start; gap: 8px;
+}
+.sla-footer {
+    padding: 14px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; flex-direction: column; gap: 12px;
+}
+.sla-checkbox-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 4px;
+}
+.sla-checkbox-row input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: #3b6ef5;
+    cursor: pointer; flex-shrink: 0;
+}
+.sla-checkbox-row label {
+    font-size: 12px; color: rgba(255,255,255,0.5);
+    cursor: pointer; user-select: none;
+}
+.sla-actions {
+    display: flex; gap: 10px;
+}
+.sla-btn-cancel {
+    flex: 1; padding: 12px; border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: transparent; color: rgba(255,255,255,0.6);
+    font-size: 13.5px; font-weight: 600; cursor: pointer;
+    font-family: var(--font); transition: all .15s;
+}
+.sla-btn-cancel:hover { background: rgba(255,255,255,0.06); color: white; }
+.sla-btn-proceed {
+    flex: 2; padding: 12px 20px; border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #1d4ed8 0%, #3b6ef5 100%);
+    color: white; font-size: 13.5px; font-weight: 700;
+    cursor: pointer; font-family: var(--font);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all .15s;
+    box-shadow: 0 4px 16px rgba(59,110,245,0.35);
+}
+.sla-btn-proceed:hover { background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); transform: translateY(-1px); }
+
+/* ── SLA NOTE BELOW CATEGORY ───────── */
+.sla-inline-note {
+    margin-top: 12px; padding: 11px 14px;
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-radius: 11px;
+    font-size: 12px; color: #15803d; line-height: 1.6;
+    display: none;
+    align-items: flex-start; gap: 8px;
+    animation: noteIn .2s ease;
+}
+@keyframes noteIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.sla-inline-note.visible { display: flex; }
+.sla-inline-note svg { flex-shrink: 0; margin-top: 1px; }
+
+/* ── VALIDATION ERROR STYLES ───────── */
+.field-error {
+    font-size: 11px; color: #ef4444; margin-top: 4px;
+    display: none;
+}
+.field-error.visible { display: block; }
+.field.has-error input,
+.field.has-error textarea,
+.field.has-error select {
+    border-color: #fca5a5 !important;
+    background: #fef2f2 !important;
+}
 </style>
 @endsection
 
 @section('content')
-<div class="create-page">
+
+{{-- SLA POLICY MODAL --}}
+<div class="sla-overlay" id="sla-overlay" style="display:none;">
+    <div class="sla-modal">
+        <div class="sla-header">
+            <div class="sla-header-icon">
+                <svg width="22" height="22" fill="none" stroke="#60a5fa" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="sla-header-text">
+                <h2>Creative SLA <span class="sla-badge-policy">Policy</span></h2>
+                <p>Standard turnaround periods observed by Marketing Office.</p>
+            </div>
+        </div>
+        <div class="sla-body">
+            <div class="sla-item">
+                <div class="sla-item-icon sla-item-icon--check">✅</div>
+                <div class="sla-item-info">
+                    <div class="sla-item-title">
+                        Checking of Materials
+                        <span class="sla-turnaround sla-ta--green">Up to 24 hours</span>
+                    </div>
+                    <div class="sla-item-note">Review and validation of ready marketing and informational materials.</div>
+                </div>
+            </div>
+            <div class="sla-item">
+                <div class="sla-item-icon sla-item-icon--post">📋</div>
+                <div class="sla-item-info">
+                    <div class="sla-item-title">
+                        Posting with Ready-Made PubMat
+                        <span class="sla-turnaround sla-ta--green">Up to 24 hours</span>
+                    </div>
+                    <div class="sla-item-warn">Caption must also be provided upon request submission.</div>
+                    <div class="sla-item-note">Immediate scheduling of completed pubmats with complete post captions.</div>
+                </div>
+            </div>
+            <div class="sla-item">
+                <div class="sla-item-icon sla-item-icon--tmpl">🔲</div>
+                <div class="sla-item-info">
+                    <div class="sla-item-title">
+                        Template-Based PubMat
+                        <span class="sla-turnaround sla-ta--yellow">Up to 48 hours</span>
+                    </div>
+                    <div class="sla-item-warn">e.g. announcements, congratulatory, news articles, partnerships.</div>
+                    <div class="sla-item-note">Design generation using official NU Lipa pre-approved templates.</div>
+                </div>
+            </div>
+            <div class="sla-item">
+                <div class="sla-item-icon sla-item-icon--std">✏️</div>
+                <div class="sla-item-info">
+                    <div class="sla-item-title">
+                        Standard PubMat
+                        <span class="sla-turnaround sla-ta--orange">2–4 working days</span>
+                    </div>
+                    <div class="sla-item-note">Basic, non-templated promotional material created for a specific institutional event.</div>
+                </div>
+            </div>
+            <div class="sla-item">
+                <div class="sla-item-icon sla-item-icon--multi">💎</div>
+                <div class="sla-item-info">
+                    <div class="sla-item-title">
+                        Multiple Collaterals / Tarpaulins
+                        <span class="sla-turnaround sla-ta--red">5–10 working days</span>
+                    </div>
+                    <div class="sla-item-note">Tarpaulins, print collateral packages, badges, brochures, and composite signage.</div>
+                </div>
+            </div>
+            <div class="sla-item">
+                <div class="sla-item-icon sla-item-icon--campaign">💡</div>
+                <div class="sla-item-info">
+                    <div class="sla-item-title">
+                        New Campaign / Creative Concept
+                        <span class="sla-turnaround sla-ta--purple">10–20 working days</span>
+                    </div>
+                    <div class="sla-item-note">Comprehensive visual branding, campaign art direction, and theme conceptualization.</div>
+                </div>
+            </div>
+            <div class="sla-item">
+                <div class="sla-item-icon sla-item-icon--event">🎬</div>
+                <div class="sla-item-info">
+                    <div class="sla-item-title">
+                        Event Documentation
+                        <span class="sla-turnaround sla-ta--red">1 month prior to event</span>
+                    </div>
+                    <div class="sla-item-note">On-site coverage, photo/video documentation booking, and media team deployment.</div>
+                </div>
+            </div>
+        </div>
+        <div class="sla-context-note" id="sla-context-note" style="display:none;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span id="sla-context-text"></span>
+        </div>
+        <div class="sla-footer">
+            <div class="sla-checkbox-row">
+                <input type="checkbox" id="sla-dont-show">
+                <label for="sla-dont-show">Don't show this notice automatically again</label>
+            </div>
+            <div class="sla-actions">
+                <button type="button" class="sla-btn-cancel" onclick="history.back()">Cancel</button>
+                <button type="button" class="sla-btn-proceed" id="sla-proceed-btn">
+                    I Understand & Proceed
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="create-page" id="create-page" style="display:none;">
 
     {{-- HERO CARD --}}
     <div class="hero-card" style="width:100%;max-width:680px;">
@@ -402,18 +689,20 @@
             <div class="section-body">
                 <div class="field">
                     <label>Post Title <span class="req">*</span></label>
-                    <input type="text" name="title" id="title-field" placeholder="e.g., College Week 2025 Opening Ceremony" value="{{ old('title') }}" required>
+                    <input type="text" name="title" id="title-field" placeholder="e.g., College Week 2025 Opening Ceremony" value="{{ old('title') }}" required minlength="5">
+                    <div class="field-error" id="title-error">Title must be at least 5 characters.</div>
                 </div>
                 <div class="field">
                     <label>Description <span class="req">*</span></label>
-                    <textarea name="description" id="desc-field" placeholder="Describe your event or announcement in detail. Include key info like date, time, and location..." required>{{ old('description') }}</textarea>
+                    <textarea name="description" id="desc-field" placeholder="Describe your event or announcement in detail. Include key info like date, time, and location..." required minlength="15">{{ old('description') }}</textarea>
+                    <div class="field-error" id="desc-error">Description must be at least 15 characters.</div>
                 </div>
                 <div class="field-row">
                     <div class="field" style="margin-bottom:0;">
                         <label>Category <span class="req">*</span></label>
                         <select name="category" id="cat-field" required>
                             <option value="" disabled {{ !old('category') ? 'selected' : '' }}>Select category</option>
-                            @foreach(['Events','Announcements','Academic','Sports','Community','Others'] as $cat)
+                            @foreach(['Checking of Materials','Posting with Ready-Made PubMat','Template-Based PubMat','Standard PubMat','Multiple Collaterals / Tarpaulins','New Campaign / Creative Concept','Event Documentation'] as $cat)
                                 <option value="{{ $cat }}" {{ old('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
                             @endforeach
                         </select>
@@ -429,13 +718,19 @@
                     </div>
                 </div>
 
+                {{-- SLA TURNAROUND NOTE --}}
+                <div class="sla-inline-note" id="sla-inline-note">
+                    <svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span id="sla-inline-text"></span>
+                </div>
+
                 {{-- PREFERRED DATE WITH LOAD INDICATOR --}}
                 <div class="field" style="margin-top:16px;margin-bottom:0;">
-                    <label>Preferred Post Date <span class="opt">(Optional)</span></label>
+                    <label>Preferred Post Date <span class="req">*</span></label>
                     <div class="date-wrapper">
                         <div class="date-input-wrap">
                             <input type="date" name="post_date" id="post-date-input"
-                                   value="{{ old('post_date') }}" min="{{ date('Y-m-d') }}">
+                                   value="{{ old('post_date') }}" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
                             <span class="date-cal-icon">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2.5"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             </span>
@@ -563,6 +858,60 @@
 
 @section('scripts')
 <script>
+// ── SLA POLICY MODAL ──────────────────────────────────────────────
+(function() {
+    const overlay   = document.getElementById('sla-overlay');
+    const page      = document.getElementById('create-page');
+    const proceedBtn= document.getElementById('sla-proceed-btn');
+    const dontShow  = document.getElementById('sla-dont-show');
+    const KEY       = 'nupost_sla_dismissed';
+
+    if (localStorage.getItem(KEY) === 'true') {
+        // Skip modal, show form directly
+        overlay.style.display = 'none';
+        page.style.display = 'flex';
+    } else {
+        overlay.style.display = 'flex';
+        page.style.display = 'none';
+    }
+
+    proceedBtn.addEventListener('click', function() {
+        if (dontShow.checked) {
+            localStorage.setItem(KEY, 'true');
+        }
+        overlay.style.display = 'none';
+        page.style.display = 'flex';
+    });
+})();
+
+// ── SLA CATEGORY NOTES ────────────────────────────────────────────
+const SLA_NOTES = {
+    'Checking of Materials': 'SLA Turnaround: Up to 24 hours • Review and validation of ready marketing and informational materials.',
+    'Posting with Ready-Made PubMat': 'SLA Turnaround: Up to 24 hours • Immediate scheduling of completed pubmats. Caption must be provided upon submission.',
+    'Template-Based PubMat': 'SLA Turnaround: Up to 48 hours • Design generation using official NU Lipa pre-approved templates (e.g. announcements, congratulatory, news articles, partnerships).',
+    'Standard PubMat': 'SLA Turnaround: 2–4 working days • Standard PubMat (2–4 days). Basic, non-templated promotional material created for a specific institutional event.',
+    'Multiple Collaterals / Tarpaulins': 'SLA Turnaround: 5–10 working days • Tarpaulins, print collateral packages, badges, brochures, and composite signage.',
+    'New Campaign / Creative Concept': 'SLA Turnaround: 10–20 working days • Comprehensive visual branding, campaign art direction, and theme conceptualization.',
+    'Event Documentation': 'SLA Turnaround: 1 month prior to event • On-site coverage, photo/video documentation booking, and media team deployment. Event coverage requires 30 days notice.',
+};
+
+const catField     = document.getElementById('cat-field');
+const slaNote      = document.getElementById('sla-inline-note');
+const slaText      = document.getElementById('sla-inline-text');
+
+function updateSlaNote() {
+    const cat = catField.value;
+    if (cat && SLA_NOTES[cat]) {
+        slaText.textContent = SLA_NOTES[cat];
+        slaNote.classList.add('visible');
+    } else {
+        slaNote.classList.remove('visible');
+    }
+}
+catField.addEventListener('change', updateSlaNote);
+// Show on load if category is pre-selected (old input)
+if (catField.value) updateSlaNote();
+
 // ── FIXED FOOTER ──────────────────────────────────────────────────
 const FIXED_FOOTER = "\n\nApply now and secure your place for the upcoming academic year: https://onlineapp.nu-lipa.edu.ph/quest/register.php\nExperience \u{1D60C}\u{1D625}\u{1D636}\u{1D624}\u{1D622}\u{1D635}\u{1D62A}\u{1D630}\u{1D62F} \u{1D61B}\u{1D629}\u{1D622}\u{1D635} \u{1D61E}\u{1D630}\u{1D633}\u{1D62C}\u{1D634}.\n#NULipa\n#EducationThatWorks";
 
@@ -571,6 +920,45 @@ document.getElementById('create-form').addEventListener('submit', function(e) {
 
     // Prevent double submission
     if (submitBtn.dataset.submitted === 'true') {
+        e.preventDefault();
+        return;
+    }
+
+    // ── CLIENT-SIDE VALIDATION ──
+    let hasError = false;
+
+    // Title min 5
+    const titleVal = document.getElementById('title-field').value.trim();
+    const titleErr = document.getElementById('title-error');
+    if (titleVal.length < 5) {
+        titleErr.classList.add('visible');
+        titleErr.closest('.field').classList.add('has-error');
+        hasError = true;
+    } else {
+        titleErr.classList.remove('visible');
+        titleErr.closest('.field').classList.remove('has-error');
+    }
+
+    // Description min 15
+    const descVal = document.getElementById('desc-field').value.trim();
+    const descErr = document.getElementById('desc-error');
+    if (descVal.length < 15) {
+        descErr.classList.add('visible');
+        descErr.closest('.field').classList.add('has-error');
+        hasError = true;
+    } else {
+        descErr.classList.remove('visible');
+        descErr.closest('.field').classList.remove('has-error');
+    }
+
+    // At least one platform
+    const platforms = document.querySelectorAll('.platform-btn.selected');
+    if (platforms.length === 0) {
+        hasError = true;
+        alert('Please select at least one target platform.');
+    }
+
+    if (hasError) {
         e.preventDefault();
         return;
     }

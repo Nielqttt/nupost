@@ -76,9 +76,14 @@ class RequestController extends Controller
     {
         $user_name = session('name');
         
-        if (!$request->title || !$request->description || !$request->category || !$request->priority) {
-            return back()->withInput()->with('error', 'Please fill in all required fields.');
-        }
+        $request->validate([
+            'title'       => 'required|string|min:5|max:255',
+            'description' => 'required|string|min:15',
+            'category'    => 'required|in:Checking of Materials,Posting with Ready-Made PubMat,Template-Based PubMat,Standard PubMat,Multiple Collaterals / Tarpaulins,New Campaign / Creative Concept,Event Documentation',
+            'priority'    => 'required|in:Low,Medium,High,Urgent',
+            'platforms'   => 'required|array|min:1',
+            'post_date'   => 'required|date|after:today',
+        ]);
 
         $media_file = '';
         if ($request->hasFile('media')) {
@@ -202,10 +207,12 @@ class RequestController extends Controller
 
         // Basic Validation para hindi mag-crash ang database
         $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'required',
-            'category'    => 'required',
-            'priority'    => 'required',
+            'title'       => 'required|string|min:5|max:255',
+            'description' => 'required|string|min:15',
+            'category'    => 'required|in:Checking of Materials,Posting with Ready-Made PubMat,Template-Based PubMat,Standard PubMat,Multiple Collaterals / Tarpaulins,New Campaign / Creative Concept,Event Documentation',
+            'priority'    => 'required|in:Low,Medium,High,Urgent',
+            'platforms'   => 'required|array|min:1',
+            'post_date'   => 'required|date|after:today',
         ]);
 
         $data = [

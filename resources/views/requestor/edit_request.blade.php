@@ -303,6 +303,33 @@
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+
+/* ── SLA NOTE BELOW CATEGORY ───────── */
+.sla-inline-note {
+    margin-top: 12px; padding: 11px 14px;
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-radius: 11px;
+    font-size: 12px; color: #15803d; line-height: 1.6;
+    display: none;
+    align-items: flex-start; gap: 8px;
+    animation: noteIn .2s ease;
+}
+@keyframes noteIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.sla-inline-note.visible { display: flex; }
+.sla-inline-note svg { flex-shrink: 0; margin-top: 1px; }
+
+/* ── VALIDATION ERROR STYLES ───────── */
+.field-error {
+    font-size: 11px; color: #ef4444; margin-top: 4px;
+    display: none;
+}
+.field-error.visible { display: block; }
+.field.has-error input,
+.field.has-error textarea,
+.field.has-error select {
+    border-color: #fca5a5 !important;
+    background: #fef2f2 !important;
+}
 </style>
 @endsection
 
@@ -356,20 +383,22 @@
                     <label>Post Title <span class="req">*</span></label>
                     <input type="text" name="title" id="title-field"
                            placeholder="e.g., College Week 2025 Opening Ceremony"
-                           value="{{ old('title', $req->title) }}" required>
+                           value="{{ old('title', $req->title) }}" required minlength="5">
+                    <div class="field-error" id="title-error">Title must be at least 5 characters.</div>
                 </div>
                 <div class="field">
                     <label>Description <span class="req">*</span></label>
                     <textarea name="description" id="desc-field" rows="4"
                               placeholder="Provide detailed information about your event or announcement..."
-                              required>{{ old('description', $req->description) }}</textarea>
+                              required minlength="15">{{ old('description', $req->description) }}</textarea>
+                    <div class="field-error" id="desc-error">Description must be at least 15 characters.</div>
                 </div>
                 <div class="field-row">
                     <div class="field" style="margin-bottom:0;">
                         <label>Category <span class="req">*</span></label>
                         <select name="category" id="cat-field" required>
                             <option value="" disabled>Select category</option>
-                            @foreach(['Events','Announcements','Academic','Sports','Community','Others'] as $cat)
+                            @foreach(['Checking of Materials','Posting with Ready-Made PubMat','Template-Based PubMat','Standard PubMat','Multiple Collaterals / Tarpaulins','New Campaign / Creative Concept','Event Documentation'] as $cat)
                                 <option value="{{ $cat }}"
                                     {{ old('category', $req->category) === $cat ? 'selected' : '' }}>
                                     {{ $cat }}
@@ -390,11 +419,18 @@
                         </select>
                     </div>
                 </div>
+
+                {{-- SLA TURNAROUND NOTE --}}
+                <div class="sla-inline-note" id="sla-inline-note">
+                    <svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span id="sla-inline-text"></span>
+                </div>
+
                 <div class="field" style="margin-top:16px;margin-bottom:0;">
-                    <label>Preferred Post Date <span class="opt">(Optional)</span></label>
+                    <label>Preferred Post Date <span class="req">*</span></label>
                     <div class="date-input-wrap">
                         <input type="date" name="post_date" id="post-date-input"
-                               value="{{ old('post_date', $req->preferred_date ? \Carbon\Carbon::parse($req->preferred_date)->format('Y-m-d') : '') }}">
+                               value="{{ old('post_date', $req->preferred_date ? \Carbon\Carbon::parse($req->preferred_date)->format('Y-m-d') : '') }}" required>
                         <span class="date-cal-icon">
                             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2.5"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </span>
@@ -526,10 +562,74 @@
 
 @section('scripts')
 <script>
+// ── SLA CATEGORY NOTES ────────────────────────────────────────────
+const SLA_NOTES = {
+    'Checking of Materials': 'SLA Turnaround: Up to 24 hours • Review and validation of ready marketing and informational materials.',
+    'Posting with Ready-Made PubMat': 'SLA Turnaround: Up to 24 hours • Immediate scheduling of completed pubmats. Caption must be provided upon submission.',
+    'Template-Based PubMat': 'SLA Turnaround: Up to 48 hours • Design generation using official NU Lipa pre-approved templates (e.g. announcements, congratulatory, news articles, partnerships).',
+    'Standard PubMat': 'SLA Turnaround: 2–4 working days • Standard PubMat (2–4 days). Basic, non-templated promotional material created for a specific institutional event.',
+    'Multiple Collaterals / Tarpaulins': 'SLA Turnaround: 5–10 working days • Tarpaulins, print collateral packages, badges, brochures, and composite signage.',
+    'New Campaign / Creative Concept': 'SLA Turnaround: 10–20 working days • Comprehensive visual branding, campaign art direction, and theme conceptualization.',
+    'Event Documentation': 'SLA Turnaround: 1 month prior to event • On-site coverage, photo/video documentation booking, and media team deployment. Event coverage requires 30 days notice.',
+};
+
+const catField = document.getElementById('cat-field');
+const slaNote  = document.getElementById('sla-inline-note');
+const slaText  = document.getElementById('sla-inline-text');
+
+function updateSlaNote() {
+    const cat = catField.value;
+    if (cat && SLA_NOTES[cat]) {
+        slaText.textContent = SLA_NOTES[cat];
+        slaNote.classList.add('visible');
+    } else {
+        slaNote.classList.remove('visible');
+    }
+}
+catField.addEventListener('change', updateSlaNote);
+// Show on load if category is pre-selected
+if (catField.value) updateSlaNote();
+
 // ── FIXED FOOTER ──────────────────────────────────────────────────
 const FIXED_FOOTER = "\n\nApply now and secure your place for the upcoming academic year: https://onlineapp.nu-lipa.edu.ph/quest/register.php\nExperience \u{1D60C}\u{1D625}\u{1D636}\u{1D624}\u{1D622}\u{1D635}\u{1D62A}\u{1D630}\u{1D62F} \u{1D61B}\u{1D629}\u{1D622}\u{1D635} \u{1D61E}\u{1D630}\u{1D633}\u{1D62C}\u{1D634}.\n#NULipa\n#EducationThatWorks";
 
-document.getElementById('edit-form').addEventListener('submit', function() {
+document.getElementById('edit-form').addEventListener('submit', function(e) {
+    // ── CLIENT-SIDE VALIDATION ──
+    let hasError = false;
+
+    const titleVal = document.getElementById('title-field').value.trim();
+    const titleErr = document.getElementById('title-error');
+    if (titleVal.length < 5) {
+        titleErr.classList.add('visible');
+        titleErr.closest('.field').classList.add('has-error');
+        hasError = true;
+    } else {
+        titleErr.classList.remove('visible');
+        titleErr.closest('.field').classList.remove('has-error');
+    }
+
+    const descVal = document.getElementById('desc-field').value.trim();
+    const descErr = document.getElementById('desc-error');
+    if (descVal.length < 15) {
+        descErr.classList.add('visible');
+        descErr.closest('.field').classList.add('has-error');
+        hasError = true;
+    } else {
+        descErr.classList.remove('visible');
+        descErr.closest('.field').classList.remove('has-error');
+    }
+
+    const platforms = document.querySelectorAll('.platform-btn.selected');
+    if (platforms.length === 0) {
+        hasError = true;
+        alert('Please select at least one target platform.');
+    }
+
+    if (hasError) {
+        e.preventDefault();
+        return;
+    }
+
     const box     = document.getElementById('caption-field');
     const current = box.value.trim();
     if (current && !current.includes('onlineapp.nu-lipa.edu.ph')) {
