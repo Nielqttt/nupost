@@ -95,27 +95,6 @@ class LegacyMobileApiController extends Controller
             ], 422);
         }
 
-        // Dedicated Admin Login fallback matching web LoginController
-        if ($email === 'admin@nupost.com' && $password === 'admin123') {
-            $adminUser = DB::table('users')->where('email', 'admin@nupost.com')->first();
-            $adminId = $adminUser ? (int) $adminUser->id : 1;
-            return response()->json([
-                'success' => true,
-                'id' => $adminId,
-                'user_id' => $adminId,
-                'name' => 'System Admin',
-                'email' => 'admin@nupost.com',
-                'role' => 'admin',
-                'data' => [
-                    'id' => $adminId,
-                    'user_id' => $adminId,
-                    'name' => 'System Admin',
-                    'email' => 'admin@nupost.com',
-                    'role' => 'admin',
-                ],
-            ], 200);
-        }
-
         $user = DB::table('users')
             ->select('id', 'name', 'email', 'password', 'is_verified', 'role')
             ->where('email', $email)
@@ -138,21 +117,16 @@ class LegacyMobileApiController extends Controller
             ], 401);
         }
 
-        if (isset($user->is_verified) && (int) $user->is_verified === 0) {
+        $rawRole = strtolower(trim((string) ($user->role ?? 'requestor')));
+        $userRole = ($rawRole === 'admin') ? 'admin' : 'requestor';
+        $uId = (int) $user->id;
+
+        if ($userRole !== 'admin' && isset($user->is_verified) && (int) $user->is_verified === 0) {
             return response()->json([
                 'success' => false,
                 'message' => 'Please verify your email first',
             ], 403);
         }
-
-        $rawRole = trim((string) ($user->role ?? ''));
-        if ($rawRole !== '') {
-            $userRole = strtolower($rawRole);
-        } else {
-            $isAdminUser = str_contains(strtolower($user->email ?? ''), 'admin') || str_contains(strtolower($user->name ?? ''), 'admin');
-            $userRole = $isAdminUser ? 'admin' : 'staff';
-        }
-        $uId = (int) $user->id;
 
         return response()->json([
             'success' => true,
@@ -217,7 +191,7 @@ class LegacyMobileApiController extends Controller
         }
 
         if (Schema::hasColumn('users', 'role')) {
-            $payload['role'] = 'staff';
+            $payload['role'] = 'requestor';
         }
 
         if (Schema::hasColumn('users', 'created_at')) {
@@ -233,13 +207,20 @@ class LegacyMobileApiController extends Controller
         // Generate OTP
         $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         
-        DB::table('otp_codes')->insert([
+        $otpPayload = [
             'user_id' => $newId,
             'email' => $email,
             'otp_code' => $otp,
             'expires_at' => now()->addMinutes(10),
             'is_used' => 0,
-        ]);
+        ];
+        if (Schema::hasColumn('otp_codes', 'created_at')) {
+            $otpPayload['created_at'] = now();
+        }
+        if (Schema::hasColumn('otp_codes', 'updated_at')) {
+            $otpPayload['updated_at'] = now();
+        }
+        DB::table('otp_codes')->insert($otpPayload);
 
         $this->sendOtpEmail($email, $name, $otp);
 
@@ -318,8 +299,17 @@ class LegacyMobileApiController extends Controller
             ->first();
 
         if ($record) {
-            DB::table('otp_codes')->where('id', $record->id)->update(['is_used' => 1]);
-            DB::table('users')->where('email', $email)->update(['is_verified' => 1]);
+            $otpUpdate = ['is_used' => 1];
+            if (Schema::hasColumn('otp_codes', 'updated_at')) {
+                $otpUpdate['updated_at'] = now();
+            }
+            DB::table('otp_codes')->where('id', $record->id)->update($otpUpdate);
+
+            $userUpdate = ['is_verified' => 1];
+            if (Schema::hasColumn('users', 'updated_at')) {
+                $userUpdate['updated_at'] = now();
+            }
+            DB::table('users')->where('email', $email)->update($userUpdate);
 
             return response()->json([
                 'success' => true,
@@ -362,13 +352,20 @@ class LegacyMobileApiController extends Controller
 
         $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         
-        DB::table('otp_codes')->insert([
+        $otpPayload = [
             'user_id' => $user->id,
             'email' => $email,
             'otp_code' => $otp,
             'expires_at' => now()->addMinutes(10),
             'is_used' => 0,
-        ]);
+        ];
+        if (Schema::hasColumn('otp_codes', 'created_at')) {
+            $otpPayload['created_at'] = now();
+        }
+        if (Schema::hasColumn('otp_codes', 'updated_at')) {
+            $otpPayload['updated_at'] = now();
+        }
+        DB::table('otp_codes')->insert($otpPayload);
 
         $this->sendOtpEmail($email, $user->name ?? 'User', $otp);
 
@@ -427,7 +424,7 @@ class LegacyMobileApiController extends Controller
                 'email' => (string) ($user->email ?? ''),
                 'phone' => (string) ($user->phone ?? ''),
                 'organization' => (string) ($user->organization ?? ''),
-                'role' => (string) ($user->role ?? 'staff'),
+                'role' => (strtolower(trim((string) ($user->role ?? ''))) === 'admin') ? 'admin' : 'requestor',
                 'public_profile' => (int) ($user->public_profile ?? 0),
                 'public_calendar' => (int) ($user->public_calendar ?? 0),
                 'stats' => [
@@ -560,7 +557,7 @@ class LegacyMobileApiController extends Controller
                     'image/jpeg', 'image/png', 'image/gif', 'image/webp',
                     'video/mp4', 'video/quicktime',
                 ];
-                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov'];
+                $allowedExtensions = ['jpg', 'jpeg', 'jfif', 'png', 'gif', 'webp', 'mp4', 'mov'];
                 $maxSize = 10 * 1024 * 1024;
 
                 foreach (array_slice($files, 0, 4) as $file) {
@@ -574,6 +571,11 @@ class LegacyMobileApiController extends Controller
                     $validExt = in_array($ext, $allowedExtensions, true);
                     if (!$validType && !$validExt) {
                         continue;
+                    }
+
+                    // Normalize jfif to standard jpg so web templates and web servers serve it as image/jpeg
+                    if ($ext === 'jfif') {
+                        $ext = 'jpg';
                     }
 
                     $newName = uniqid('media_', true) . ($ext !== '' ? ".{$ext}" : '');
@@ -596,6 +598,9 @@ class LegacyMobileApiController extends Controller
                 'preferred_date' => $preferredDate !== '' ? $preferredDate : null,
             ];
 
+            if (Schema::hasColumn($table, 'user_id')) {
+                $payload['user_id'] = $userId;
+            }
             if (Schema::hasColumn($table, 'created_at')) {
                 $payload['created_at'] = now();
             }
@@ -620,6 +625,54 @@ class LegacyMobileApiController extends Controller
                     $act['updated_at'] = now();
                 }
                 DB::table('request_activity')->insert($act);
+            }
+
+            if (Schema::hasTable('notifications')) {
+                $requesterName = (string) ($user->name ?? 'Requester');
+
+                // 1. Broadcast notification to all Admin users (purely role-based)
+                $adminUsers = DB::table('users')->where('role', 'admin')->get();
+
+                foreach ($adminUsers as $admin) {
+                    $notifPayload = [
+                        'user_id' => (int) $admin->id,
+                        'title' => 'New Posting Request 📋',
+                        'message' => "New request \"$title\" ($reqCode) submitted by $requesterName ($priority priority).",
+                        'type' => 'status_update',
+                        'is_read' => 0,
+                        'created_at' => now(),
+                    ];
+                    if (Schema::hasColumn('notifications', 'updated_at')) {
+                        $notifPayload['updated_at'] = now();
+                    }
+                    if (Schema::hasColumn('notifications', 'request_id')) {
+                        $notifPayload['request_id'] = $newId;
+                    }
+                    if (Schema::hasColumn('notifications', 'request_status')) {
+                        $notifPayload['request_status'] = 'Pending Review';
+                    }
+                    DB::table('notifications')->insert($notifPayload);
+                }
+
+                // 2. Acknowledge notification for the Requester
+                $userNotifPayload = [
+                    'user_id' => $userId,
+                    'title' => 'Request Submitted 📋',
+                    'message' => "Your request \"$title\" ($reqCode) has been received and is pending review.",
+                    'type' => 'status_update',
+                    'is_read' => 0,
+                    'created_at' => now(),
+                ];
+                if (Schema::hasColumn('notifications', 'updated_at')) {
+                    $userNotifPayload['updated_at'] = now();
+                }
+                if (Schema::hasColumn('notifications', 'request_id')) {
+                    $userNotifPayload['request_id'] = $newId;
+                }
+                if (Schema::hasColumn('notifications', 'request_status')) {
+                    $userNotifPayload['request_status'] = 'Pending Review';
+                }
+                DB::table('notifications')->insert($userNotifPayload);
             }
 
             return response()->json([
@@ -724,7 +777,7 @@ class LegacyMobileApiController extends Controller
                     'image/jpeg', 'image/png', 'image/gif', 'image/webp',
                     'video/mp4', 'video/quicktime',
                 ];
-                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov'];
+                $allowedExtensions = ['jpg', 'jpeg', 'jfif', 'png', 'gif', 'webp', 'mp4', 'mov'];
                 $maxSize = 10 * 1024 * 1024;
 
                 foreach (array_slice($files, 0, 4) as $file) {
@@ -738,6 +791,11 @@ class LegacyMobileApiController extends Controller
                     $validExt = in_array($ext, $allowedExtensions, true);
                     if (!$validType && !$validExt) {
                         continue;
+                    }
+
+                    // Normalize jfif to standard jpg so web templates and web servers serve it as image/jpeg
+                    if ($ext === 'jfif') {
+                        $ext = 'jpg';
                     }
 
                     $newName = uniqid('media_', true) . ($ext !== '' ? ".{$ext}" : '');
@@ -760,6 +818,9 @@ class LegacyMobileApiController extends Controller
                 'preferred_date' => $preferredDate !== '' ? $preferredDate : null,
             ];
 
+            if (Schema::hasColumn($table, 'user_id') && $userId > 0) {
+                $payload['user_id'] = $userId;
+            }
             if (Schema::hasColumn($table, 'updated_at')) {
                 $payload['updated_at'] = now();
             }
@@ -780,6 +841,34 @@ class LegacyMobileApiController extends Controller
             }
 
             $reqCode = (string) ($existingReq->request_id ?? ('REQ-' . str_pad((string) $requestId, 5, '0', STR_PAD_LEFT)));
+
+            if (Schema::hasTable('notifications')) {
+                $requesterName = (string) ($user->name ?? 'Requester');
+
+                // Broadcast re-submission notification to all Admin users (purely role-based)
+                $adminUsers = DB::table('users')->where('role', 'admin')->get();
+
+                foreach ($adminUsers as $admin) {
+                    $notifPayload = [
+                        'user_id' => (int) $admin->id,
+                        'title' => 'Request Re-submitted 🔄',
+                        'message' => "Request \"$title\" ($reqCode) has been updated and re-submitted by $requesterName.",
+                        'type' => 'status_update',
+                        'is_read' => 0,
+                        'created_at' => now(),
+                    ];
+                    if (Schema::hasColumn('notifications', 'updated_at')) {
+                        $notifPayload['updated_at'] = now();
+                    }
+                    if (Schema::hasColumn('notifications', 'request_id')) {
+                        $notifPayload['request_id'] = $requestId;
+                    }
+                    if (Schema::hasColumn('notifications', 'request_status')) {
+                        $notifPayload['request_status'] = 'Pending Review';
+                    }
+                    DB::table('notifications')->insert($notifPayload);
+                }
+            }
 
             return response()->json([
                 'success' => true,
@@ -1689,7 +1778,7 @@ class LegacyMobileApiController extends Controller
             $id = (int) $request->input('request_id', 0);
             $newStatus = trim((string) $request->input('status', ''));
             $note = trim((string) $request->input('note', ''));
-            $adminActor = trim((string) $request->input('admin_name', 'admin@nupost.com'));
+            $adminActor = trim((string) $request->input('admin_name', 'Admin'));
 
             $allowed = ['Pending Review', 'Under Review', 'Approved', 'Posted', 'Rejected'];
             if ($id <= 0 || !in_array($newStatus, $allowed, true)) {
@@ -1745,13 +1834,22 @@ class LegacyMobileApiController extends Controller
                 }
             }
 
-            // Notify user
-            $user = DB::table('users')->where('name', $req->requester)->first();
-            if ($user) {
+            // Notify requester
+            $targetUser = null;
+            if (isset($req->user_id) && (int) $req->user_id > 0) {
+                $targetUser = DB::table('users')->where('id', (int) $req->user_id)->first();
+            }
+            if (!$targetUser && !empty($req->requester)) {
+                $rName = trim((string) $req->requester);
+                $targetUser = DB::table('users')->where('name', $rName)->first()
+                    ?? DB::table('users')->where('name', 'like', $rName)->first();
+            }
+
+            if ($targetUser) {
                 $notifData = $this->getNotifDataForStatus($newStatus, (string)$req->title, $note);
                 if (Schema::hasTable('notifications')) {
                     $payload = [
-                        'user_id' => $user->id,
+                        'user_id' => $targetUser->id,
                         'title' => $notifData['title'],
                         'message' => $notifData['message'],
                         'type' => $notifData['type'],
