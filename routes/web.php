@@ -127,6 +127,49 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     Route::get('/requests/{id}/download/{filename}', [RequestManagementController::class, 'downloadFile'])->name('requests.download')->where('filename', '.*');
 });
 
+// Direct uploads route fallback (ensures images and videos display even if web server rewrites to index.php or on Hostinger public_html setups)
+Route::get('/uploads/{filename}', function ($filename) {
+    $filename = basename($filename);
+    $candidates = [
+        public_path('uploads/' . $filename),
+        base_path('public_html/uploads/' . $filename),
+        base_path('uploads/' . $filename),
+    ];
+
+    $filePath = null;
+    foreach ($candidates as $path) {
+        if (file_exists($path)) {
+            $filePath = $path;
+            break;
+        }
+    }
+
+    if (!$filePath) {
+        abort(404, 'Media file not found');
+    }
+
+    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'jfif' => 'image/jpeg',
+        'png'  => 'image/png',
+        'gif'  => 'image/gif',
+        'webp' => 'image/webp',
+        'svg'  => 'image/svg+xml',
+        'mp4'  => 'video/mp4',
+        'mov'  => 'video/quicktime',
+        'webm' => 'video/webm',
+    ];
+
+    $contentType = $mimeTypes[$ext] ?? (mime_content_type($filePath) ?: 'application/octet-stream');
+
+    return response()->file($filePath, [
+        'Content-Type'  => $contentType,
+        'Cache-Control' => 'public, max-age=604800, immutable',
+    ]);
+})->where('filename', '.*');
+
 // Cache Clearing Helper for Deployment
 Route::get('/clear-cache', function () {
     \Illuminate\Support\Facades\Artisan::call('view:clear');

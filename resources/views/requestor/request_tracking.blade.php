@@ -556,7 +556,7 @@
                     <div class="media-thumbs">
                         @foreach($media_files as $file)
                             @php $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION)); @endphp
-                            @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
+                            @if(in_array($ext, ['jpg','jpeg','png','gif','webp','jfif','svg']))
                                 <img class="media-thumb" src="/uploads/{{ $file }}" alt="media" onerror="this.style.opacity=0.2">
                             @else
                                 <div class="media-video-thumb">

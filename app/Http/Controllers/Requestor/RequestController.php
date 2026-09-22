@@ -88,17 +88,28 @@ class RequestController extends Controller
         $media_file = '';
         if ($request->hasFile('media')) {
             $upload_dir    = public_path('uploads');
-            $uploaded      = [];
+            $altUploadDir  = base_path('public_html/uploads');
+            $mirrorNeeded  = is_dir($altUploadDir) && realpath($altUploadDir) !== realpath($upload_dir);
 
             foreach (array_slice($request->file('media'), 0, 10) as $file) {
                 if (!$file->isValid()) continue;
-                $filename  = 'media_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $origExt   = strtolower($file->getClientOriginalExtension());
+                // Normalize jfif to standard jpg so web templates and web servers serve it as image/jpeg
+                $saveExt   = ($origExt === 'jfif') ? 'jpg' : $origExt;
+                $filename  = 'media_' . uniqid() . '.' . $saveExt;
                 $file->move($upload_dir, $filename);
 
+                // If public_html/uploads exists and is separate from public_path('uploads'), mirror file
+                if ($mirrorNeeded) {
+                    @copy($upload_dir . '/' . $filename, $altUploadDir . '/' . $filename);
+                }
+
                 // Image Optimization
-                $ext = strtolower($file->getClientOriginalExtension());
-                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                if (in_array($saveExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
                     \App\Services\ImageOptimizer::optimize($upload_dir . '/' . $filename);
+                    if ($mirrorNeeded) {
+                        @copy($upload_dir . '/' . $filename, $altUploadDir . '/' . $filename);
+                    }
                 }
 
                 $uploaded[] = $filename;
@@ -231,15 +242,27 @@ class RequestController extends Controller
             // Burahin ang lumang files kung gusto mo ng fresh (Optional)
             // if($req->media_file) { /* delete logic here */ }
 
+            $upload_dir    = public_path('uploads');
+            $altUploadDir  = base_path('public_html/uploads');
+            $mirrorNeeded  = is_dir($altUploadDir) && realpath($altUploadDir) !== realpath($upload_dir);
+
             foreach (array_slice($request->file('media'), 0, 10) as $file) {
                 if ($file->isValid()) {
-                    $filename = 'media_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $file->move(public_path('uploads'), $filename);
+                    $origExt   = strtolower($file->getClientOriginalExtension());
+                    $saveExt   = ($origExt === 'jfif') ? 'jpg' : $origExt;
+                    $filename  = 'media_' . uniqid() . '.' . $saveExt;
+                    $file->move($upload_dir, $filename);
+
+                    if ($mirrorNeeded) {
+                        @copy($upload_dir . '/' . $filename, $altUploadDir . '/' . $filename);
+                    }
 
                     // Image Optimization
-                    $ext = strtolower($file->getClientOriginalExtension());
-                    if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                        \App\Services\ImageOptimizer::optimize(public_path('uploads/' . $filename));
+                    if (in_array($saveExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                        \App\Services\ImageOptimizer::optimize($upload_dir . '/' . $filename);
+                        if ($mirrorNeeded) {
+                            @copy($upload_dir . '/' . $filename, $altUploadDir . '/' . $filename);
+                        }
                     }
 
                     $uploaded[] = $filename;

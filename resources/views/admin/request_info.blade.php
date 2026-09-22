@@ -293,7 +293,7 @@
     $firstImage    = null;
     foreach ($mediaFiles as $f) {
         $ext2 = strtolower(pathinfo(trim($f), PATHINFO_EXTENSION));
-        if (in_array($ext2, ['jpg','jpeg','png','gif','webp'])) { $firstImage = trim($f); break; }
+        if (in_array($ext2, ['jpg','jpeg','png','gif','webp','jfif','svg'])) { $firstImage = trim($f); break; }
     }
 @endphp
 
@@ -434,7 +434,7 @@
                         @php
                             $filename  = trim($file);
                             $ext       = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                            $isImage   = in_array($ext, ['jpg','jpeg','png','gif','webp']);
+                            $isImage   = in_array($ext, ['jpg','jpeg','png','gif','webp','jfif','svg']);
                             $caption   = $captions[$filename] ?? '';
                             $fileUrl   = '/uploads/' . $filename;
                         @endphp
@@ -500,7 +500,7 @@
                         <select id="edit-file-select" onchange="loadEditorImage(this.value)" style="padding:5px 12px;border:1px solid rgba(0,0,0,0.1);border-radius:8px;font-size:12.5px;font-family:var(--font);cursor:pointer;outline:none;">
                             @foreach($mediaFiles as $f)
                             @php $ext3 = strtolower(pathinfo(trim($f), PATHINFO_EXTENSION)); @endphp
-                            @if(in_array($ext3, ['jpg','jpeg','png','gif','webp']))
+                            @if(in_array($ext3, ['jpg','jpeg','png','gif','webp','jfif','svg']))
                             <option value="/uploads/{{ trim($f) }}">{{ trim($f) }}</option>
                             @endif
                             @endforeach
