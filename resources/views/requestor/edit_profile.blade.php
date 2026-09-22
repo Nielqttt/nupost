@@ -124,6 +124,31 @@
     .form-card { padding: 24px; }
     .form-actions { flex-direction: column; gap: 14px; padding: 20px 24px; }
 }
+
+/* ── DARK THEME OVERRIDES ── */
+[data-theme="dark"] .form-card {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .card-title {
+    border-bottom-color: rgba(30, 79, 216, 0.25) !important;
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .form-actions {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .btn-cancel {
+    background: #0b1a3d !important;
+    border-color: rgba(30, 79, 216, 0.3) !important;
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .btn-cancel:hover {
+    background: #0f2250 !important;
+    color: #f8fafc !important;
+}
 </style>
 @endsection
 

@@ -173,6 +173,73 @@
     font-size: 13.5px; cursor: pointer; font-family: var(--font); transition: all .15s;
 }
 .btn-modal-secondary:hover { background: #f1f5f9; }
+
+/* ── DARK THEME OVERRIDES ── */
+[data-theme="dark"] .card {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .notif-item {
+    border-bottom-color: rgba(30, 79, 216, 0.15) !important;
+}
+[data-theme="dark"] .notif-item:hover {
+    background: rgba(30, 79, 216, 0.12) !important;
+}
+[data-theme="dark"] .notif-item--unread {
+    background: rgba(30, 79, 216, 0.18) !important;
+}
+[data-theme="dark"] .notif-item--unread:hover {
+    background: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .notif-title {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .notif-message {
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .modal-overlay {
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+[data-theme="dark"] .notif-modal {
+    background: #081636 !important;
+    border: 1px solid rgba(30, 79, 216, 0.3) !important;
+}
+[data-theme="dark"] .modal-head {
+    background: #06112a !important;
+    border-bottom-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .modal-title {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .modal-left {
+    border-right-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .modal-req-title {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .modal-message {
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .modal-right {
+    background: #06112a !important;
+}
+[data-theme="dark"] .modal-right--empty {
+    background: #06112a !important;
+}
+[data-theme="dark"] .modal-footer {
+    background: #06112a !important;
+    border-top-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .btn-modal-secondary {
+    background: #0b1a3d !important;
+    border-color: rgba(30, 79, 216, 0.3) !important;
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .btn-modal-secondary:hover {
+    background: #0f2250 !important;
+    color: #f8fafc !important;
+}
 </style>
 @endsection
 

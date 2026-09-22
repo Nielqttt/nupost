@@ -315,6 +315,81 @@
     transition: background 0.15s;
 }
 .modal-cancel:hover { background: #e2e8f0; }
+
+/* ── DARK THEME OVERRIDES ── */
+[data-theme="dark"] .trk-title {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .trk-card {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .trk-card-head {
+    background: #06112a !important;
+    border-bottom-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .trk-card-icon {
+    background: #0b1a3d !important;
+    border-color: rgba(30, 79, 216, 0.3) !important;
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .trk-card-title {
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .detail-val {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .detail-desc {
+    color: #cbd5e1 !important;
+    border-top-color: rgba(30, 79, 216, 0.2) !important;
+}
+[data-theme="dark"] .caption-box {
+    background: #06112a !important;
+    border-top-color: rgba(30, 79, 216, 0.2) !important;
+}
+[data-theme="dark"] .caption-text {
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .tl-event {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .tl-line {
+    background: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .tl-dot--note {
+    background: #06112a !important;
+    border-color: rgba(30, 79, 216, 0.3) !important;
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .chat-cta-name {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .media-thumb {
+    border-color: rgba(30, 79, 216, 0.3) !important;
+}
+[data-theme="dark"] .media-video-thumb {
+    background: #0b1a3d !important;
+    border-color: rgba(30, 79, 216, 0.3) !important;
+}
+[data-theme="dark"] .modal {
+    background: #081636 !important;
+    border: 1px solid rgba(30, 79, 216, 0.3) !important;
+}
+[data-theme="dark"] .modal h3 {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .modal p {
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .modal-cancel {
+    background: #0b1a3d !important;
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .modal-cancel:hover {
+    background: #0f2250 !important;
+    color: #f8fafc !important;
+}
 </style>
 @endsection
 

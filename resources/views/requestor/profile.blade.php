@@ -141,6 +141,47 @@
     .profile-info, .profile-stats, .profile-actions { padding-left: 24px; padding-right: 24px; }
     .profile-member { padding-left: 24px; padding-right: 24px; }
 }
+
+/* ── DARK THEME OVERRIDES ── */
+[data-theme="dark"] .profile-card {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .profile-member {
+    background: #06112a !important;
+    border-bottom-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .profile-info {
+    border-bottom-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .profile-stats {
+    border-bottom-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .stat-box {
+    background: #06112a !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .stat-box:hover {
+    border-color: #3b82f6 !important;
+}
+[data-theme="dark"] .action-item {
+    background: #0b1a3d !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .action-item:hover {
+    background: #0f2250 !important;
+    border-color: #3b82f6 !important;
+}
+[data-theme="dark"] .action-item--danger {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #fca5a5 !important;
+}
+[data-theme="dark"] .action-item--danger:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+}
 </style>
 @endsection
 

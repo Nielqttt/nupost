@@ -291,6 +291,88 @@
     .upcoming-title { font-size: 12px; }
     .upcoming-meta  { font-size: 10.5px; }
 }
+
+/* ── DARK THEME OVERRIDES ── */
+[data-theme="dark"] .upcoming-card {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .upcoming-card h3 {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .upcoming-empty {
+    color: #64748b !important;
+}
+[data-theme="dark"] .upcoming-empty p {
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .upcoming-item {
+    border-bottom-color: rgba(30, 79, 216, 0.15) !important;
+}
+[data-theme="dark"] .upcoming-title {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .upcoming-meta {
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .upcoming-others-tag {
+    background: #06112a !important;
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .day-panel {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .dp__empty {
+    color: #64748b !important;
+}
+[data-theme="dark"] .dp__empty p {
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .dp__empty span {
+    color: #64748b !important;
+}
+[data-theme="dark"] .dp__body::-webkit-scrollbar-thumb {
+    background: rgba(30, 79, 216, 0.3) !important;
+}
+[data-theme="dark"] .req-card {
+    background: #0b1a3d !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .req-card:hover {
+    background: #0f2250 !important;
+    border-color: #3b82f6 !important;
+}
+[data-theme="dark"] .req-card__num {
+    background: #06112a !important;
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .req-card__title {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .req-card__meta {
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .req-card--others {
+    background: #06112a !important;
+    border-left-color: #64748b !important;
+}
+[data-theme="dark"] .req-tag--pending {
+    background: #06112a !important;
+    color: #94a3b8 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+}
+[data-theme="dark"] .req-tag--others {
+    background: #06112a !important;
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .public-banner {
+    background: rgba(16, 185, 129, 0.12) !important;
+    border-color: rgba(16, 185, 129, 0.25) !important;
+    color: #6ee7b7 !important;
+}
 </style>
 @endsection
 

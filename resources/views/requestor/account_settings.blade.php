@@ -148,6 +148,31 @@
     .section-card { padding: 24px; }
     .save-bar { padding: 20px 24px; }
 }
+
+/* ── DARK THEME OVERRIDES ── */
+[data-theme="dark"] .section-card {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .section-header {
+    border-bottom-color: rgba(30, 79, 216, 0.25) !important;
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .toggle-row {
+    border-bottom-color: rgba(30, 79, 216, 0.15) !important;
+}
+[data-theme="dark"] .toggle-label {
+    color: #f8fafc !important;
+}
+[data-theme="dark"] .toggle-desc {
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .save-bar {
+    background: #081636 !important;
+    border-color: rgba(30, 79, 216, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
 </style>
 @endsection
 
