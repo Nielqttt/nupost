@@ -413,27 +413,12 @@
             overflow: hidden;
             position: relative;
             z-index: 2;
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
-            animation: heroWindowFloat 6s ease-in-out infinite alternate;
-            will-change: transform;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
         .demo-window:hover {
-            transform: translateY(-8px) scale(1.012);
-            box-shadow: 0 25px 55px -12px rgba(0, 0, 0, 0.5), 0 0 35px rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.45);
-        }
-
-        @keyframes heroWindowFloat {
-            0% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-7px) rotate(0.35deg);
-            }
-            100% {
-                transform: translateY(-13px) rotate(-0.35deg);
-            }
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.35);
+            border-color: rgba(59, 130, 246, 0.35);
         }
 
         .demo-header {
@@ -671,75 +656,36 @@
             transform: scale(1.03);
         }
 
-        /* ── Floating Badges (Fluid Levitation + Interactive Hover Reaction) ── */
+        /* ── Modern Minimal Badges ── */
         .float-tag {
             position: absolute;
             background: var(--bg-surface);
             border-radius: var(--radius-md);
-            padding: 10px 18px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
+            padding: 8px 14px;
+            box-shadow: var(--shadow-card);
             border: 1px solid var(--border-card);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             z-index: 4;
-            cursor: pointer;
-            pointer-events: auto;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-            will-change: transform;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            transition: border-color 0.2s ease, transform 0.2s ease;
         }
 
         .float-tag:hover {
-            animation-play-state: paused !important;
-            transform: translateY(-8px) scale(1.08) !important;
-            box-shadow: 0 20px 42px rgba(0, 0, 0, 0.5), 0 0 24px rgba(234, 179, 8, 0.28);
-            border-color: var(--gold-400);
+            transform: translateY(-2px);
+            border-color: rgba(59, 130, 246, 0.4);
         }
 
-        /* Top Right Badge - Floating Levitation */
         .float-tag-1 {
-            top: 4px;
-            right: -20px;
-            animation: floatLevitate1 4.2s ease-in-out infinite alternate;
+            top: 6px;
+            right: -10px;
         }
 
-        /* Bottom Left Badge - Floating Levitation */
         .float-tag-2 {
-            bottom: 4px;
-            left: -20px;
-            animation: floatLevitate2 4.8s ease-in-out infinite alternate-reverse;
-        }
-
-        @keyframes floatLevitate1 {
-            0% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-            33% {
-                transform: translate(-3px, -8px) rotate(1.2deg);
-            }
-            66% {
-                transform: translate(3px, -15px) rotate(-1deg);
-            }
-            100% {
-                transform: translate(0, -20px) rotate(1.6deg);
-            }
-        }
-
-        @keyframes floatLevitate2 {
-            0% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-            33% {
-                transform: translate(4px, 7px) rotate(-1.2deg);
-            }
-            66% {
-                transform: translate(-3px, 14px) rotate(1deg);
-            }
-            100% {
-                transform: translate(0, 18px) rotate(-1.6deg);
-            }
+            bottom: 6px;
+            left: -10px;
         }
 
         .float-icon {
@@ -1866,12 +1812,14 @@
 
                 <!-- Right Column: Interactive Simulator with Levitating Floating Badges -->
                 <div class="hero-right" id="demo">
-                    <!-- Floating Badge 1 (Top-Right Floating Levitation) -->
+                    <!-- Floating Badge 1 -->
                     <div class="float-tag float-tag-1">
-                        <div class="float-icon" style="background:rgba(34,197,94,0.15);color:#4ade80;">⚡</div>
+                        <div class="float-icon" style="background:rgba(34,197,94,0.15);color:#4ade80;">
+                            <svg width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        </div>
                         <div class="float-meta">
                             <h6>Rapid Review</h6>
-                            <p>Average < 24h turnaround</p>
+                            <p>Average &lt; 24h turnaround</p>
                         </div>
                     </div>
 
@@ -1884,20 +1832,20 @@
                                 <span class="demo-dot green"></span>
                             </div>
                             <div class="demo-badge-interactive">
-                                <span>✨ Interactive Playground</span>
+                                <span>Live Preview</span>
                             </div>
                         </div>
 
                         <div class="demo-body">
                             <div class="demo-tabs-label">
-                                <span>Select Post Template</span>
-                                <span class="hint">Click to test live preview 👇</span>
+                                <span>Select Post Category</span>
+                                <span class="hint">Click to test live preview</span>
                             </div>
 
                             <div class="demo-tabs">
-                                <button class="demo-tab-btn active" data-type="event">🎓 Event</button>
-                                <button class="demo-tab-btn" data-type="sports">🏆 Sports</button>
-                                <button class="demo-tab-btn" data-type="org">📢 Notice</button>
+                                <button class="demo-tab-btn active" data-type="event">Event</button>
+                                <button class="demo-tab-btn" data-type="sports">Sports</button>
+                                <button class="demo-tab-btn" data-type="org">Notice</button>
                             </div>
 
                             <!-- Live Card Preview -->
@@ -1914,35 +1862,37 @@
                                 </div>
 
                                 <div class="preview-caption-box">
-                                    <span class="ai-tag">✨ Gemini AI Assist</span>
+                                    <span class="ai-tag"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:-1px;margin-right:3px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Gemini AI</span>
                                     <p id="demoCaption" class="demo-caption-text">
-                                        "Gear up for innovation! Join us at the NU Lipa Tech Summit 2026. Explore hands-on AI workshops and keynote talks from industry leaders. 🚀💡 #NULipa #TechSummit2026 #NationalUniversity"
+                                        "Gear up for innovation! Join us at the NU Lipa Tech Summit 2026. Explore hands-on AI workshops and keynote talks from industry leaders. #NULipa #TechSummit2026 #NationalUniversity"
                                     </p>
                                 </div>
 
                                 <div class="preview-bottom-bar">
                                     <div class="preview-platforms">
-                                        <span class="platform-pill">📱 Facebook</span>
-                                        <span class="platform-pill">📸 Instagram</span>
+                                        <span class="platform-pill">Facebook</span>
+                                        <span class="platform-pill">Instagram</span>
                                     </div>
                                     <div class="preview-media-badge">
-                                        📎 3 Assets Attached
+                                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:-1px;margin-right:4px;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> 3 Assets Attached
                                     </div>
                                 </div>
                             </div>
 
                             <div class="demo-interactive-action">
-                                <span id="demoActionHint">Need captions? Let AI write it for you:</span>
+                                <span id="demoActionHint">Need captions? Let AI assist:</span>
                                 <button type="button" class="btn-sparkle" id="btnGenCaption">
-                                    ✨ Regenerate AI Caption
+                                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" style="vertical-align:-1px;margin-right:5px;"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Regenerate AI Caption
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Floating Badge 2 (Bottom-Left Floating Levitation) -->
+                    <!-- Floating Badge 2 -->
                     <div class="float-tag float-tag-2">
-                        <div class="float-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;">🔒</div>
+                        <div class="float-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;">
+                            <svg width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
                         <div class="float-meta">
                             <h6>Verified NU Accounts</h6>
                             <p>Role-based access control</p>
@@ -1980,27 +1930,31 @@
             <div class="section-head">
                 <div class="section-tag">Powerful Features</div>
                 <h2 class="section-headline">Everything needed to streamline campus communication</h2>
-                <p class="section-desc">Designed specifically for the NU Lipa Marketing Office, student council, and recognized student organizations.</p>
+                <p class="section-desc">Designed specifically for the NU Lipa Marketing Office, academic departments, and institutional offices.</p>
             </div>
 
             <div class="bento-grid">
                 <div class="bento-card bento-col-8">
                     <div>
-                        <div class="bento-icon" style="background:rgba(245,158,11,0.15);color:#fbbf24;">✨</div>
+                        <div class="bento-icon" style="background:rgba(245,158,11,0.15);color:#fbbf24;">
+                            <svg width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
                         <h3 class="bento-title">AI-Powered Social Media Captioning</h3>
                         <p class="bento-text">Stuck on what to write? Our integrated Gemini AI crafts tailored, engaging captions with relevant hashtags and event highlights in seconds.</p>
                     </div>
                     <div class="bento-visual-ai">
                         <span class="ai-prompt-chip">Prompt: Campus Intramurals 2026 Announcement</span>
                         <div class="ai-output-stream">
-                            "Unleash the Bulldog spirit! 🐶🔥 Are you ready to champion your college? Intramurals 2026 kickstarts this Monday at the Main Gymnasium. Be there, be proud!"<span class="cursor"></span>
+                            "Unleash the Bulldog spirit! Are you ready to champion your college? Intramurals 2026 kickstarts this Monday at the Main Gymnasium. Be there, be proud!"<span class="cursor"></span>
                         </div>
                     </div>
                 </div>
 
                 <div class="bento-card bento-col-4">
                     <div>
-                        <div class="bento-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;">📡</div>
+                        <div class="bento-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;">
+                            <svg width="22" height="22" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
                         <h3 class="bento-title">Live Tracking</h3>
                         <p class="bento-text">Know exactly when your post is queued, in review, or published.</p>
                     </div>
@@ -2014,7 +1968,9 @@
 
                 <div class="bento-card bento-col-4">
                     <div>
-                        <div class="bento-icon" style="background:rgba(168,85,247,0.15);color:#c084fc;">💬</div>
+                        <div class="bento-icon" style="background:rgba(168,85,247,0.15);color:#c084fc;">
+                            <svg width="22" height="22" fill="none" stroke="#a855f7" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
                         <h3 class="bento-title">Admin Feedback</h3>
                         <p class="bento-text">Direct 1-on-1 comments per request for fast revisions and creative approval.</p>
                     </div>
@@ -2026,7 +1982,9 @@
 
                 <div class="bento-card bento-col-8">
                     <div>
-                        <div class="bento-icon" style="background:rgba(34,197,94,0.15);color:#4ade80;">📅</div>
+                        <div class="bento-icon" style="background:rgba(34,197,94,0.15);color:#4ade80;">
+                            <svg width="22" height="22" fill="none" stroke="#22c55e" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </div>
                         <h3 class="bento-title">Conflict-Free Visual Calendar</h3>
                         <p class="bento-text">Prevent overlapping promotions and schedule posts strategically across official social channels with our interactive schedule grid.</p>
                     </div>
@@ -2206,9 +2164,9 @@
                     status: "Approved",
                     statusClass: "chip-approved",
                     captions: [
-                        '"Gear up for innovation! Join us at the NU Lipa Tech Summit 2026. Explore hands-on AI workshops and keynote talks from industry leaders. 🚀💡 #NULipa #TechSummit2026"',
-                        '"Code, build, and lead! 💻 The future of technology unfolds at NU Lipa Tech Summit 2026. Free admission for all students! #BulldogPride #CCIT"',
-                        '"Level up your digital skills! Join our interactive workshop tracks this May 24th at the Multipurpose Hall. Register now! 🔥✨ #NUPost #NULipa"'
+                        '"Gear up for innovation! Join us at the NU Lipa Tech Summit 2026. Explore hands-on AI workshops and keynote talks from industry leaders. #NULipa #TechSummit2026"',
+                        '"Code, build, and lead! The future of technology unfolds at NU Lipa Tech Summit 2026. Free admission for all students! #BulldogPride #CCIT"',
+                        '"Level up your digital skills! Join our interactive workshop tracks this May 24th at the Multipurpose Hall. Register now! #NUPost #NULipa"'
                     ]
                 },
                 sports: {
@@ -2218,21 +2176,21 @@
                     status: "Scheduled",
                     statusClass: "chip-scheduled",
                     captions: [
-                        '"Hear the Bulldogs roar! 🐶🏆 Catch our varsity teams in action at the Southern Luzon University Games. Let\'s bring home the championship! #GoBulldogs #NUAthletics"',
-                        '"Game day ready! Support our athletes as they defend the court this Tuesday. Gates open at 8:00 AM. Wear your Gold & Blue! 💙💛 #BulldogPride"',
-                        '"Unstoppable spirit, unmatched energy! Watch the livestreams right here on our official Facebook page. 🔥🏀 #NULipaSports"'
+                        '"Hear the Bulldogs roar! Catch our varsity teams in action at the Southern Luzon University Games. Let\'s bring home the championship! #GoBulldogs #NUAthletics"',
+                        '"Game day ready! Support our athletes as they defend the court this Tuesday. Gates open at 8:00 AM. Wear your Gold & Blue! #BulldogPride"',
+                        '"Unstoppable spirit, unmatched energy! Watch the livestreams right here on our official Facebook page. #NULipaSports"'
                     ]
                 },
                 org: {
-                    avatar: "SSC",
-                    title: "Supreme Student Council — General Assembly",
+                    avatar: "OAA",
+                    title: "Office of Academic Affairs — General Assembly",
                     org: "Target Date: May 28, 2026 • 10:00 AM",
                     status: "Under Review",
                     statusClass: "chip-review",
                     captions: [
-                        '"Your voice, your council! 📢 Join the SSC Year-End General Assembly. Submit your agenda items and hear key project updates. See you there! #SSC2026 #OneNU"',
-                        '"Transparency in action! All student leaders and org representatives are invited to our term review this Thursday. 🤝✨ #NULipaSSC"',
-                        '"Lead the change! Check the link in bio for the complete assembly agenda and open forum guidelines. 📋🇵🇭 #StudentLeadership"'
+                        '"Your voice, your community! Join the Annual Academic General Assembly. Submit your agenda items and hear key institutional updates. #NULipa #OneNU"',
+                        '"Transparency in action! All academic chairs and office representatives are invited to our term review this Thursday. #NULipa"',
+                        '"Lead the institutional change! Check the link in bio for the complete assembly agenda and open forum guidelines. #AcademicLeadership"'
                     ]
                 }
             };
@@ -2301,31 +2259,6 @@
                     }
                 });
             });
-
-            // ── Interactive 3D Parallax & Mouse Hover Drift ──
-            const heroRight = document.querySelector('.hero-right');
-            const demoWindow = document.querySelector('.demo-window');
-            const floatTag1 = document.querySelector('.float-tag-1');
-            const floatTag2 = document.querySelector('.float-tag-2');
-
-            if (heroRight && demoWindow) {
-                heroRight.addEventListener('mousemove', (e) => {
-                    if (window.innerWidth <= 992) return;
-                    const rect = heroRight.getBoundingClientRect();
-                    const x = (e.clientX - rect.left) / rect.width - 0.5;
-                    const y = (e.clientY - rect.top) / rect.height - 0.5;
-
-                    demoWindow.style.transform = `perspective(1000px) rotateY(${x * 7}deg) rotateX(${-y * 7}deg) translateY(-8px) scale(1.015)`;
-                    if (floatTag1) floatTag1.style.transform = `translate(${x * 22}px, ${y * 22 - 8}px) scale(1.05)`;
-                    if (floatTag2) floatTag2.style.transform = `translate(${x * -18}px, ${y * -18 + 8}px) scale(1.05)`;
-                });
-
-                heroRight.addEventListener('mouseleave', () => {
-                    demoWindow.style.transform = '';
-                    if (floatTag1) floatTag1.style.transform = '';
-                    if (floatTag2) floatTag2.style.transform = '';
-                });
-            }
         });
     </script>
 </body>

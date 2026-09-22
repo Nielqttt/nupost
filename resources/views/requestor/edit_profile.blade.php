@@ -192,8 +192,8 @@
                     <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" placeholder="+63 912 345 6789">
                 </div>
                 <div class="field">
-                    <label>Organization</label>
-                    <input type="text" name="organization" value="{{ old('organization', $user->organization) }}" placeholder="e.g., Student Council">
+                    <label>Office</label>
+                    <input type="text" name="organization" value="{{ old('organization', $user->organization) }}" placeholder="e.g., Marketing Office">
                 </div>
             </div>
             <div class="field">

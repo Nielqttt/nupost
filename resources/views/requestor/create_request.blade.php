@@ -412,8 +412,8 @@
 .sla-body::-webkit-scrollbar { width: 4px; }
 .sla-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 .sla-item {
-    display: flex; align-items: flex-start; gap: 14px;
-    padding: 14px 16px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; margin-bottom: 6px;
     border-radius: 14px;
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.05);
@@ -554,39 +554,44 @@
         </div>
         <div class="sla-body">
             <div class="sla-item">
-                <div class="sla-item-icon sla-item-icon--check">✅</div>
+                <div class="sla-item-icon sla-item-icon--check">
+                    <svg width="18" height="18" fill="none" stroke="#10b981" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
                 <div class="sla-item-info">
                     <div class="sla-item-title">
                         Checking of Materials
                         <span class="sla-turnaround sla-ta--green">Up to 24 hours</span>
                     </div>
-                    <div class="sla-item-note">Review and validation of ready marketing and informational materials.</div>
                 </div>
             </div>
             <div class="sla-item">
-                <div class="sla-item-icon sla-item-icon--post">📋</div>
+                <div class="sla-item-icon sla-item-icon--post">
+                    <svg width="18" height="18" fill="none" stroke="#0ea5e9" stroke-width="2" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                </div>
                 <div class="sla-item-info">
                     <div class="sla-item-title">
                         Posting with Ready-Made PubMat
                         <span class="sla-turnaround sla-ta--green">Up to 24 hours</span>
                     </div>
                     <div class="sla-item-warn">Caption must also be provided upon request submission.</div>
-                    <div class="sla-item-note">Immediate scheduling of completed pubmats with complete post captions.</div>
                 </div>
             </div>
             <div class="sla-item">
-                <div class="sla-item-icon sla-item-icon--tmpl">🔲</div>
+                <div class="sla-item-icon sla-item-icon--tmpl">
+                    <svg width="18" height="18" fill="none" stroke="#a855f7" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                </div>
                 <div class="sla-item-info">
                     <div class="sla-item-title">
                         Template-Based PubMat
                         <span class="sla-turnaround sla-ta--yellow">Up to 48 hours</span>
                     </div>
                     <div class="sla-item-warn">e.g. announcements, congratulatory, news articles, partnerships.</div>
-                    <div class="sla-item-note">Design generation using official NU Lipa pre-approved templates.</div>
                 </div>
             </div>
             <div class="sla-item">
-                <div class="sla-item-icon sla-item-icon--std">✏️</div>
+                <div class="sla-item-icon sla-item-icon--std">
+                    <svg width="18" height="18" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><circle cx="12" cy="12" r="1"/></svg>
+                </div>
                 <div class="sla-item-info">
                     <div class="sla-item-title">
                         Standard PubMat
@@ -596,33 +601,36 @@
                 </div>
             </div>
             <div class="sla-item">
-                <div class="sla-item-icon sla-item-icon--multi">💎</div>
+                <div class="sla-item-icon sla-item-icon--multi">
+                    <svg width="18" height="18" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                </div>
                 <div class="sla-item-info">
                     <div class="sla-item-title">
                         Multiple Collaterals / Tarpaulins
                         <span class="sla-turnaround sla-ta--red">5–10 working days</span>
                     </div>
-                    <div class="sla-item-note">Tarpaulins, print collateral packages, badges, brochures, and composite signage.</div>
                 </div>
             </div>
             <div class="sla-item">
-                <div class="sla-item-icon sla-item-icon--campaign">💡</div>
+                <div class="sla-item-icon sla-item-icon--campaign">
+                    <svg width="18" height="18" fill="none" stroke="#6366f1" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.7 3.5 6h7c2-1.3 3.5-3.5 3.5-6a7 7 0 0 0-7-7z"/></svg>
+                </div>
                 <div class="sla-item-info">
                     <div class="sla-item-title">
                         New Campaign / Creative Concept
                         <span class="sla-turnaround sla-ta--purple">10–20 working days</span>
                     </div>
-                    <div class="sla-item-note">Comprehensive visual branding, campaign art direction, and theme conceptualization.</div>
                 </div>
             </div>
             <div class="sla-item">
-                <div class="sla-item-icon sla-item-icon--event">🎬</div>
+                <div class="sla-item-icon sla-item-icon--event">
+                    <svg width="18" height="18" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                </div>
                 <div class="sla-item-info">
                     <div class="sla-item-title">
                         Event Documentation
                         <span class="sla-turnaround sla-ta--red">1 month prior to event</span>
                     </div>
-                    <div class="sla-item-note">On-site coverage, photo/video documentation booking, and media team deployment.</div>
                 </div>
             </div>
         </div>
