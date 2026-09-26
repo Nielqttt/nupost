@@ -884,14 +884,14 @@ body { background: var(--cream) !important; }
                 <span style="font-size:10px;font-weight:700;padding:4px 14px;border-radius:20px;background:rgba(16,185,129,0.2);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3);">✅ Connected</span>
             </div>
 
-            {{-- Metric Cards --}}
+            {{-- Metric Cards (Matching Meta Professional Dashboard 28-day window) --}}
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
                 @php
                     $fb_dash_items = [
-                        ['key'=>'total_reach',      'label'=>'Reach (7d)',        'c'=>'#1877f2','bg'=>'#dbeafe','path'=>'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'],
-                        ['key'=>'total_engagement',  'label'=>'Engagements (7d)', 'c'=>'#e1306c','bg'=>'#fce7f3','path'=>'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'],
-                        ['key'=>'total_likes',       'label'=>'Reactions (7d)',       'c'=>'#f59e0b','bg'=>'#fef3c7','path'=>'<circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>'],
-                        ['key'=>'total_shares',      'label'=>'Shares (7d)',      'c'=>'#10b981','bg'=>'#d1fae5','path'=>'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>'],
+                        ['key'=>'total_reach',      'label'=>'Views (28d)',        'c'=>'#1877f2','bg'=>'#dbeafe','path'=>'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'],
+                        ['key'=>'total_engagement',  'label'=>'Engagement (28d)',   'c'=>'#e1306c','bg'=>'#fce7f3','path'=>'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'],
+                        ['key'=>'total_likes',       'label'=>'Reactions (28d)',    'c'=>'#f59e0b','bg'=>'#fef3c7','path'=>'<circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>'],
+                        ['key'=>'total_shares',      'label'=>'Shares (28d)',       'c'=>'#10b981','bg'=>'#d1fae5','path'=>'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>'],
                     ];
                 @endphp
                 @foreach($fb_dash_items as $fi)
@@ -901,7 +901,7 @@ body { background: var(--cream) !important; }
                     </div>
                     <div class="meta-mini__label">{{ $fi['label'] }}</div>
                     <div style="font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;padding:12px 0;">
-                        {{ number_format($fb['metrics'][$fi['key']]['total_7d'] ?? $fb['metrics'][$fi['key']]['total'] ?? 0) }}
+                        {{ number_format($fb['metrics'][$fi['key']]['total'] ?? 0) }}
                     </div>
                 </div>
                 @endforeach
@@ -910,7 +910,7 @@ body { background: var(--cream) !important; }
             {{-- Performance Chart --}}
             <div class="meta-full">
                 <div class="meta-full__head">
-                    <div class="meta-full__title">Post Performance — Reach & Engagement</div>
+                    <div class="meta-full__title">Post Performance — Views & Engagement (Last 28 Days)</div>
                     <span class="meta-api-badge" style="background:#d1fae5;color:#047857;border-color:#6ee7b7;">✅ Live Data</span>
                 </div>
                 @if(!empty($fb['metrics']['total_reach']['daily']))
@@ -1060,8 +1060,8 @@ if (fbCtx) {
         data:{
             labels: fbLabels,
             datasets:[
-                {label:'Impressions',data:fbReach,borderColor:'#1877f2',backgroundColor:gR,borderWidth:2.5,pointBackgroundColor:'#1877f2',pointRadius:3,tension:0.4,fill:true},
-                {label:'Engagements',data:fbEng,borderColor:'#e1306c',backgroundColor:gE,borderWidth:2.5,pointBackgroundColor:'#e1306c',pointRadius:3,tension:0.4,fill:true}
+                {label:'Views',data:fbReach,borderColor:'#1877f2',backgroundColor:gR,borderWidth:2.5,pointBackgroundColor:'#1877f2',pointRadius:3,tension:0.4,fill:true},
+                {label:'Engagement',data:fbEng,borderColor:'#e1306c',backgroundColor:gE,borderWidth:2.5,pointBackgroundColor:'#e1306c',pointRadius:3,tension:0.4,fill:true}
             ]
         },
         options:{

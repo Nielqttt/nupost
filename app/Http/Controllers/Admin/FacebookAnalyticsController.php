@@ -65,16 +65,28 @@ class FacebookAnalyticsController extends Controller
 
     public function getData(string $selectedMonth = null): array
     {
-        if (!$selectedMonth) {
-            $selectedMonth = Carbon::now()->format('Y-m');
-        }
+        $isDashboard = empty($selectedMonth);
 
-        $monthCarbon = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
-        $since = $monthCarbon->copy()->startOfMonth()->format('Y-m-d');
-        // Don't go past today
-        $until = $monthCarbon->copy()->endOfMonth()->isFuture()
-            ? Carbon::now()->format('Y-m-d')
-            : $monthCarbon->copy()->endOfMonth()->format('Y-m-d');
+        if ($isDashboard) {
+            // Dashboard mode: Last 28 days matching Facebook Professional Dashboard (e.g. Aug 29 - Sep 25)
+            $since = Carbon::now()->subDays(28)->format('Y-m-d');
+            $until = Carbon::now()->format('Y-m-d');
+            $sinceTs = Carbon::now()->subDays(28)->timestamp;
+            $untilTs = Carbon::now()->timestamp;
+            $cacheSuffix = '28d_v4';
+        } else {
+            // Specific calendar month mode (for Analytics page)
+            $monthCarbon = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
+            $since = $monthCarbon->copy()->startOfMonth()->format('Y-m-d');
+            $until = $monthCarbon->copy()->endOfMonth()->isFuture()
+                ? Carbon::now()->format('Y-m-d')
+                : $monthCarbon->copy()->endOfMonth()->format('Y-m-d');
+            $sinceTs = $monthCarbon->copy()->startOfMonth()->timestamp;
+            $untilTs = $monthCarbon->copy()->endOfMonth()->isFuture()
+                ? Carbon::now()->timestamp
+                : $monthCarbon->copy()->endOfMonth()->timestamp;
+            $cacheSuffix = "{$selectedMonth}_v4";
+        }
 
         if (!$this->token) {
             return [
@@ -87,7 +99,7 @@ class FacebookAnalyticsController extends Controller
 
         try {
             // ── 1. Page basic info ─────────────────────────────────────────
-            $pageInfo = Cache::remember('fb_page_info', 300, function () {
+            $pageInfo = Cache::remember('fb_page_info_v2', 300, function () {
                 $response = $this->fbHttp()->get("{$this->base}/me", [
                     'fields'       => 'name,id,fan_count,followers_count,link,picture.type(large)',
                     'access_token' => $this->token,
@@ -97,17 +109,12 @@ class FacebookAnalyticsController extends Controller
             });
 
             if (isset($pageInfo['error'])) {
-                Cache::forget('fb_page_info');
+                Cache::forget('fb_page_info_v2');
                 throw new \Exception($pageInfo['error']['message'] ?? 'Unknown Facebook API error');
             }
 
-            // ── 2. Posts for selected month + past 7 days ─────────────────
-            $cacheKey = "fb_posts_{$selectedMonth}_v2";
-            $sinceTs  = min($monthCarbon->copy()->startOfMonth()->timestamp, Carbon::now()->subDays(7)->timestamp);
-            $untilTs  = $monthCarbon->copy()->endOfMonth()->isFuture()
-                ? Carbon::now()->timestamp
-                : $monthCarbon->copy()->endOfMonth()->timestamp;
-
+            // ── 2. Posts for the period ────────────────────────────────────
+            $cacheKey = "fb_posts_{$cacheSuffix}";
             $postsRes = Cache::remember($cacheKey, 300, function () use ($sinceTs, $untilTs) {
                 $response = $this->fbHttp()->get("{$this->base}/me/posts", [
                     'fields'       => 'id,message,story,created_time,full_picture,permalink_url,reactions.summary(true),likes.summary(true),comments.summary(true),shares',
@@ -127,113 +134,134 @@ class FacebookAnalyticsController extends Controller
 
             $posts = collect($postsRes['data'] ?? [])->values()->all();
 
-            // ── 3. Page Insights for selected month ────────────────────────
-            // NOTE: page_impressions_unique was deprecated by Meta on June 15,
-            // 2026. Reach is now read from page_views_total instead. Because
-            // Graph API fails the WHOLE multi-metric request if any one metric
-            // in it is invalid, keeping the old metric name here would also
-            // silently zero out page_post_engagements even though that metric
-            // is still valid on its own.
-            $insightsCacheKey = "fb_insights_{$selectedMonth}";
-
-            $insightsData = Cache::remember($insightsCacheKey, 300, function () use ($since, $until) {
+            // ── 3. Page Insights for the period ────────────────────────────
+            // Query Views and Engagements independently so a deprecation/metric change in one
+            // cannot cause Graph API to fail or zero out the other.
+            
+            // 3a. Views Metric (tries page_media_view first, falls back to page_views_total)
+            $viewsCacheKey = "fb_views_{$cacheSuffix}";
+            $viewsData = Cache::remember($viewsCacheKey, 300, function () use ($since, $until) {
+                // Try Meta's unified Views metric first
                 $response = $this->fbHttp()->get("{$this->base}/me/insights", [
-                    'metric'       => 'page_views_total,page_post_engagements',
+                    'metric'       => 'page_media_view',
                     'period'       => 'day',
                     'since'        => $since,
                     'until'        => $until,
                     'access_token' => $this->token,
                 ]);
-                Log::debug('FB Insights Response', ['status' => $response->status(), 'body' => $response->json()]);
+                $json = $response->json();
+                if (!empty($json['data'])) {
+                    return $json;
+                }
+
+                // Try page_total_media_view_unique
+                $response = $this->fbHttp()->get("{$this->base}/me/insights", [
+                    'metric'       => 'page_total_media_view_unique',
+                    'period'       => 'day',
+                    'since'        => $since,
+                    'until'        => $until,
+                    'access_token' => $this->token,
+                ]);
+                $json = $response->json();
+                if (!empty($json['data'])) {
+                    return $json;
+                }
+
+                // Fallback to page_views_total
+                $response = $this->fbHttp()->get("{$this->base}/me/insights", [
+                    'metric'       => 'page_views_total',
+                    'period'       => 'day',
+                    'since'        => $since,
+                    'until'        => $until,
+                    'access_token' => $this->token,
+                ]);
                 return $response->json();
             });
 
-            if (isset($insightsData['error'])) {
-                // Don't let a stale/failed response get cached.
-                Cache::forget($insightsCacheKey);
-                Log::warning('FB Insights API Error', $insightsData['error']);
-            }
+            // 3b. Engagement Metric (page_post_engagements)
+            $engCacheKey = "fb_eng_{$cacheSuffix}";
+            $engData = Cache::remember($engCacheKey, 300, function () use ($since, $until) {
+                $response = $this->fbHttp()->get("{$this->base}/me/insights", [
+                    'metric'       => 'page_post_engagements',
+                    'period'       => 'day',
+                    'since'        => $since,
+                    'until'        => $until,
+                    'access_token' => $this->token,
+                ]);
+                return $response->json();
+            });
 
-            // Parse insights
+            // Parse Views & Engagements
             $totalReach      = 0;
             $totalEngagement = 0;
-            $dailyReach      = [];
-            $dailyEngagement = [];
+            $dailyReachMap   = [];
+            $dailyEngMap     = [];
 
-            if (!empty($insightsData['data'])) {
-                foreach ($insightsData['data'] as $metric) {
-                    $metricName = $metric['name'] ?? '';
-                    $values     = $metric['values'] ?? [];
-
-                    if ($metricName === 'page_views_total') {
-                        foreach ($values as $v) {
-                            $totalReach += $v['value'] ?? 0;
-                            $dailyReach[] = [
-                                'date'  => $v['end_time'] ?? '',
-                                'value' => $v['value'] ?? 0,
-                            ];
-                        }
-                    }
-
-                    if ($metricName === 'page_post_engagements') {
-                        foreach ($values as $v) {
-                            $totalEngagement += $v['value'] ?? 0;
-                            $dailyEngagement[] = [
-                                'date'  => $v['end_time'] ?? '',
-                                'value' => $v['value'] ?? 0,
-                            ];
-                        }
+            if (!empty($viewsData['data'])) {
+                foreach ($viewsData['data'] as $metric) {
+                    foreach ($metric['values'] ?? [] as $v) {
+                        $date = $v['end_time'] ?? '';
+                        $val  = $v['value'] ?? 0;
+                        $totalReach += $val;
+                        $dailyReachMap[$date] = ($dailyReachMap[$date] ?? 0) + $val;
                     }
                 }
             }
 
-            // ── 4. Aggregate post metrics (Monthly & 7-day) ────────────────
-            $totalLikes      = 0;
-            $totalComments   = 0;
-            $totalShares     = 0;
-            $totalLikes7d    = 0;
-            $totalComments7d = 0;
-            $totalShares7d   = 0;
-            $sevenDaysAgo    = Carbon::now()->subDays(7);
+            if (!empty($engData['data'])) {
+                foreach ($engData['data'] as $metric) {
+                    foreach ($metric['values'] ?? [] as $v) {
+                        $date = $v['end_time'] ?? '';
+                        $val  = $v['value'] ?? 0;
+                        $totalEngagement += $val;
+                        $dailyEngMap[$date] = ($dailyEngMap[$date] ?? 0) + $val;
+                    }
+                }
+            }
+
+            // Align daily arrays
+            $allDates = collect(array_keys($dailyReachMap))
+                ->merge(array_keys($dailyEngMap))
+                ->unique()
+                ->sort()
+                ->values();
+
+            $dailyReach = [];
+            $dailyEngagement = [];
+            foreach ($allDates as $d) {
+                $dailyReach[]      = ['date' => $d, 'value' => $dailyReachMap[$d] ?? 0];
+                $dailyEngagement[] = ['date' => $d, 'value' => $dailyEngMap[$d] ?? 0];
+            }
+
+            // ── 4. Aggregate post metrics ──────────────────────────────────
+            $totalLikes    = 0;
+            $totalComments = 0;
+            $totalShares   = 0;
 
             foreach ($posts as $p) {
                 $pReactions = $p['reactions']['summary']['total_count'] ?? $p['likes']['summary']['total_count'] ?? 0;
                 $pComments  = $p['comments']['summary']['total_count'] ?? 0;
                 $pShares    = $p['shares']['count']                    ?? 0;
 
-                $created = isset($p['created_time']) ? Carbon::parse($p['created_time']) : null;
-                $inSelectedMonth = $created && $created->format('Y-m') === $selectedMonth;
-
-                if ($inSelectedMonth) {
-                    $totalLikes    += $pReactions;
-                    $totalComments += $pComments;
-                    $totalShares   += $pShares;
-                }
-
-                if ($created && $created->gte($sevenDaysAgo)) {
-                    $totalLikes7d    += $pReactions;
-                    $totalComments7d += $pComments;
-                    $totalShares7d   += $pShares;
-                }
+                $totalLikes    += $pReactions;
+                $totalComments += $pComments;
+                $totalShares   += $pShares;
             }
-
-            $reach7d = collect($dailyReach)->take(-7)->sum('value');
-            $eng7d   = collect($dailyEngagement)->take(-7)->sum('value');
 
             $metrics = [
                 'page_fans'        => ['total' => $pageInfo['fan_count']       ?? 0, 'daily' => []],
                 'followers'        => ['total' => $pageInfo['followers_count'] ?? 0, 'daily' => []],
-                'total_reach'      => ['total' => $totalReach,      'total_7d' => $reach7d ?: $totalReach,      'daily' => $dailyReach],
-                'total_engagement' => ['total' => $totalEngagement, 'total_7d' => $eng7d   ?: $totalEngagement, 'daily' => $dailyEngagement],
-                'total_likes'      => ['total' => $totalLikes,      'total_7d' => $totalLikes7d,                'daily' => []],
-                'total_comments'   => ['total' => $totalComments,   'total_7d' => $totalComments7d,             'daily' => []],
-                'total_shares'     => ['total' => $totalShares,     'total_7d' => $totalShares7d,               'daily' => []],
+                'total_reach'      => ['total' => $totalReach,      'daily' => $dailyReach],
+                'total_engagement' => ['total' => $totalEngagement, 'daily' => $dailyEngagement],
+                'total_likes'      => ['total' => $totalLikes,      'daily' => []],
+                'total_comments'   => ['total' => $totalComments,   'daily' => []],
+                'total_shares'     => ['total' => $totalShares,     'daily' => []],
                 'total_posts'      => ['total' => count($posts),    'daily' => []],
             ];
 
             return [
                 'error'          => null,
-                'insights_error' => $insightsData['error']['message'] ?? null,
+                'insights_error' => $viewsData['error']['message'] ?? $engData['error']['message'] ?? null,
                 'pageInfo'       => $pageInfo,
                 'metrics'        => $metrics,
                 'posts'          => $posts,
@@ -331,10 +359,17 @@ class FacebookAnalyticsController extends Controller
         $selectedMonth = $request->query('month', Carbon::now()->format('Y-m'));
 
         Cache::forget('fb_page_info');
+        Cache::forget('fb_page_info_v2');
         Cache::forget("fb_posts_{$selectedMonth}");
+        Cache::forget("fb_posts_{$selectedMonth}_v2");
+        Cache::forget("fb_posts_{$selectedMonth}_v4");
         Cache::forget("fb_insights_{$selectedMonth}");
+        Cache::forget("fb_views_{$selectedMonth}_v4");
+        Cache::forget("fb_eng_{$selectedMonth}_v4");
+        Cache::forget('fb_posts_28d_v4');
+        Cache::forget('fb_views_28d_v4');
+        Cache::forget('fb_eng_28d_v4');
 
-        return redirect()->route('admin.analytics', ['month' => $selectedMonth])
-                         ->with('success', '✅ Facebook analytics refreshed!');
+        return redirect()->back()->with('success', '✅ Facebook analytics refreshed!');
     }
 }
