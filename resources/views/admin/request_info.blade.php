@@ -354,12 +354,24 @@
                     <div class="req-field-value">{{ $request->description }}</div>
                 </div>
                 @endif
-                @if($request->caption)
                 <div class="req-field">
-                    <div class="req-field-label">Requested Caption</div>
-                    <div class="req-field-value">{{ $request->caption }}</div>
+                    <div class="req-field-label" style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>Caption Draft</span>
+                        @if($request->caption)
+                        <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('caption-field').value);showToast('Caption copied!');" style="background:none;border:none;color:var(--navy);font-size:11px;font-weight:700;cursor:pointer;padding:0;">Copy</button>
+                        @endif
+                    </div>
+                    <form method="POST" action="{{ route('admin.requests.caption', $request->id) }}" style="margin-top:6px;">
+                        @csrf
+                        <textarea id="caption-field" name="caption" class="caption-textarea" style="width:100%;min-height:95px;padding:12px;border:1.5px solid rgba(0,0,0,0.1);border-radius:12px;font-size:13px;font-family:inherit;outline:none;resize:vertical;background:var(--cream);" placeholder="Enter or edit social media caption draft...">{{ old('caption', $request->caption) }}</textarea>
+                        <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+                            <button type="submit" class="btn-sm btn-sm--navy" style="padding:7px 16px;">
+                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                Save Caption Draft
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                @endif
                 @if(!empty($request->platforms_array))
                 <div class="req-field">
                     <div class="req-field-label">Target Platforms</div>

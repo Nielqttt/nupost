@@ -37,10 +37,21 @@ class RequestController extends Controller
             'posted'   => 'Posted',
         ];
 
-        $query = PostRequest::where('requester', $user_name);
+        $user_id   = session('user_id');
+        $query = PostRequest::where(function ($q) use ($user_name, $user_id) {
+            if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'user_id') && $user_id) {
+                $q->where('user_id', $user_id)->orWhere('requester', $user_name);
+            } else {
+                $q->where('requester', $user_name);
+            }
+        });
 
-        if ($filter !== 'all' && isset($status_map[$filter])) {
-            $query->where('status', $status_map[$filter]);
+        if ($filter !== 'all') {
+            if ($filter === 'pending') {
+                $query->whereIn('status', ['Pending Review', 'Pending']);
+            } elseif (isset($status_map[$filter])) {
+                $query->where('status', $status_map[$filter]);
+            }
         }
 
         if ($search !== '') {
@@ -117,7 +128,7 @@ class RequestController extends Controller
             $media_file = implode(',', $uploaded);
         }
 
-        $req = PostRequest::create([
+        $payload = [
             'title'          => $request->title,
             'requester'      => $user_name,
             'category'       => $request->category,
@@ -128,7 +139,17 @@ class RequestController extends Controller
             'caption'        => $request->caption,
             'preferred_date' => $request->post_date ?: null,
             'media_file'     => $media_file,
-        ]);
+        ];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'user_id') && session('user_id')) {
+            $payload['user_id'] = session('user_id');
+        }
+
+        $req = PostRequest::create($payload);
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'request_id') && empty($req->request_id)) {
+            $reqCode = 'REQ-' . str_pad((string) $req->id, 5, '0', STR_PAD_LEFT);
+            $req->update(['request_id' => $reqCode]);
+        }
 
         \App\Models\AuditLog::record('post_request_created');
 
