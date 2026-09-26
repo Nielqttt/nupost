@@ -400,21 +400,38 @@ class LegacyMobileApiController extends Controller
         $table = $this->requestsTable();
         $requester = (string) ($user->name ?? '');
 
-        $total = DB::table($table)->where('requester', $requester)->count();
-        $approved = DB::table($table)
-            ->where('requester', $requester)
-            ->where('status', 'Approved')
-            ->count();
-        $pending = DB::table($table)
-            ->where('requester', $requester)
-            ->where(function ($q) {
-                $q->where('status', 'Pending')
-                    ->orWhere('status', 'Pending Review')
-                    ->orWhere('status', 'Under Review')
-                    ->orWhereNull('status')
-                    ->orWhere('status', '');
-            })
-            ->count();
+        $isAdmin = (strtolower(trim((string) ($user->role ?? ''))) === 'admin');
+        if ($isAdmin) {
+            $total = DB::table($table)->count();
+            $approved = DB::table($table)
+                ->whereIn('status', ['Approved', 'Posted'])
+                ->count();
+            $pending = DB::table($table)
+                ->where(function ($q) {
+                    $q->where('status', 'Pending')
+                        ->orWhere('status', 'Pending Review')
+                        ->orWhere('status', 'Under Review')
+                        ->orWhereNull('status')
+                        ->orWhere('status', '');
+                })
+                ->count();
+        } else {
+            $total = DB::table($table)->where('requester', $requester)->count();
+            $approved = DB::table($table)
+                ->where('requester', $requester)
+                ->where('status', 'Approved')
+                ->count();
+            $pending = DB::table($table)
+                ->where('requester', $requester)
+                ->where(function ($q) {
+                    $q->where('status', 'Pending')
+                        ->orWhere('status', 'Pending Review')
+                        ->orWhere('status', 'Under Review')
+                        ->orWhereNull('status')
+                        ->orWhere('status', '');
+                })
+                ->count();
+        }
 
         return response()->json([
             'success' => true,
@@ -1389,15 +1406,25 @@ class LegacyMobileApiController extends Controller
         }
 
         if (Schema::hasTable('request_comments')) {
+            $selectCols = ['sender_name', 'message', 'created_at'];
+            if (Schema::hasColumn('request_comments', 'sender_role')) {
+                $selectCols[] = 'sender_role';
+            }
             $activities = $activities->merge(
                 DB::table('request_comments')
                     ->where('request_id', $requestId)
                     ->orderBy('created_at')
-                    ->get(['sender_name', 'message', 'created_at'])
+                    ->get($selectCols)
                     ->map(function ($c) {
+                        $role = strtolower(trim((string) ($c->sender_role ?? '')));
+                        $name = trim((string) ($c->sender_name ?? ''));
+                        if ($role === '') {
+                            $role = (stripos($name, 'admin') !== false) ? 'admin' : 'requestor';
+                        }
                         return [
-                            'actor' => (string) ($c->sender_name ?? ''),
-                            'action' => 'Internal note: ' . (string) ($c->message ?? ''),
+                            'actor' => $name !== '' ? $name : ($role === 'admin' ? 'System Admin' : 'Requestor'),
+                            'role' => $role,
+                            'action' => (string) ($c->message ?? ''),
                             'created_at' => (string) ($c->created_at ?? ''),
                         ];
                     })
@@ -1412,7 +1439,7 @@ class LegacyMobileApiController extends Controller
         $baseUrl = url('/');
         $mediaUrls = array_map(function($file) use ($baseUrl) {
             if (str_starts_with($file, 'http')) return $file;
-            return rtrim($baseUrl, '/') . '/uploads/' . $file;
+            return rtrim($baseUrl, '/') . '/api/media.php?file=' . urlencode($file);
         }, $mediaFiles);
 
         return response()->json([
@@ -1440,6 +1467,69 @@ class LegacyMobileApiController extends Controller
                 'activities' => $activities,
             ],
         ], 200);
+    }
+
+    public function getMedia(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
+        $rawFile = (string) ($request->query('file') ?? $request->route('file') ?? '');
+        $filename = rtrim(trim(basename($rawFile)), '.');
+        if ($filename === '') {
+            return response()->json(['success' => false, 'message' => 'File name required'], 400);
+        }
+
+        $candidates = [
+            public_path('uploads/' . $filename),
+            public_path('uploads/' . $filename . '.png'),
+            public_path('uploads/' . $filename . '.jpg'),
+            public_path('uploads/' . $filename . '.jpeg'),
+            public_path('uploads/' . $filename . '.jfif'),
+            storage_path('app/public/uploads/' . $filename),
+            storage_path('app/public/uploads/' . $filename . '.png'),
+            storage_path('app/public/uploads/' . $filename . '.jpg'),
+            storage_path('app/public/uploads/' . $filename . '.jpeg'),
+        ];
+
+        $foundPath = null;
+        foreach ($candidates as $cand) {
+            if (file_exists($cand) && !is_dir($cand)) {
+                $foundPath = $cand;
+                break;
+            }
+        }
+
+        if (!$foundPath) {
+            $matches = glob(public_path('uploads/' . $filename . '*'));
+            if (!empty($matches) && file_exists($matches[0])) {
+                $foundPath = $matches[0];
+            }
+        }
+
+        if (!$foundPath) {
+            $cleanName = htmlspecialchars(substr($filename, 0, 36));
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">'
+                . '<rect width="600" height="400" fill="#0D1527" rx="16"/>'
+                . '<circle cx="300" cy="150" r="50" fill="#1A2744"/>'
+                . '<path d="M275 175l18-24 14 18 20-30 18 36z" fill="#3B82F6"/>'
+                . '<circle cx="330" cy="130" r="8" fill="#FBBF24"/>'
+                . '<text x="300" y="240" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#F8FAFC" text-anchor="middle">Attached Media Asset</text>'
+                . '<text x="300" y="270" font-family="system-ui, sans-serif" font-size="14" fill="#94A3B8" text-anchor="middle">' . $cleanName . '</text>'
+                . '<rect x="230" y="295" width="140" height="28" rx="14" fill="#1E2B45"/>'
+                . '<text x="300" y="314" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#FBBF24" text-anchor="middle">UAT ATTACHMENT</text>'
+                . '</svg>';
+
+            return response($svg, 200, [
+                'Content-Type' => 'image/svg+xml',
+                'Access-Control-Allow-Origin' => '*',
+                'Cache-Control' => 'public, max-age=3600',
+            ]);
+        }
+
+        $mime = mime_content_type($foundPath) ?: 'application/octet-stream';
+        return response()->file($foundPath, [
+            'Content-Type' => $mime,
+            'Access-Control-Allow-Origin' => '*',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
     }
 
     public function messageThreads(Request $request): JsonResponse
@@ -1474,10 +1564,15 @@ class LegacyMobileApiController extends Controller
             ], 200);
         }
 
+        $userRole = strtolower(trim((string) ($user->role ?? 'requestor')));
+        $isAdmin = ($userRole === 'admin');
+
         $table = $this->requestsTable();
-        $requests = DB::table($table)
-            ->where('requester', (string) ($user->name ?? ''))
-            ->get(['id', 'request_id', 'title', 'status']);
+        $query = DB::table($table);
+        if (!$isAdmin) {
+            $query->where('requester', (string) ($user->name ?? ''));
+        }
+        $requests = $query->get(['id', 'request_id', 'title', 'status', 'requester', 'category']);
 
         $threads = [];
         $totalUnread = 0;
@@ -1489,17 +1584,19 @@ class LegacyMobileApiController extends Controller
                 ->orderByDesc('id')
                 ->first(['id', 'sender_role', 'sender_name', 'message', 'created_at']);
 
+            // Threads MUST only appear if at least one message was started by admin or requester
             if (!$latest) {
                 continue;
             }
 
             $unreadCount = 0;
-            $totalUnread = 0; // App will track this locally now
 
             $threads[] = [
                 'request_id' => (int) $req->id,
                 'request_code' => (string) ($req->request_id ?? ''),
                 'request_title' => (string) ($req->title ?? ''),
+                'requester' => (string) ($req->requester ?? ''),
+                'category' => (string) ($req->category ?? ''),
                 'request_status' => trim((string) ($req->status ?? '')) !== ''
                     ? (string) $req->status
                     : 'Pending',
@@ -1558,11 +1655,15 @@ class LegacyMobileApiController extends Controller
             ], 200);
         }
 
+        $userRole = strtolower(trim((string) ($user->role ?? 'requestor')));
+        $isAdmin = ($userRole === 'admin');
+
         $table = $this->requestsTable();
-        $req = DB::table($table)
-            ->where('id', $requestId)
-            ->where('requester', (string) ($user->name ?? ''))
-            ->first(['id', 'request_id', 'title', 'status']);
+        $query = DB::table($table)->where('id', $requestId);
+        if (!$isAdmin) {
+            $query->where('requester', (string) ($user->name ?? ''));
+        }
+        $req = $query->first(['id', 'request_id', 'title', 'status', 'requester', 'category']);
 
         if (!$req) {
             return response()->json([
@@ -1594,6 +1695,8 @@ class LegacyMobileApiController extends Controller
                     'id' => (int) $req->id,
                     'request_id' => (string) ($req->request_id ?? ''),
                     'title' => (string) ($req->title ?? ''),
+                    'requester' => (string) ($req->requester ?? ''),
+                    'category' => (string) ($req->category ?? ''),
                     'status' => trim((string) ($req->status ?? '')) !== ''
                         ? (string) $req->status
                         : 'Pending',
@@ -1635,11 +1738,15 @@ class LegacyMobileApiController extends Controller
             ], 500);
         }
 
+        $userRole = strtolower(trim((string) ($user->role ?? 'requestor')));
+        $isAdmin = ($userRole === 'admin');
+
         $table = $this->requestsTable();
-        $req = DB::table($table)
-            ->where('id', $requestId)
-            ->where('requester', (string) ($user->name ?? ''))
-            ->first(['id', 'title']);
+        $query = DB::table($table)->where('id', $requestId);
+        if (!$isAdmin) {
+            $query->where('requester', (string) ($user->name ?? ''));
+        }
+        $req = $query->first(['id', 'title', 'requester']);
 
         if (!$req) {
             return response()->json([
@@ -1648,10 +1755,16 @@ class LegacyMobileApiController extends Controller
             ], 404);
         }
 
+        $senderRole = ($isAdmin) ? 'admin' : 'requestor';
+        $senderName = trim((string) ($user->name ?? ''));
+        if ($senderName === '') {
+            $senderName = ($isAdmin) ? 'System Administrator' : 'Requestor';
+        }
+
         $payload = [
             'request_id' => $requestId,
-            'sender_role' => 'requestor',
-            'sender_name' => (string) ($user->name ?? ''),
+            'sender_role' => $senderRole,
+            'sender_name' => $senderName,
             'message' => $message,
             'created_at' => now(),
         ];
@@ -1665,8 +1778,8 @@ class LegacyMobileApiController extends Controller
         if (Schema::hasTable('request_activity')) {
             $activity = [
                 'request_id' => $requestId,
-                'actor' => (string) ($user->name ?? ''),
-                'action' => 'Requestor message: ' . $message,
+                'actor' => $senderName,
+                'action' => ($senderRole === 'admin' ? 'Admin note: ' : 'Requestor message: ') . $message,
                 'created_at' => now(),
             ];
 
@@ -1677,14 +1790,73 @@ class LegacyMobileApiController extends Controller
             DB::table('request_activity')->insert($activity);
         }
 
+        if (Schema::hasTable('notifications')) {
+            $msgPreview = mb_strimwidth($message, 0, 80, '...');
+            $reqTitle = (string) ($req->title ?? 'Request');
+
+            if ($isAdmin) {
+                // Admin sent message -> notify requester
+                $recipientUserId = DB::table('users')->where('name', (string) ($req->requester ?? ''))->value('id');
+                if (!$recipientUserId && Schema::hasColumn($table, 'user_id')) {
+                    $recipientUserId = DB::table($table)->where('id', $requestId)->value('user_id');
+                }
+                if ($recipientUserId && (int)$recipientUserId > 0) {
+                    $notif = [
+                        'user_id' => (int) $recipientUserId,
+                        'title' => 'Admin replied on "' . $reqTitle . '"',
+                        'message' => $msgPreview,
+                        'type' => 'message',
+                        'is_read' => 0,
+                        'created_at' => now(),
+                    ];
+                    if (Schema::hasColumn('notifications', 'request_id')) {
+                        $notif['request_id'] = $requestId;
+                    }
+                    if (Schema::hasColumn('notifications', 'request_status')) {
+                        $notif['request_status'] = $req->status ?? 'Under Review';
+                    }
+                    if (Schema::hasColumn('notifications', 'updated_at')) {
+                        $notif['updated_at'] = now();
+                    }
+                    DB::table('notifications')->insert($notif);
+                }
+            } else {
+                // Requester sent message -> notify all admins
+                $adminIds = DB::table('users')
+                    ->whereRaw('LOWER(TRIM(role)) = ?', ['admin'])
+                    ->pluck('id');
+
+                foreach ($adminIds as $aId) {
+                    $notif = [
+                        'user_id' => (int) $aId,
+                        'title' => $senderName . ' sent a message',
+                        'message' => '"' . $reqTitle . '": ' . $msgPreview,
+                        'type' => 'message',
+                        'is_read' => 0,
+                        'created_at' => now(),
+                    ];
+                    if (Schema::hasColumn('notifications', 'request_id')) {
+                        $notif['request_id'] = $requestId;
+                    }
+                    if (Schema::hasColumn('notifications', 'request_status')) {
+                        $notif['request_status'] = $req->status ?? 'Pending Review';
+                    }
+                    if (Schema::hasColumn('notifications', 'updated_at')) {
+                        $notif['updated_at'] = now();
+                    }
+                    DB::table('notifications')->insert($notif);
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Message sent',
             'data' => [
                 'id' => $newId,
                 'request_id' => $requestId,
-                'sender_role' => 'requestor',
-                'sender_name' => (string) ($user->name ?? ''),
+                'sender_role' => $senderRole,
+                'sender_name' => $senderName,
                 'message' => $message,
                 'created_at' => now()->toDateTimeString(),
             ],
