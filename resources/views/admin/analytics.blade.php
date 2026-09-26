@@ -633,7 +633,7 @@
             ],
             [
                 'key'   => 'total_likes',
-                'label' => 'Post Likes',
+                'label' => 'Reactions',
                 'icon'  => '<circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
                 'color' => '#f59e0b',
                 'bg'    => '#fef3c7',
@@ -742,7 +742,7 @@
                             <th>Post</th>
                             <th>
                                 <span style="display:flex;align-items:center;gap:4px;">
-                                    <span style="color:#1877f2;">♥</span> Likes
+                                    <span style="color:#1877f2;">♥</span> Reactions
                                 </span>
                             </th>
                             <th>
@@ -762,7 +762,7 @@
                     <tbody>
                     @foreach($fb['posts'] as $post)
                     @php
-                        $likes    = $post['likes']['summary']['total_count']    ?? 0;
+                        $likes    = $post['reactions']['summary']['total_count'] ?? $post['likes']['summary']['total_count'] ?? 0;
                         $comments = $post['comments']['summary']['total_count'] ?? 0;
                         $shares   = $post['shares']['count']                    ?? 0;
                     @endphp
@@ -841,7 +841,7 @@
     </div>
 
     <div class="fb-metric-grid">
-        @foreach(['Total Reach','Engagements','Post Likes','Comments','Shares','Posts'] as $lbl)
+        @foreach(['Total Reach','Engagements','Reactions','Comments','Shares','Posts'] as $lbl)
         <div class="fb-ph-card">
             <div style="font-size:12px;font-weight:600;color:var(--ink-soft);">{{ $lbl }}</div>
             <div class="fb-ph-block">

@@ -881,7 +881,7 @@ body { background: var(--cream) !important; }
                     $fb_dash_items = [
                         ['key'=>'total_reach',      'label'=>'Reach (7d)',        'c'=>'#1877f2','bg'=>'#dbeafe','path'=>'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'],
                         ['key'=>'total_engagement',  'label'=>'Engagements (7d)', 'c'=>'#e1306c','bg'=>'#fce7f3','path'=>'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'],
-                        ['key'=>'total_likes',       'label'=>'Likes (7d)',       'c'=>'#f59e0b','bg'=>'#fef3c7','path'=>'<circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>'],
+                        ['key'=>'total_likes',       'label'=>'Reactions (7d)',       'c'=>'#f59e0b','bg'=>'#fef3c7','path'=>'<circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>'],
                         ['key'=>'total_shares',      'label'=>'Shares (7d)',      'c'=>'#10b981','bg'=>'#d1fae5','path'=>'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>'],
                     ];
                 @endphp
