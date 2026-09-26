@@ -128,19 +128,31 @@ class FacebookAnalyticsController extends Controller
             $posts = collect($postsRes['data'] ?? [])->values()->all();
 
             // ── 3. Page Insights for selected month ────────────────────────
+            // NOTE: page_impressions_unique was deprecated by Meta on June 15,
+            // 2026. Reach is now read from page_views_total instead. Because
+            // Graph API fails the WHOLE multi-metric request if any one metric
+            // in it is invalid, keeping the old metric name here would also
+            // silently zero out page_post_engagements even though that metric
+            // is still valid on its own.
             $insightsCacheKey = "fb_insights_{$selectedMonth}";
 
             $insightsData = Cache::remember($insightsCacheKey, 300, function () use ($since, $until) {
                 $response = $this->fbHttp()->get("{$this->base}/me/insights", [
-                    'metric'       => 'page_impressions_unique,page_post_engagements',
+                    'metric'       => 'page_views_total,page_post_engagements',
                     'period'       => 'day',
                     'since'        => $since,
                     'until'        => $until,
                     'access_token' => $this->token,
                 ]);
-                Log::debug('FB Insights Response', ['status' => $response->status()]);
+                Log::debug('FB Insights Response', ['status' => $response->status(), 'body' => $response->json()]);
                 return $response->json();
             });
+
+            if (isset($insightsData['error'])) {
+                // Don't let a stale/failed response get cached.
+                Cache::forget($insightsCacheKey);
+                Log::warning('FB Insights API Error', $insightsData['error']);
+            }
 
             // Parse insights
             $totalReach      = 0;
@@ -153,7 +165,7 @@ class FacebookAnalyticsController extends Controller
                     $metricName = $metric['name'] ?? '';
                     $values     = $metric['values'] ?? [];
 
-                    if ($metricName === 'page_impressions_unique') {
+                    if ($metricName === 'page_views_total') {
                         foreach ($values as $v) {
                             $totalReach += $v['value'] ?? 0;
                             $dailyReach[] = [
@@ -197,10 +209,11 @@ class FacebookAnalyticsController extends Controller
             ];
 
             return [
-                'error'    => null,
-                'pageInfo' => $pageInfo,
-                'metrics'  => $metrics,
-                'posts'    => $posts,
+                'error'          => null,
+                'insights_error' => $insightsData['error']['message'] ?? null,
+                'pageInfo'       => $pageInfo,
+                'metrics'        => $metrics,
+                'posts'          => $posts,
             ];
 
         } catch (\Exception $e) {
@@ -256,7 +269,7 @@ class FacebookAnalyticsController extends Controller
             fputcsv($handle, []);
 
             // ── Daily reach ──────────────────────────────────────────────
-            fputcsv($handle, ['Daily Reach (Impressions)']);
+            fputcsv($handle, ['Daily Reach (Views)']);
             fputcsv($handle, ['Date', 'Reach', 'Engagements']);
             $reachByDate      = collect($fb['metrics']['total_reach']['daily'] ?? [])->keyBy('date');
             $engByDate        = collect($fb['metrics']['total_engagement']['daily'] ?? [])->keyBy('date');
