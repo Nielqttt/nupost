@@ -135,7 +135,13 @@ class RequestManagementController extends Controller
             ]);
         }
 
-        $user = User::where('name', $req->requester)->first();
+        $user = null;
+        if (!empty($req->user_id)) {
+            $user = User::find($req->user_id);
+        }
+        if (!$user && !empty($req->requester)) {
+            $user = User::where('name', $req->requester)->first();
+        }
         if ($user) {
             $notif_data = $this->getNotifData($new_status, $req->title, $note);
             Notification::create([
