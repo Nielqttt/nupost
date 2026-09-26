@@ -866,7 +866,16 @@ body { background: var(--cream) !important; }
                     <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                 </div>
                 <div style="flex:1;">
-                    <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px;">{{ $fb['pageInfo']['name'] ?? 'Facebook Page' }}</div>
+                    <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px;">
+                        @if(!empty($fb['pageInfo']['link']))
+                            <a href="{{ $fb['pageInfo']['link'] }}" target="_blank" style="color:white;text-decoration:none;display:inline-flex;align-items:center;gap:6px;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                {{ $fb['pageInfo']['name'] ?? 'Facebook Page' }}
+                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            </a>
+                        @else
+                            {{ $fb['pageInfo']['name'] ?? 'Facebook Page' }}
+                        @endif
+                    </div>
                     <div style="font-size:12.5px;color:rgba(255,255,255,0.6);">
                         Likes: <strong style="color:rgba(255,255,255,0.9);">{{ number_format($fb['pageInfo']['fan_count'] ?? 0) }}</strong> &nbsp;·&nbsp;
                         Followers: <strong style="color:rgba(255,255,255,0.9);">{{ number_format($fb['pageInfo']['followers_count'] ?? 0) }}</strong>
@@ -892,7 +901,7 @@ body { background: var(--cream) !important; }
                     </div>
                     <div class="meta-mini__label">{{ $fi['label'] }}</div>
                     <div style="font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;padding:12px 0;">
-                        {{ number_format($fb['metrics'][$fi['key']]['total'] ?? 0) }}
+                        {{ number_format($fb['metrics'][$fi['key']]['total_7d'] ?? $fb['metrics'][$fi['key']]['total'] ?? 0) }}
                     </div>
                 </div>
                 @endforeach

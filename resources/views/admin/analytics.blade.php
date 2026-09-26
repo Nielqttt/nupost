@@ -572,7 +572,16 @@
                 <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
             </div>
             <div style="flex:1;">
-                <div class="fb-banner__title">{{ $fb['pageInfo']['name'] ?? 'Facebook Page' }}</div>
+                <div class="fb-banner__title">
+                    @if(!empty($fb['pageInfo']['link']))
+                        <a href="{{ $fb['pageInfo']['link'] }}" target="_blank" style="color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                            {{ $fb['pageInfo']['name'] ?? 'Facebook Page' }}
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                    @else
+                        {{ $fb['pageInfo']['name'] ?? 'Facebook Page' }}
+                    @endif
+                </div>
                 <div class="fb-banner__sub">
                     Likes: <strong>{{ number_format($fb['pageInfo']['fan_count'] ?? 0) }}</strong>
                     &nbsp;·&nbsp;

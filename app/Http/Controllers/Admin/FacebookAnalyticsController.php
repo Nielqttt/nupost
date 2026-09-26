@@ -101,16 +101,16 @@ class FacebookAnalyticsController extends Controller
                 throw new \Exception($pageInfo['error']['message'] ?? 'Unknown Facebook API error');
             }
 
-            // ── 2. Posts for selected month ────────────────────────────────
-            $cacheKey = "fb_posts_{$selectedMonth}";
-            $sinceTs  = $monthCarbon->copy()->startOfMonth()->timestamp;
+            // ── 2. Posts for selected month + past 7 days ─────────────────
+            $cacheKey = "fb_posts_{$selectedMonth}_v2";
+            $sinceTs  = min($monthCarbon->copy()->startOfMonth()->timestamp, Carbon::now()->subDays(7)->timestamp);
             $untilTs  = $monthCarbon->copy()->endOfMonth()->isFuture()
                 ? Carbon::now()->timestamp
                 : $monthCarbon->copy()->endOfMonth()->timestamp;
 
             $postsRes = Cache::remember($cacheKey, 300, function () use ($sinceTs, $untilTs) {
                 $response = $this->fbHttp()->get("{$this->base}/me/posts", [
-                    'fields'       => 'id,message,story,created_time,full_picture,permalink_url,likes.summary(true),comments.summary(true),shares',
+                    'fields'       => 'id,message,story,created_time,full_picture,permalink_url,reactions.summary(true),likes.summary(true),comments.summary(true),shares',
                     'since'        => $sinceTs,
                     'until'        => $untilTs,
                     'limit'        => 100,
@@ -187,24 +187,47 @@ class FacebookAnalyticsController extends Controller
                 }
             }
 
-            // ── 4. Aggregate post metrics ──────────────────────────────────
-            $totalLikes    = 0;
-            $totalComments = 0;
-            $totalShares   = 0;
+            // ── 4. Aggregate post metrics (Monthly & 7-day) ────────────────
+            $totalLikes      = 0;
+            $totalComments   = 0;
+            $totalShares     = 0;
+            $totalLikes7d    = 0;
+            $totalComments7d = 0;
+            $totalShares7d   = 0;
+            $sevenDaysAgo    = Carbon::now()->subDays(7);
+
             foreach ($posts as $p) {
-                $totalLikes    += $p['likes']['summary']['total_count']    ?? 0;
-                $totalComments += $p['comments']['summary']['total_count'] ?? 0;
-                $totalShares   += $p['shares']['count']                    ?? 0;
+                $pReactions = $p['reactions']['summary']['total_count'] ?? $p['likes']['summary']['total_count'] ?? 0;
+                $pComments  = $p['comments']['summary']['total_count'] ?? 0;
+                $pShares    = $p['shares']['count']                    ?? 0;
+
+                $created = isset($p['created_time']) ? Carbon::parse($p['created_time']) : null;
+                $inSelectedMonth = $created && $created->format('Y-m') === $selectedMonth;
+
+                if ($inSelectedMonth) {
+                    $totalLikes    += $pReactions;
+                    $totalComments += $pComments;
+                    $totalShares   += $pShares;
+                }
+
+                if ($created && $created->gte($sevenDaysAgo)) {
+                    $totalLikes7d    += $pReactions;
+                    $totalComments7d += $pComments;
+                    $totalShares7d   += $pShares;
+                }
             }
+
+            $reach7d = collect($dailyReach)->take(-7)->sum('value');
+            $eng7d   = collect($dailyEngagement)->take(-7)->sum('value');
 
             $metrics = [
                 'page_fans'        => ['total' => $pageInfo['fan_count']       ?? 0, 'daily' => []],
                 'followers'        => ['total' => $pageInfo['followers_count'] ?? 0, 'daily' => []],
-                'total_reach'      => ['total' => $totalReach,      'daily' => $dailyReach],
-                'total_engagement' => ['total' => $totalEngagement, 'daily' => $dailyEngagement],
-                'total_likes'      => ['total' => $totalLikes,      'daily' => []],
-                'total_comments'   => ['total' => $totalComments,   'daily' => []],
-                'total_shares'     => ['total' => $totalShares,     'daily' => []],
+                'total_reach'      => ['total' => $totalReach,      'total_7d' => $reach7d ?: $totalReach,      'daily' => $dailyReach],
+                'total_engagement' => ['total' => $totalEngagement, 'total_7d' => $eng7d   ?: $totalEngagement, 'daily' => $dailyEngagement],
+                'total_likes'      => ['total' => $totalLikes,      'total_7d' => $totalLikes7d,                'daily' => []],
+                'total_comments'   => ['total' => $totalComments,   'total_7d' => $totalComments7d,             'daily' => []],
+                'total_shares'     => ['total' => $totalShares,     'total_7d' => $totalShares7d,               'daily' => []],
                 'total_posts'      => ['total' => count($posts),    'daily' => []],
             ];
 
