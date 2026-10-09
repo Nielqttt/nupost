@@ -275,6 +275,10 @@ td { padding:13px 16px; font-size:12.5px; vertical-align:middle; }
                     <td class="date-text">{{ $req->created_at->format('M j, Y') }}</td>
                     <td>
                         <div class="action-wrap">
+                            <a href="{{ route('admin.requests.show', $req->id) }}" class="btn-chat" style="text-decoration:none;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;font-weight:600;">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                View
+                            </a>
                             <form method="POST" action="{{ route('admin.requests.status') }}" style="display:flex;align-items:center;gap:5px;" onsubmit="confirmStatus(event, this)">
                                 @csrf
                                 <input type="hidden" name="request_id" value="{{ $req->id }}">
@@ -405,6 +409,7 @@ filterForm.addEventListener('submit', function () {
 
 // ── CHAT PANEL ──────────────────────────────────────────────────
 let cid = null;
+let chatPollTimer = null;
 function openChat(reqId, title, status, requester) {
     cid = reqId;
     document.getElementById('panel-req-title').textContent    = title;
@@ -414,16 +419,23 @@ function openChat(reqId, title, status, requester) {
     document.getElementById('panel-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
     loadMessages(reqId);
+    clearInterval(chatPollTimer);
+    chatPollTimer = setInterval(() => {
+        if (cid) loadMessages(cid, true);
+    }, 2000);
 }
 function closeChat() {
+    clearInterval(chatPollTimer);
     document.getElementById('chat-panel').classList.remove('open');
     document.getElementById('panel-overlay').classList.remove('open');
     document.body.style.overflow = '';
     cid = null;
 }
-function loadMessages(reqId) {
+function loadMessages(reqId, silent = false) {
     const box = document.getElementById('chat-messages');
-    box.innerHTML = '<div class="chat-empty-state"><p>Loading…</p></div>';
+    if (!silent) {
+        box.innerHTML = '<div class="chat-empty-state"><p>Loading…</p></div>';
+    }
     fetch(`/admin/requests/${reqId}/comments`, {
         headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
     })
@@ -434,7 +446,7 @@ function loadMessages(reqId) {
             box.innerHTML = '<div class="chat-empty-state"><svg width="36" height="36" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>No messages yet!</p></div>';
             return;
         }
-        box.innerHTML = msgs.map(c => {
+        const rendered = msgs.map(c => {
             const a = c.sender_role === 'admin';
             return `<div class="bubble-row ${a ? 'bubble-row--admin' : ''}">
                 <div class="bubble-av ${a ? 'bubble-av--admin' : 'bubble-av--requestor'}">${esc(c.sender_name.charAt(0).toUpperCase())}</div>
@@ -443,9 +455,13 @@ function loadMessages(reqId) {
                 </div>
             </div>`;
         }).join('');
-        box.scrollTop = box.scrollHeight;
+        if (box.innerHTML !== rendered) {
+            const shouldScroll = box.scrollTop + box.clientHeight >= box.scrollHeight - 60 || !silent;
+            box.innerHTML = rendered;
+            if (shouldScroll) box.scrollTop = box.scrollHeight;
+        }
     })
-    .catch(() => { box.innerHTML = '<div class="chat-empty-state"><p>Could not load messages.</p></div>'; });
+    .catch(() => { if (!silent) box.innerHTML = '<div class="chat-empty-state"><p>Could not load messages.</p></div>'; });
 }
 async function sendMessage() {
     const input = document.getElementById('chat-input');

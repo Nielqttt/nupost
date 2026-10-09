@@ -123,6 +123,7 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     Route::get('/requests/{id}/comments',   [RequestManagementController::class, 'getComments'])->name('requests.comments');
     Route::post('/requests/{id}/generate-caption', [RequestManagementController::class, 'generateCaption'])->name('requests.generate-caption');
     Route::post('/requests/{id}/save-caption',     [RequestManagementController::class, 'saveCaption'])->name('requests.save-caption');
+    Route::post('/requests/{id}/caption',          [RequestManagementController::class, 'updateCaption'])->name('requests.caption');
     Route::get('/requests/{id}/download/{filename}', [RequestManagementController::class, 'downloadFile'])->name('requests.download')->where('filename', '.*');
 });
 

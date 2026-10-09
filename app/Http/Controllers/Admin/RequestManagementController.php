@@ -22,7 +22,7 @@ class RequestManagementController extends Controller
         $filter = $request->input('filter', 'all');
         $sort   = $request->input('sort', 'newest');
 
-        $pending  = PostRequest::where('status', 'Pending Review')->count();
+        $pending  = PostRequest::whereIn('status', ['Pending', 'Pending Review'])->count();
         $review   = PostRequest::where('status', 'Under Review')->count();
         $approved = PostRequest::where('status', 'Approved')->count();
         $posted   = PostRequest::where('status', 'Posted')->count();
@@ -31,23 +31,32 @@ class RequestManagementController extends Controller
         $query = PostRequest::query();
 
         if ($filter !== 'all') {
-            $status_map = [
-                'pending'  => 'Pending Review',
-                'review'   => 'Under Review',
-                'approved' => 'Approved',
-                'posted'   => 'Posted',
-                'rejected' => 'Rejected',
-            ];
-            if (isset($status_map[$filter])) {
-                $query->where('status', $status_map[$filter]);
+            if ($filter === 'pending') {
+                $query->whereIn('status', ['Pending', 'Pending Review']);
+            } else {
+                $status_map = [
+                    'review'   => 'Under Review',
+                    'approved' => 'Approved',
+                    'posted'   => 'Posted',
+                    'rejected' => 'Rejected',
+                ];
+                if (isset($status_map[$filter])) {
+                    $query->where('status', $status_map[$filter]);
+                }
             }
         }
 
         if ($search !== '') {
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = ltrim($search, '#');
+            $query->where(function ($q) use ($search, $cleanSearch) {
                 $q->where('title', 'like', "%$search%")
                   ->orWhere('requester', 'like', "%$search%")
-                  ->orWhere('category', 'like', "%$search%");
+                  ->orWhere('category', 'like', "%$search%")
+                  ->orWhere('description', 'like', "%$search%")
+                  ->orWhere('platform', 'like', "%$search%")
+                  ->orWhere('priority', 'like', "%$search%")
+                  ->orWhere('request_id', 'like', "%$search%")
+                  ->orWhere('id', 'like', "%$cleanSearch%");
             });
         }
 
@@ -126,7 +135,13 @@ class RequestManagementController extends Controller
             ]);
         }
 
-        $user = User::where('name', $req->requester)->first();
+        $user = null;
+        if (!empty($req->user_id)) {
+            $user = User::find($req->user_id);
+        }
+        if (!$user && !empty($req->requester)) {
+            $user = User::where('name', $req->requester)->first();
+        }
         if ($user) {
             $notif_data = $this->getNotifData($new_status, $req->title, $note);
             Notification::create([
@@ -153,12 +168,45 @@ class RequestManagementController extends Controller
             }
         }
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Status updated to $new_status.",
+                'status'  => $new_status,
+            ]);
+        }
+
         $redirect = $request->input('redirect_to');
         if ($redirect) {
             return redirect($redirect)->with('success', "Status updated to $new_status.");
         }
 
         return back()->with('success', "Status updated to $new_status.");
+    }
+
+    public function updateCaption(Request $request, $id)
+    {
+        $req = PostRequest::findOrFail($id);
+        $caption = trim($request->input('caption', ''));
+
+        $req->update(['caption' => $caption]);
+
+        $adminEmail = session('admin_name', session('admin_email', 'Admin'));
+        RequestActivity::create([
+            'request_id' => $id,
+            'actor'      => $adminEmail,
+            'action'     => "Admin updated the caption draft",
+        ]);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Caption draft updated successfully.',
+                'caption' => $caption,
+            ]);
+        }
+
+        return back()->with('success', 'Caption draft updated successfully.');
     }
 
     // ── AI CAPTION GENERATION (GEMINI) ───────────────────────────

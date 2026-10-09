@@ -16,11 +16,11 @@ class LegacyMobileApiController extends Controller
 {
     private function requestsTable(): string
     {
-        if (Schema::hasTable('requests')) {
-            return 'requests';
+        if (Schema::hasTable('post_requests')) {
+            return 'post_requests';
         }
 
-        return 'post_requests';
+        return 'requests';
     }
 
     private function ensureRequestsTableExists(): ?JsonResponse
@@ -147,14 +147,25 @@ class LegacyMobileApiController extends Controller
 
     public function register(Request $request): JsonResponse
     {
+        $firstName = trim((string) $request->input('first_name', ''));
+        $lastName = trim((string) $request->input('last_name', ''));
         $name = trim((string) $request->input('name', ''));
+
+        if ($firstName !== '' && $lastName !== '') {
+            $name = "$firstName $lastName";
+        } elseif ($name !== '' && $firstName === '') {
+            $parts = explode(' ', $name, 2);
+            $firstName = $parts[0];
+            $lastName = $parts[1] ?? '';
+        }
+
         $email = trim((string) $request->input('email', ''));
         $password = trim((string) $request->input('password', ''));
 
         if ($name === '' || $email === '' || $password === '') {
             return response()->json([
                 'success' => false,
-                'message' => 'Name, email, and password are required',
+                'message' => 'First name, last name, email, and password are required',
             ], 422);
         }
 
@@ -185,6 +196,14 @@ class LegacyMobileApiController extends Controller
             'email' => $email,
             'password' => Hash::make($password),
         ];
+
+        if (Schema::hasColumn('users', 'first_name')) {
+            $payload['first_name'] = $firstName;
+        }
+
+        if (Schema::hasColumn('users', 'last_name')) {
+            $payload['last_name'] = $lastName;
+        }
 
         if (Schema::hasColumn('users', 'is_verified')) {
             $payload['is_verified'] = 0;
@@ -404,7 +423,10 @@ class LegacyMobileApiController extends Controller
         if ($isAdmin) {
             $total = DB::table($table)->count();
             $approved = DB::table($table)
-                ->whereIn('status', ['Approved', 'Posted'])
+                ->where('status', 'Approved')
+                ->count();
+            $posted = DB::table($table)
+                ->where('status', 'Posted')
                 ->count();
             $pending = DB::table($table)
                 ->where(function ($q) {
@@ -416,13 +438,26 @@ class LegacyMobileApiController extends Controller
                 })
                 ->count();
         } else {
-            $total = DB::table($table)->where('requester', $requester)->count();
+            $userFilter = function ($q) use ($user, $userId, $table) {
+                if (Schema::hasColumn($table, 'user_id')) {
+                    $q->where('user_id', $userId)
+                      ->orWhere('requester', (string) ($user->name ?? ''));
+                } else {
+                    $q->where('requester', (string) ($user->name ?? ''));
+                }
+            };
+
+            $total = DB::table($table)->where($userFilter)->count();
             $approved = DB::table($table)
-                ->where('requester', $requester)
+                ->where($userFilter)
                 ->where('status', 'Approved')
                 ->count();
+            $posted = DB::table($table)
+                ->where($userFilter)
+                ->where('status', 'Posted')
+                ->count();
             $pending = DB::table($table)
-                ->where('requester', $requester)
+                ->where($userFilter)
                 ->where(function ($q) {
                     $q->where('status', 'Pending')
                         ->orWhere('status', 'Pending Review')
@@ -447,6 +482,7 @@ class LegacyMobileApiController extends Controller
                 'stats' => [
                     'total' => $total,
                     'approved' => $approved,
+                    'posted' => $posted,
                     'pending' => $pending,
                 ],
             ],
@@ -478,9 +514,17 @@ class LegacyMobileApiController extends Controller
         }
 
         $table = $this->requestsTable();
-        $query = DB::table($table)->where('requester', (string) ($user->name ?? ''));
+        $query = DB::table($table)->where(function ($q) use ($user, $userId, $table) {
+            if (Schema::hasColumn($table, 'user_id')) {
+                $q->where('user_id', $userId)
+                  ->orWhere('requester', (string) ($user->name ?? ''));
+            } else {
+                $q->where('requester', (string) ($user->name ?? ''));
+            }
+        });
         if ($status !== '' && strtolower($status) !== 'all') {
-            if (strtolower($status) === 'pending') {
+            $lowerStat = strtolower($status);
+            if ($lowerStat === 'pending' || $lowerStat === 'pending review') {
                 $query->where(function ($q) {
                     $q->where('status', 'Pending')
                         ->orWhere('status', 'Pending Review')
@@ -493,6 +537,20 @@ class LegacyMobileApiController extends Controller
             }
         }
 
+        $search = trim((string) $request->query('search', ''));
+        if ($search !== '') {
+            $cleanSearch = ltrim($search, '#');
+            $query->where(function ($q) use ($search, $cleanSearch) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('platform', 'like', "%{$search}%")
+                    ->orWhere('priority', 'like', "%{$search}%")
+                    ->orWhere('request_id', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$cleanSearch}%");
+            });
+        }
+
         $rows = $query
             ->orderByDesc('created_at')
             ->get(['id', 'request_id', 'title', 'status', 'created_at', 'priority', 'platform'])
@@ -502,7 +560,7 @@ class LegacyMobileApiController extends Controller
                     'id' => (int) $r->id,
                     'request_id' => (string) ($r->request_id ?? ''),
                     'title' => (string) ($r->title ?? ''),
-                    'status' => $status !== '' ? $status : 'Pending',
+                    'status' => $status !== '' ? $status : 'Pending Review',
                     'priority' => $r->priority ?? 'Low',
                     'platform' => $r->platform ?? 'Facebook',
                     'created_at' => (string) ($r->created_at ?? ''),
@@ -607,7 +665,7 @@ class LegacyMobileApiController extends Controller
                 'requester' => (string) ($user->name ?? ''),
                 'category' => $category,
                 'priority' => $priority,
-                'status' => 'Pending',
+                'status' => 'Pending Review',
                 'description' => $description,
                 'media_file' => implode(',', $mediaNames),
                 'platform' => is_array($platforms) ? implode(',', $platforms) : '',
@@ -751,10 +809,12 @@ class LegacyMobileApiController extends Controller
             }
 
             $currentStatus = trim((string) ($existingReq->status ?? ''));
-            if (strtolower($currentStatus) !== 'rejected') {
+            $lowerStatus = strtolower($currentStatus);
+            $editableStatuses = ['pending', 'pending review', 'rejected'];
+            if (!in_array($lowerStatus, $editableStatuses, true)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Requests can only be edited if they have been rejected by an admin.',
+                    'message' => 'Requests can only be edited while Pending Review or if Rejected by an admin.',
                 ], 422);
             }
 
@@ -827,7 +887,7 @@ class LegacyMobileApiController extends Controller
                 'title' => $title,
                 'category' => $category,
                 'priority' => $priority,
-                'status' => 'Pending',
+                'status' => 'Pending Review',
                 'description' => $description,
                 'media_file' => implode(',', $mediaNames),
                 'platform' => is_array($platforms) ? implode(',', $platforms) : '',
@@ -1570,7 +1630,14 @@ class LegacyMobileApiController extends Controller
         $table = $this->requestsTable();
         $query = DB::table($table);
         if (!$isAdmin) {
-            $query->where('requester', (string) ($user->name ?? ''));
+            $query->where(function ($q) use ($user, $table) {
+                if (Schema::hasColumn($table, 'user_id')) {
+                    $q->where('user_id', $user->id)
+                      ->orWhere('requester', (string) ($user->name ?? ''));
+                } else {
+                    $q->where('requester', (string) ($user->name ?? ''));
+                }
+            });
         }
         $requests = $query->get(['id', 'request_id', 'title', 'status', 'requester', 'category']);
 
@@ -1661,7 +1728,14 @@ class LegacyMobileApiController extends Controller
         $table = $this->requestsTable();
         $query = DB::table($table)->where('id', $requestId);
         if (!$isAdmin) {
-            $query->where('requester', (string) ($user->name ?? ''));
+            $query->where(function ($q) use ($user, $table) {
+                if (Schema::hasColumn($table, 'user_id')) {
+                    $q->where('user_id', $user->id)
+                      ->orWhere('requester', (string) ($user->name ?? ''));
+                } else {
+                    $q->where('requester', (string) ($user->name ?? ''));
+                }
+            });
         }
         $req = $query->first(['id', 'request_id', 'title', 'status', 'requester', 'category']);
 
@@ -1899,11 +1973,16 @@ class LegacyMobileApiController extends Controller
         }
 
         if ($search !== '') {
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = ltrim($search, '#');
+            $query->where(function ($q) use ($search, $cleanSearch) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('requester', 'like', "%{$search}%")
                     ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('platform', 'like', "%{$search}%")
+                    ->orWhere('priority', 'like', "%{$search}%")
+                    ->orWhere('request_id', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$cleanSearch}%");
             });
         }
 
