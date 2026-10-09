@@ -24,7 +24,7 @@ class SettingsController extends Controller
             'expires_at' => $expiresAt,
         ]);
 
-        return back()->with('success', 'New access token generated successfully for Ms. Kaye.');
+        return back()->with('success', 'New access token generated successfully.');
     }
 
     public function revokeKayeToken()
