@@ -683,12 +683,14 @@ function esc(s) {
 }
 
 // On load: auto-show today's panel if today has events
-document.addEventListener('DOMContentLoaded', function () {
+function initCalendarToday() {
     const todayNum = document.querySelector('.cal-day-num--today');
     if (todayNum) {
         const td = todayNum.closest('td');
         if (td && td.dataset.date) showPanel(td);
     }
-});
+}
+document.addEventListener('DOMContentLoaded', initCalendarToday);
+document.addEventListener('turbo:load', initCalendarToday);
 </script>
 @endsection

@@ -168,10 +168,12 @@
 <script>
     let isSubmittingChat = false;
 
-    document.addEventListener('DOMContentLoaded', () => {
+    function scrollChatBottom() {
         const chatBox = document.getElementById('chat-messages');
         if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-    });
+    }
+    document.addEventListener('DOMContentLoaded', scrollChatBottom);
+    document.addEventListener('turbo:load', scrollChatBottom);
 
     function handleChatSubmit(e) {
         if (isSubmittingChat) {

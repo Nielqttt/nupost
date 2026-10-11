@@ -581,8 +581,8 @@ let currentPage = 1;
 let filteredRows = []; // holds currently visible/matching rows
 
 // All list rows and grid cards paired together
-const allListRows  = Array.from(document.querySelectorAll('#list-tbody .req-row'));
-const allGridCards = Array.from(document.querySelectorAll('#grid-container .req-row'));
+let allListRows  = [];
+let allGridCards = [];
 
 function escapeRegex(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -738,35 +738,30 @@ function clearSearch() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    // init filtered rows = all rows
+function initRequestsPage() {
+    allListRows  = Array.from(document.querySelectorAll('#list-tbody .req-row'));
+    allGridCards = Array.from(document.querySelectorAll('#grid-container .req-row'));
+    filteredRows = [];
     allListRows.forEach((_, i) => filteredRows.push(i));
 
-    // init view
-    setView(savedView);
-
-    // restore saved view properly
     const v = localStorage.getItem('nupost_view') || 'list';
-    document.getElementById('view-list').style.display = v === 'list' ? 'block' : 'none';
-    document.getElementById('view-grid').style.display = v === 'grid' ? 'block' : 'none';
-    document.getElementById('btn-list').classList.toggle('view-btn--active', v === 'list');
-    document.getElementById('btn-grid').classList.toggle('view-btn--active', v === 'grid');
+    setView(v);
 
-    // render first page
     renderPage(1);
 
-    // live search — trigger on 1 character
-    let debounceTimer;
     const searchInput = document.getElementById('live-search-input');
-    if (searchInput) {
+    if (searchInput && !searchInput._bound) {
+        searchInput._bound = true;
+        let debounceTimer;
         searchInput.addEventListener('input', function() {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => applySearch(this.value), 300);
         });
-        // also trigger on initial load if there's a prefilled search
         if (searchInput.value.trim()) applySearch(searchInput.value);
     }
-});
+}
+document.addEventListener('DOMContentLoaded', initRequestsPage);
+document.addEventListener('turbo:load', initRequestsPage);
 
 // ── DELETE MODAL ─────────────────────────────────────────────────
 function confirmDelete(id, title) {

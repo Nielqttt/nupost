@@ -13,6 +13,9 @@
     })();
 </script>
 
+<!-- Turbo Drive: Replaces page reloads with seamless background swaps -->
+<script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js"></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
@@ -682,6 +685,60 @@ html, body {
     .calendar-container { overflow-x: auto; }
     .calendar-grid { min-width: 700px; }
 }
+
+/* ── Reusable Skeleton Shimmer System ────────────────────────────── */
+@keyframes skeleton-shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.06) 25%,
+        rgba(0, 0, 0, 0.12) 37%,
+        rgba(0, 0, 0, 0.06) 63%
+    );
+    background-size: 400% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.12) 37%,
+        rgba(255, 255, 255, 0.05) 63%
+    );
+    background-size: 400% 100%;
+}
+
+/* Common Skeleton Helpers */
+.skeleton-text       { height: 14px; width: 80%; border-radius: 4px; margin-bottom: 6px; }
+.skeleton-text-sm    { height: 11px; width: 50%; border-radius: 4px; }
+.skeleton-title      { height: 22px; width: 60%; border-radius: 6px; margin-bottom: 10px; }
+.skeleton-badge      { height: 22px; width: 68px; border-radius: 99px; }
+.skeleton-avatar     { width: 42px; height: 42px; border-radius: 50%; }
+.skeleton-card       { width: 100%; height: 110px; border-radius: 16px; margin-bottom: 14px; }
+
+/* ── Smooth GPU Micro-Animations & Page Fades ────────────────────── */
+@keyframes pageFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+main, .main-content, .content-wrap, .page-content, .page-outer, .create-page, .trk {
+    animation: pageFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
 </style>
 @yield('head-styles')
 </head>
@@ -918,19 +975,33 @@ function markAllRead() {
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // Poll every 30s
-loadNotifications();
-setInterval(loadNotifications, 30000);
+if (!window._notifPollActive) {
+    window._notifPollActive = true;
+    setInterval(loadNotifications, 30000);
+}
 
 // ── THEME TOGGLE ──
-const themeToggle = document.getElementById('themeToggle');
-if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme') || 'light';
-        const next = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('nupost-theme', next);
-    });
-}
+document.addEventListener('turbo:load', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle && !themeToggle._bound) {
+        themeToggle._bound = true;
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('nupost-theme', next);
+        });
+    }
+    loadNotifications();
+});
+
+// Prevent Turbo from intercepting direct file downloads and CSV exports
+document.addEventListener('turbo:before-visit', function(event) {
+    if (event.detail.url && (event.detail.url.includes('/export') || event.detail.url.includes('export=') || event.detail.url.includes('/download'))) {
+        event.preventDefault();
+        window.location.href = event.detail.url;
+    }
+});
 </script>
 <script>
 // Prevent viewing authenticated pages via back button after logout (bfcache)
@@ -940,6 +1011,8 @@ window.addEventListener('pageshow', function (event) {
     }
 });
 </script>
+<!-- instant.page: Pre-fetches pages on link hover for 0ms navigation -->
+<script src="//instant.page/5.2.0" type="module" integrity="sha384-jnZyxPjiipYXnSU0Rck6V38m2BQHTEXv80QwJuJChhxLMgkE4g++aD4IVFzpBc1z"></script>
 @yield('scripts')
 </body>
 </html>

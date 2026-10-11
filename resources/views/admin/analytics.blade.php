@@ -3,9 +3,6 @@
 
 @section('head-styles')
 <style>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 .page-hd { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; }
 .page-hd__title { font-family:var(--font-disp); font-size:22px; color:var(--ink); }
 .page-hd__sub   { font-size:13px; color:var(--ink-soft); margin-top:3px; }
@@ -84,17 +81,6 @@
     gap: 5px;
     flex-shrink: 0;
 }
-
-=======
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
-.page-hd { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; }
-.page-hd__title { font-family:var(--font-disp); font-size:22px; color:var(--ink); }
-.page-hd__sub   { font-size:13px; color:var(--ink-soft); margin-top:3px; }
-
-<<<<<<< HEAD
-=======
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 /* STAT CARDS */
 .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
 .scard {
@@ -408,9 +394,6 @@
     <div style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;font-size:13px;font-weight:500;color:#15803d;margin-bottom:16px;">{{ session('success') }}</div>
 @endif
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 {{-- LIVE SEARCH BAR WITH PROPER SPACING --}}
 <div class="vis-search-wrap" id="vis-search-wrap">
     <span class="vis-search-icon">
@@ -430,10 +413,6 @@
     </span>
     <button type="button" class="vis-search-clear" id="vis-search-clear" onclick="clearVisSearch()" title="Clear search">✕</button>
 </div>
-
-=======
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 {{-- STAT CARDS --}}
 <div class="stats-row">
     <div class="scard" style="border-bottom:3px solid #60a5fa;">
@@ -614,15 +593,7 @@
         <div><div class="pa-title">Recent Published Requests</div><div class="pa-sub">Latest approved & posted</div></div>
     </div>
     <div style="overflow-x:auto;">
-<<<<<<< HEAD
-        <table class="rtable">
-=======
-<<<<<<< HEAD
         <table class="rtable" id="vis-recent-table">
-=======
-        <table class="rtable">
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
             <thead>
                 <tr><th>Request</th><th>Requestor</th><th>Category</th><th>Platforms</th><th>Status</th><th>Date</th></tr>
             </thead>
@@ -867,15 +838,7 @@
                 </a>
             </div>
             <div style="overflow-x:auto;">
-<<<<<<< HEAD
-                <table class="rtable">
-=======
-<<<<<<< HEAD
                 <table class="rtable" id="vis-fb-table">
-=======
-                <table class="rtable">
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
                     <thead>
                         <tr>
                             <th>Post</th>
@@ -997,129 +960,128 @@
 @section('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-/* ── Visualization Live Search ─────────────────────────────────────── */
-let visSearchTimer = null;
-const visInput = document.getElementById('vis-search-input');
-const visClear = document.getElementById('vis-search-clear');
-const visPill  = document.getElementById('vis-search-pill');
-const visPillText = document.getElementById('vis-search-pill-text');
+(function() {
+    /* ── Visualization Live Search ─────────────────────────────────────── */
+    let visSearchTimer = null;
+    const visInput = document.getElementById('vis-search-input');
+    const visClear = document.getElementById('vis-search-clear');
+    const visPill  = document.getElementById('vis-search-pill');
+    const visPillText = document.getElementById('vis-search-pill-text');
 
-function applyVisSearch(rawQuery) {
-    const q = (rawQuery || '').toLowerCase().trim();
-    if (!visInput) return;
+    window.applyVisSearch = function(rawQuery) {
+        const q = (rawQuery || '').toLowerCase().trim();
+        if (!visInput) return;
 
-    if (q) {
-        visClear.classList.add('visible');
-    } else {
-        visClear.classList.remove('visible');
-        visPill.style.display = 'none';
-    }
-
-    let matchCount = 0;
-
-    // Filter Recent Published Requests table
-    const recTable = document.getElementById('vis-recent-table');
-    if (recTable) {
-        const rows = recTable.querySelectorAll('tbody tr');
-        rows.forEach(tr => {
-            if (tr.querySelector('td[colspan]')) return;
-            if (!q) {
-                tr.style.display = '';
-                matchCount++;
-            } else {
-                const text = tr.textContent.toLowerCase();
-                if (text.includes(q)) {
-                    tr.style.display = '';
-                    matchCount++;
-                } else {
-                    tr.style.display = 'none';
-                }
-            }
-        });
-    }
-
-    // Filter Facebook posts table if present
-    const fbTable = document.getElementById('vis-fb-table');
-    if (fbTable) {
-        const fbRows = fbTable.querySelectorAll('tbody tr');
-        fbRows.forEach(tr => {
-            if (tr.querySelector('td[colspan]')) return;
-            if (!q) {
-                tr.style.display = '';
-            } else {
-                const text = tr.textContent.toLowerCase();
-                if (text.includes(q)) {
-                    tr.style.display = '';
-                    matchCount++;
-                } else {
-                    tr.style.display = 'none';
-                }
-            }
-        });
-    }
-
-    if (q) {
-        visPill.style.display = 'inline-flex';
-        visPillText.textContent = `${matchCount} match${matchCount === 1 ? '' : 'es'}`;
-    }
-}
-
-function clearVisSearch() {
-    if (!visInput) return;
-    visInput.value = '';
-    applyVisSearch('');
-    visInput.focus();
-}
-
-if (visInput) {
-    visInput.addEventListener('input', function() {
-        clearTimeout(visSearchTimer);
-        visSearchTimer = setTimeout(() => {
-            applyVisSearch(this.value);
-        }, 120);
-    });
-}
-
-=======
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
-/* ── Internal Trend Chart ─────────────────────────────────────── */
-const months   = @json(array_column($months_data,'label'));
-const totals   = @json(array_column($months_data,'total'));
-const posted   = @json(array_column($months_data,'posted'));
-const approved = @json(array_column($months_data,'approved'));
-
-const ctx = document.getElementById('trendChart').getContext('2d');
-const gT  = ctx.createLinearGradient(0,0,0,240); gT.addColorStop(0,'rgba(0,35,102,0.12)');  gT.addColorStop(1,'rgba(0,35,102,0)');
-const gP  = ctx.createLinearGradient(0,0,0,240); gP.addColorStop(0,'rgba(139,92,246,0.12)'); gP.addColorStop(1,'rgba(139,92,246,0)');
-const gA  = ctx.createLinearGradient(0,0,0,240); gA.addColorStop(0,'rgba(16,185,129,0.12)'); gA.addColorStop(1,'rgba(16,185,129,0)');
-
-new Chart(ctx,{
-    type:'line',
-    data:{
-        labels:months,
-        datasets:[
-            {label:'Total',    data:totals,   borderColor:'#002366',backgroundColor:gT,borderWidth:2.5,pointBackgroundColor:'#002366',pointRadius:4,tension:0.4,fill:true},
-            {label:'Approved', data:approved, borderColor:'#10b981',backgroundColor:gA,borderWidth:2.5,pointBackgroundColor:'#10b981',pointRadius:4,tension:0.4,fill:true},
-            {label:'Posted',   data:posted,   borderColor:'#8b5cf6',backgroundColor:gP,borderWidth:2.5,pointBackgroundColor:'#8b5cf6',pointRadius:4,tension:0.4,fill:true},
-        ]
-    },
-    options:{
-        responsive:true,maintainAspectRatio:false,
-        interaction:{mode:'index',intersect:false},
-        plugins:{
-            legend:{position:'top',align:'end',labels:{font:{family:'DM Sans',size:12,weight:'600'},color:'#7a7672',usePointStyle:true,pointStyleWidth:8,boxHeight:8,padding:20}},
-            tooltip:{backgroundColor:'#1a1a1a',titleFont:{family:'DM Sans',size:12,weight:'700'},bodyFont:{family:'DM Sans',size:12},padding:12,cornerRadius:10}
-        },
-        scales:{
-            x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:12},color:'#b5b0a8'}},
-            y:{beginAtZero:true,grid:{color:'#e8e3da'},ticks:{font:{family:'DM Sans',size:12},color:'#b5b0a8',stepSize:1,callback:v=>Number.isInteger(v)?v:''}}
+        if (q) {
+            visClear.classList.add('visible');
+        } else {
+            visClear.classList.remove('visible');
+            visPill.style.display = 'none';
         }
+
+        let matchCount = 0;
+
+        // Filter Recent Published Requests table
+        const recTable = document.getElementById('vis-recent-table');
+        if (recTable) {
+            const rows = recTable.querySelectorAll('tbody tr');
+            rows.forEach(tr => {
+                if (tr.querySelector('td[colspan]')) return;
+                if (!q) {
+                    tr.style.display = '';
+                    matchCount++;
+                } else {
+                    const text = tr.textContent.toLowerCase();
+                    if (text.includes(q)) {
+                        tr.style.display = '';
+                        matchCount++;
+                    } else {
+                        tr.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Filter Facebook posts table if present
+        const fbTable = document.getElementById('vis-fb-table');
+        if (fbTable) {
+            const fbRows = fbTable.querySelectorAll('tbody tr');
+            fbRows.forEach(tr => {
+                if (tr.querySelector('td[colspan]')) return;
+                if (!q) {
+                    tr.style.display = '';
+                } else {
+                    const text = tr.textContent.toLowerCase();
+                    if (text.includes(q)) {
+                        tr.style.display = '';
+                        matchCount++;
+                    } else {
+                        tr.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        if (q) {
+            visPill.style.display = 'inline-flex';
+            visPillText.textContent = `${matchCount} match${matchCount === 1 ? '' : 'es'}`;
+        }
+    };
+
+    window.clearVisSearch = function() {
+        if (!visInput) return;
+        visInput.value = '';
+        window.applyVisSearch('');
+        visInput.focus();
+    };
+
+    if (visInput) {
+        visInput.addEventListener('input', function() {
+            clearTimeout(visSearchTimer);
+            visSearchTimer = setTimeout(() => {
+                window.applyVisSearch(this.value);
+            }, 120);
+        });
     }
-});
+
+    /* ── Internal Trend Chart ─────────────────────────────────────── */
+    const trendEl = document.getElementById('trendChart');
+    if (trendEl) {
+        const months   = @json(array_column($months_data,'label'));
+        const totals   = @json(array_column($months_data,'total'));
+        const posted   = @json(array_column($months_data,'posted'));
+        const approved = @json(array_column($months_data,'approved'));
+
+        const ctx = trendEl.getContext('2d');
+        const gT  = ctx.createLinearGradient(0,0,0,240); gT.addColorStop(0,'rgba(0,35,102,0.12)');  gT.addColorStop(1,'rgba(0,35,102,0)');
+        const gP  = ctx.createLinearGradient(0,0,0,240); gP.addColorStop(0,'rgba(139,92,246,0.12)'); gP.addColorStop(1,'rgba(139,92,246,0)');
+        const gA  = ctx.createLinearGradient(0,0,0,240); gA.addColorStop(0,'rgba(16,185,129,0.12)'); gA.addColorStop(1,'rgba(16,185,129,0)');
+
+        new Chart(ctx,{
+            type:'line',
+            data:{
+                labels:months,
+                datasets:[
+                    {label:'Total',    data:totals,   borderColor:'#002366',backgroundColor:gT,borderWidth:2.5,pointBackgroundColor:'#002366',pointRadius:4,tension:0.4,fill:true},
+                    {label:'Approved', data:approved, borderColor:'#10b981',backgroundColor:gA,borderWidth:2.5,pointBackgroundColor:'#10b981',pointRadius:4,tension:0.4,fill:true},
+                    {label:'Posted',   data:posted,   borderColor:'#8b5cf6',backgroundColor:gP,borderWidth:2.5,pointBackgroundColor:'#8b5cf6',pointRadius:4,tension:0.4,fill:true},
+                ]
+            },
+            options:{
+                responsive:true,maintainAspectRatio:false,
+                interaction:{mode:'index',intersect:false},
+                plugins:{
+                    legend:{position:'top',align:'end',labels:{font:{family:'DM Sans',size:12,weight:'600'},color:'#7a7672',usePointStyle:true,pointStyleWidth:8,boxHeight:8,padding:20}},
+                    tooltip:{backgroundColor:'#1a1a1a',titleFont:{family:'DM Sans',size:12,weight:'700'},bodyFont:{family:'DM Sans',size:12},padding:12,cornerRadius:10}
+                },
+                scales:{
+                    x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:12},color:'#b5b0a8'}},
+                    y:{beginAtZero:true,grid:{color:'#e8e3da'},ticks:{font:{family:'DM Sans',size:12},color:'#b5b0a8',stepSize:1,callback:v=>Number.isInteger(v)?v:''}}
+                }
+            }
+        });
+    }
+})();
 </script>
 
 @if(isset($fb) && empty($fb['error']) && !empty($fb['metrics']['total_reach']['daily']))

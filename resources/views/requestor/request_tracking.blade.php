@@ -681,10 +681,16 @@
 
 @section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('del-modal').addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('open');
-    });
-});
+function initTrackingModal() {
+    const modal = document.getElementById('del-modal');
+    if (modal && !modal._bound) {
+        modal._bound = true;
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('open');
+        });
+    }
+}
+document.addEventListener('DOMContentLoaded', initTrackingModal);
+document.addEventListener('turbo:load', initTrackingModal);
 </script>
 @endsection
