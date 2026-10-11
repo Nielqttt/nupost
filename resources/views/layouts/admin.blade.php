@@ -909,17 +909,26 @@ html, body {
     gap: 12px;
     min-height: 200px;
     margin-bottom: 12px;
+    box-sizing: border-box;
 }
 .bd-msg {
     display: flex;
+    align-items: flex-end;
     gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    flex-shrink: 0;
+    box-sizing: border-box;
     animation: msg-in .2s ease;
 }
 @keyframes msg-in {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: none; }
 }
-.bd-msg--user { flex-direction: row-reverse; }
+.bd-msg--user {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
 .bd-msg-av {
     width: 28px; height: 28px;
     border-radius: 8px;
@@ -927,6 +936,7 @@ html, body {
     flex-shrink: 0;
     font-size: 11px;
     font-weight: 700;
+    margin-bottom: 2px;
 }
 .bd-msg--bot .bd-msg-av {
     background: linear-gradient(135deg, #001a4d, #002e7a);
@@ -941,11 +951,17 @@ html, body {
 }
 .bd-msg-bubble {
     max-width: 80%;
-    padding: 9px 13px;
+    min-width: 40px;
+    padding: 10px 14px;
     border-radius: 14px;
     font-size: 13px;
     font-family: 'DM Sans', sans-serif;
-    line-height: 1.65;
+    line-height: 1.6;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 .bd-msg--bot .bd-msg-bubble {
     background: rgba(255,255,255,0.06);

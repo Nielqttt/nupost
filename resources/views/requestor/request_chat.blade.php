@@ -36,24 +36,105 @@
         backdrop-filter: blur(4px); color: white; border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
-    .chat-messages { flex: 1; overflow-y: auto; padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; background: #f8faff; }
+    .chat-messages {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #f8faff;
+        box-sizing: border-box;
+        scroll-behavior: smooth;
+    }
     .chat-messages::-webkit-scrollbar { width: 4px; }
     .chat-messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 
-    .chat-bubble-row { display: flex; align-items: flex-end; gap: 8px; }
-    .chat-bubble-row--me { flex-direction: row-reverse; }
+    .chat-bubble-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        width: 100%;
+        max-width: 100%;
+        flex-shrink: 0;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        position: relative;
+    }
+    .chat-bubble-row--me {
+        flex-direction: row-reverse;
+        justify-content: flex-start;
+    }
     
-    .chat-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; }
+    .chat-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 2px;
+    }
     .chat-avatar--me { background: #7c3aed; }
     .chat-avatar--admin { background: #1e3a8a; }
 
-    .chat-bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 13.5px; line-height: 1.5; word-break: break-word; position: relative; }
-    .chat-bubble--me { background: #7c3aed; color: white; border-bottom-right-radius: 4px; }
-    .chat-bubble--admin { background: white; color: var(--color-text); border: 1px solid var(--color-border); border-bottom-left-radius: 4px; }
+    .chat-bubble {
+        max-width: 75%;
+        min-width: 48px;
+        padding: 10px 14px;
+        border-radius: 18px;
+        font-size: 13.5px;
+        line-height: 1.5;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        box-sizing: border-box;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .chat-bubble--me {
+        background: #7c3aed;
+        color: white;
+        border-radius: 18px 18px 4px 18px;
+    }
+    .chat-bubble--admin {
+        background: white;
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
+        border-radius: 18px 18px 18px 4px;
+    }
 
-    .chat-meta { font-size: 10px; margin-top: 6px; opacity: 0.7; }
-    .chat-bubble--me .chat-meta { text-align: right; color: rgba(255,255,255,0.9); }
-    .chat-bubble--admin .chat-meta { color: #9ca3af; }
+    .chat-text {
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        line-height: 1.5;
+    }
+
+    .chat-meta {
+        font-size: 10.5px;
+        margin-top: 4px;
+        line-height: 1.2;
+        opacity: 0.75;
+        user-select: none;
+        white-space: nowrap;
+    }
+    .chat-bubble--me .chat-meta {
+        text-align: right;
+        color: rgba(255, 255, 255, 0.85);
+        align-self: flex-end;
+    }
+    .chat-bubble--admin .chat-meta {
+        color: #64748b;
+        align-self: flex-start;
+    }
 
     .chat-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #9ca3af; }
     
@@ -133,7 +214,7 @@
                         {{ strtoupper(substr($msg->sender_name, 0, 1)) }}
                     </div>
                     <div class="chat-bubble {{ $is_me ? 'chat-bubble--me' : 'chat-bubble--admin' }}">
-                        {!! nl2br(e($msg->message)) !!}
+                        <div class="chat-text">{!! nl2br(e($msg->message)) !!}</div>
                         <div class="chat-meta">
                             {{ $is_me ? 'You' : 'Admin' }} &middot; {{ $msg->created_at->format('M j, g:i A') }}
                         </div>

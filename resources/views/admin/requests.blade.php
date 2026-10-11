@@ -120,20 +120,105 @@ td { padding:13px 16px; font-size:12.5px; vertical-align:middle; }
 .chat-panel__info { padding:12px 22px; background:rgba(0,0,0,0.03); border-bottom:1px solid rgba(0,0,0,0.05); flex-shrink:0; }
 .chat-panel__req-title { font-size:13px; font-weight:600; color:var(--ink); }
 .chat-panel__req-meta { font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
-.chat-panel__messages { flex:1; overflow-y:auto; padding:18px 20px; display:flex; flex-direction:column; gap:12px; background:var(--cream); }
-.chat-panel__messages::-webkit-scrollbar { width:4px; }
-.chat-panel__messages::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.1); border-radius:4px; }
-.bubble-row { display:flex; align-items:flex-end; gap:8px; }
-.bubble-row--admin { flex-direction:row-reverse; }
-.bubble-av { width:30px; height:30px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:white; }
-.bubble-av--admin { background:#0d1b3e; }
-.bubble-av--requestor { background:var(--purple); }
-.bubble { max-width:76%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.55; word-break:break-word; }
-.bubble--admin { background:#0d1b3e; color:white; border-bottom-right-radius:4px; }
-.bubble--requestor { background:var(--card); color:var(--ink); border:1px solid rgba(0,0,0,0.06); border-bottom-left-radius:4px; }
-.bubble-meta { font-size:10px; margin-top:4px; opacity:.65; }
-.bubble--admin .bubble-meta { text-align:right; color:rgba(255,255,255,.8); }
-.bubble--requestor .bubble-meta { color:var(--ink-faint); }
+.chat-panel__messages {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--cream);
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+.chat-panel__messages::-webkit-scrollbar { width: 4px; }
+.chat-panel__messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
+
+.bubble-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+.bubble-row--admin {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+.bubble-av {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 2px;
+}
+.bubble-av--admin { background: #0d1b3e; }
+.bubble-av--requestor { background: var(--purple); }
+
+.bubble {
+    max-width: 75%;
+    min-width: 48px;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 13px;
+    line-height: 1.55;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.bubble--admin {
+    background: #0d1b3e;
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+}
+.bubble--requestor {
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 18px 18px 18px 4px;
+}
+
+.bubble-text {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+.bubble-meta {
+    font-size: 10px;
+    margin-top: 4px;
+    line-height: 1.2;
+    opacity: .75;
+    user-select: none;
+    white-space: nowrap;
+}
+.bubble--admin .bubble-meta {
+    text-align: right;
+    color: rgba(255,255,255,.8);
+    align-self: flex-end;
+}
+.bubble--requestor .bubble-meta {
+    color: var(--ink-faint);
+    align-self: flex-start;
+}
 .chat-empty-state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--ink-faint); padding:32px; }
 .chat-panel__form { padding:14px 20px; border-top:1px solid rgba(0,0,0,0.05); flex-shrink:0; background:var(--card); border-radius:0 0 0 24px; }
 .chat-panel__textarea { width:100%; border:1px solid rgba(0,0,0,0.08); border-radius:12px; padding:10px 14px; font-size:13px; font-family:var(--font); resize:none; outline:none; height:78px; background:var(--cream); color:var(--ink); transition:border-color .15s; }
@@ -450,7 +535,8 @@ function loadMessages(reqId, silent = false) {
             const a = c.sender_role === 'admin';
             return `<div class="bubble-row ${a ? 'bubble-row--admin' : ''}">
                 <div class="bubble-av ${a ? 'bubble-av--admin' : 'bubble-av--requestor'}">${esc(c.sender_name.charAt(0).toUpperCase())}</div>
-                <div class="bubble ${a ? 'bubble--admin' : 'bubble--requestor'}">${esc(c.message)}
+                <div class="bubble ${a ? 'bubble--admin' : 'bubble--requestor'}">
+                    <div class="bubble-text">${esc(c.message)}</div>
                     <div class="bubble-meta">${a ? 'Admin' : esc(c.sender_name)} · ${esc(c.created_at)}</div>
                 </div>
             </div>`;
