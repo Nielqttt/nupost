@@ -15,8 +15,6 @@
     })();
 </script>
 
-<!-- Turbo Drive: Replaces page reloads with seamless background swaps -->
-<script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -688,36 +686,7 @@ html, body {
     .calendar-grid { min-width: 700px; }
 }
 
-/* ── Smooth GPU Page Entrance Animations ─────────────────────────── */
-@keyframes pageFadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
-.page-content, main, .main-content, .content-wrap, .page-outer, .create-page, .trk {
-    animation: pageFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
-    will-change: opacity, transform;
-}
-
-/* Polished Turbo Drive progress bar */
-.turbo-progress-bar {
-    height: 3px !important;
-    background: linear-gradient(90deg, #002366 0%, #3b82f6 50%, #ffd700 100%) !important;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6) !important;
-    z-index: 999999 !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .page-content, main, .main-content, .content-wrap, .page-outer, .create-page, .trk {
-        animation: none !important;
-    }
-}
 </style>
 @yield('head-styles')
 </head>
@@ -960,7 +929,7 @@ if (!window._notifPollActive) {
 }
 
 // ── THEME TOGGLE ──
-document.addEventListener('turbo:load', () => {
+document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle && !themeToggle._bound) {
         themeToggle._bound = true;
@@ -972,14 +941,6 @@ document.addEventListener('turbo:load', () => {
         });
     }
     loadNotifications();
-});
-
-// Prevent Turbo from intercepting direct file downloads and CSV exports
-document.addEventListener('turbo:before-visit', function(event) {
-    if (event.detail.url && (event.detail.url.includes('/export') || event.detail.url.includes('export=') || event.detail.url.includes('/download'))) {
-        event.preventDefault();
-        window.location.href = event.detail.url;
-    }
 });
 </script>
 <script>

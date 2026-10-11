@@ -691,6 +691,5 @@ function initTrackingModal() {
     }
 }
 document.addEventListener('DOMContentLoaded', initTrackingModal);
-document.addEventListener('turbo:load', initTrackingModal);
 </script>
 @endsection

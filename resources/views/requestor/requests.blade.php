@@ -761,7 +761,6 @@ function initRequestsPage() {
     }
 }
 document.addEventListener('DOMContentLoaded', initRequestsPage);
-document.addEventListener('turbo:load', initRequestsPage);
 
 // ── DELETE MODAL ─────────────────────────────────────────────────
 function confirmDelete(id, title) {

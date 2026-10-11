@@ -691,6 +691,5 @@ function initCalendarToday() {
     }
 }
 document.addEventListener('DOMContentLoaded', initCalendarToday);
-document.addEventListener('turbo:load', initCalendarToday);
 </script>
 @endsection

@@ -104,17 +104,6 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        @keyframes pageFadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         body {
             font-family: var(--font-main);
             background-color: var(--bg-page);
@@ -124,13 +113,6 @@
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
             transition: background-color 0.25s ease, color 0.25s ease;
-            animation: pageFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            body {
-                animation: none !important;
-            }
         }
 
         /* Ambient Gradients */

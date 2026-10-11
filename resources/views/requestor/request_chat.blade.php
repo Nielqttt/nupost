@@ -254,7 +254,6 @@
         if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     }
     document.addEventListener('DOMContentLoaded', scrollChatBottom);
-    document.addEventListener('turbo:load', scrollChatBottom);
 
     function handleChatSubmit(e) {
         if (isSubmittingChat) {

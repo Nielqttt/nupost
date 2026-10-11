@@ -28,26 +28,11 @@ html, body { height: 100%; font-family: var(--font-inter); }
 .login { position: relative; width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .login__bg { position: absolute; inset: 0; z-index: 0; }
 .login__bg img { width: 100%; height: 100%; object-fit: cover; }
-@keyframes pageFadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 .login__card {
     position: relative; z-index: 1; background: white;
     width: var(--card-width); border-radius: var(--radius-card);
     box-shadow: var(--shadow-card); padding: 32px;
     display: flex; flex-direction: column; align-items: center;
-    animation: pageFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
-    will-change: opacity, transform;
-}
-@media (prefers-reduced-motion: reduce) {
-    .login__card { animation: none !important; }
 }
 .login__logo { width: 200px; margin-bottom: 24px; }
 .login__logo img { width: 100%; }
