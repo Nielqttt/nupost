@@ -1141,12 +1141,75 @@ html, body {
     .bulldog { display: none; } /* Hide the AI float on mobile to save space, or it can be adapted later */
 }
 
+/* ── Sleek Instant Top Progress Bar (YouTube-style feedback) ── */
+#np-page-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, #002366 0%, #3b82f6 50%, #f59e0b 100%);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
+    z-index: 9999999;
+    pointer-events: none;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    opacity: 0;
+}
 
+/* ── Premium UI Micro-Animations (Zero-Flicker & Tactile) ── */
+button, .btn, .btn-primary, .back-btn, .tab-btn {
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), 
+                background-color 0.18s ease, 
+                border-color 0.18s ease !important;
+}
+button:active, .btn:active, .btn-primary:active, .back-btn:active {
+    transform: scale(0.97) !important;
+}
+
+.card, .scard, .table-card {
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+                border-color 0.22s ease;
+}
+
+table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+input[type="text"], input[type="email"], input[type="password"], input[type="search"], select, textarea {
+    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                background-color 0.2s ease !important;
+}
+
+.badge, .status-pill {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+.badge:hover {
+    transform: translateY(-2px);
+}
+
+.notif-dropdown, .admin-dropdown {
+    animation: dropSmooth 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: top right;
+}
+@keyframes dropSmooth {
+    from {
+        opacity: 0.7;
+        transform: translateY(-6px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
 
 @yield('head-styles')
 </style>
 </head>
 <body>
+<div id="np-page-progress"></div>
 <div class="shell">
 
 <!-- ═══ SIDEBAR ═══════════════════════════════════════════ -->
@@ -1905,6 +1968,24 @@ window.addEventListener('pageshow', function (event) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- instant.page: Pre-fetches pages on link hover for 0ms navigation -->
 <script src="//instant.page/5.2.0" type="module" integrity="sha384-jnZyxPjiipYXnSU0Rck6V38m2BQHTEXv80QwJuJChhxLMgkE4g++aD4IVFzpBc1z"></script>
+<script>
+// Instant visual feedback on link clicks (YouTube style top bar)
+document.addEventListener('click', function(e) {
+    const link = e.target.closest('a');
+    if (!link || !link.href) return;
+    if (link.target === '_blank' || link.hasAttribute('download')) return;
+    if (link.href.startsWith('javascript:') || link.href.includes('#')) return;
+    if (link.origin !== window.location.origin) return;
+    if (link.pathname === window.location.pathname && link.search === window.location.search) return;
+    if (link.href.includes('/export') || link.href.includes('/download')) return;
+
+    const bar = document.getElementById('np-page-progress');
+    if (bar) {
+        bar.style.opacity = '1';
+        bar.style.width = '75%';
+    }
+});
+</script>
 @yield('scripts')
 </body>
 </html>

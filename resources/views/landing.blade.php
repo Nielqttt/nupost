@@ -115,6 +115,21 @@
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
+        /* ── Sleek Instant Top Progress Bar (YouTube-style feedback) ── */
+        #np-page-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, #002366 0%, #3b82f6 50%, #f59e0b 100%);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
+            z-index: 9999999;
+            pointer-events: none;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+            opacity: 0;
+        }
+
         /* Ambient Gradients */
         .ambient-bg {
             position: absolute;
@@ -1722,6 +1737,7 @@
     </style>
 </head>
 <body>
+    <div id="np-page-progress"></div>
 
     <div class="ambient-bg" aria-hidden="true">
         <div class="ambient-glow glow-top"></div>
@@ -2265,5 +2281,22 @@
     </script>
     <!-- instant.page: Pre-fetches pages on link hover for 0ms navigation -->
     <script src="//instant.page/5.2.0" type="module" integrity="sha384-jnZyxPjiipYXnSU0Rck6V38m2BQHTEXv80QwJuJChhxLMgkE4g++aD4IVFzpBc1z"></script>
+    <script>
+        // Instant visual feedback on link clicks (YouTube style top bar)
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (!link || !link.href) return;
+            if (link.target === '_blank' || link.hasAttribute('download')) return;
+            if (link.href.startsWith('javascript:') || link.href.includes('#')) return;
+            if (link.origin !== window.location.origin) return;
+            if (link.pathname === window.location.pathname && link.search === window.location.search) return;
+
+            const bar = document.getElementById('np-page-progress');
+            if (bar) {
+                bar.style.opacity = '1';
+                bar.style.width = '75%';
+            }
+        });
+    </script>
 </body>
 </html>
