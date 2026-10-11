@@ -112,6 +112,9 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     Route::post('/settings/profile',  [SettingsController::class, 'updateProfile'])->name('settings.profile');
     Route::post('/settings/kaye-token/generate', [SettingsController::class, 'generateKayeToken'])->name('settings.kaye-token.generate');
     Route::post('/settings/kaye-token/revoke', [SettingsController::class, 'revokeKayeToken'])->name('settings.kaye-token.revoke');
+    Route::post('/settings/ai-keys',     [SettingsController::class, 'updateAiKeys'])->name('settings.ai-keys');
+    Route::post('/settings/test-gemini', [SettingsController::class, 'testGeminiKey'])->name('settings.test-gemini');
+    Route::post('/settings/test-groq',   [SettingsController::class, 'testGroqKey'])->name('settings.test-groq');
 
     // Notifications
     Route::get('/notifications',        [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications');
@@ -204,10 +207,10 @@ Route::get('/clear-cache', function () {
 
 // ─── GEMINI AI API ────────────────────────────────────────────────────────
 Route::post('/api/generate-caption', function (Request $request) {
-    $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
+    $apiKey = \App\Models\Setting::get('gemini_api_key', config('services.gemini.key') ?: env('GEMINI_API_KEY'));
 
     if (!$apiKey) {
-        return response()->json(['error' => 'API Key is missing in .env file.'], 500);
+        return response()->json(['error' => 'API Key is missing in .env file or Settings.'], 500);
     }
 
     $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=" . $apiKey;
@@ -249,11 +252,11 @@ Route::post('/api/generate-caption', function (Request $request) {
 
 Route::post('/api/bulldog-chat', function (Illuminate\Http\Request $request) {
 
-    $apiKey = config('services.groq.key') ?: env('GROQ_API_KEY');
+    $apiKey = \App\Models\Setting::get('groq_api_key', config('services.groq.key') ?: env('GROQ_API_KEY'));
 
     if (!$apiKey) {
         return response()->json([
-            'error' => 'GROQ_API_KEY is missing in .env — get a free key at https://console.groq.com'
+            'error' => 'GROQ_API_KEY is missing in .env or Settings — get a free key at https://console.groq.com'
         ], 500);
     }
 

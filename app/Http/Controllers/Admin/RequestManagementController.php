@@ -218,9 +218,9 @@ class RequestManagementController extends Controller
         $title       = $httpRequest->input('title', $postRequest->title);
         $description = $httpRequest->input('description', $postRequest->description ?? '');
 
-        $apiKey = config('services.gemini.key') ?: env('GEMINI_API_KEY');
+        $apiKey = \App\Models\Setting::get('gemini_api_key', config('services.gemini.key') ?: env('GEMINI_API_KEY'));
         if (!$apiKey) {
-            return response()->json(['error' => 'Gemini API key not configured. Add GEMINI_API_KEY to .env'], 500);
+            return response()->json(['error' => 'Gemini API key not configured. Add GEMINI_API_KEY in Settings or .env'], 500);
         }
 
         $basePrompt = "Write a compelling social media caption for a post with the following details:\n"

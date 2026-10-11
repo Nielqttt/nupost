@@ -3,23 +3,148 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use App\Models\Setting;
+use App\Models\KayeToken;
+use App\Models\User;
 
 class SettingsController extends Controller
 {
     public function index()
     {
-        $kayeToken = \App\Models\KayeToken::orderByDesc('id')->first();
-        return view('admin.settings', compact('kayeToken'));
+        $kayeToken = KayeToken::orderByDesc('id')->first();
+
+        // Retrieve AI Keys: Database first, fallback to .env/config
+        $geminiApiKey = Setting::get('gemini_api_key', config('services.gemini.key') ?: env('GEMINI_API_KEY'));
+        $groqApiKey   = Setting::get('groq_api_key', config('services.groq.key') ?: env('GROQ_API_KEY'));
+
+        // Determine storage source for transparent status indication
+        $hasDbGemini = false;
+        $hasDbGroq   = false;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+                $hasDbGemini = Setting::where('key', 'gemini_api_key')->whereNotNull('value')->where('value', '!=', '')->exists();
+                $hasDbGroq   = Setting::where('key', 'groq_api_key')->whereNotNull('value')->where('value', '!=', '')->exists();
+            }
+        } catch (\Throwable $e) {}
+
+        $geminiSource = $hasDbGemini ? 'database' : (env('GEMINI_API_KEY') ? 'env' : 'none');
+        $groqSource   = $hasDbGroq   ? 'database' : (env('GROQ_API_KEY')   ? 'env' : 'none');
+
+        return view('admin.settings', compact('kayeToken', 'geminiApiKey', 'groqApiKey', 'geminiSource', 'groqSource'));
+    }
+
+    public function updateAiKeys(Request $request)
+    {
+        $request->validate([
+            'gemini_api_key' => 'nullable|string',
+            'groq_api_key'   => 'nullable|string',
+        ]);
+
+        $geminiKey = trim((string) $request->input('gemini_api_key', ''));
+        $groqKey   = trim((string) $request->input('groq_api_key', ''));
+
+        if ($geminiKey !== '') {
+            Setting::set('gemini_api_key', $geminiKey);
+        }
+        if ($groqKey !== '') {
+            Setting::set('groq_api_key', $groqKey);
+        }
+
+        return back()->with('success', 'AI API configuration saved successfully to database!');
+    }
+
+    public function testGeminiKey(Request $request)
+    {
+        $key = trim((string) $request->input('gemini_api_key'));
+        if (!$key) {
+            $key = Setting::get('gemini_api_key', config('services.gemini.key') ?: env('GEMINI_API_KEY'));
+        }
+
+        if (!$key) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No Gemini API key provided to test.'
+            ], 400);
+        }
+
+        try {
+            $response = Http::withoutVerifying()
+                ->timeout(12)
+                ->get("https://generativelanguage.googleapis.com/v1beta/models?key={$key}");
+
+            if ($response->successful()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Connection successful! Gemini API Key is active and authorized.'
+                ]);
+            }
+
+            $err = $response->json()['error']['message'] ?? 'Invalid or unauthorized Gemini API key.';
+            return response()->json([
+                'success' => false,
+                'message' => 'Google Gemini Error: ' . $err
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Connection failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function testGroqKey(Request $request)
+    {
+        $key = trim((string) $request->input('groq_api_key'));
+        if (!$key) {
+            $key = Setting::get('groq_api_key', config('services.groq.key') ?: env('GROQ_API_KEY'));
+        }
+
+        if (!$key) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No Groq API key provided to test.'
+            ], 400);
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $key,
+                'Content-Type'  => 'application/json',
+            ])
+            ->timeout(12)
+            ->withoutVerifying()
+            ->get('https://api.groq.com/openai/v1/models');
+
+            if ($response->successful()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Connection successful! Groq API Key is active.'
+                ]);
+            }
+
+            $err = $response->json()['error']['message'] ?? 'Invalid Groq API key.';
+            return response()->json([
+                'success' => false,
+                'message' => 'Groq API Error: ' . $err
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Connection failed: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function generateKayeToken()
     {
-        \App\Models\KayeToken::query()->delete();
+        KayeToken::query()->delete();
 
         $tokenStr = bin2hex(random_bytes(32));
         $expiresAt = now()->addDays(60);
 
-        \App\Models\KayeToken::create([
+        KayeToken::create([
             'token' => $tokenStr,
             'expires_at' => $expiresAt,
         ]);
@@ -29,11 +154,11 @@ class SettingsController extends Controller
 
     public function revokeKayeToken()
     {
-        \App\Models\KayeToken::query()->delete();
+        KayeToken::query()->delete();
         return back()->with('success', 'Access token revoked successfully.');
     }
 
-    public function updateProfile(\Illuminate\Http\Request $request)
+    public function updateProfile(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -41,7 +166,7 @@ class SettingsController extends Controller
 
         $email = session('admin_email');
         if ($email) {
-            $user = \App\Models\User::where('email', $email)->first();
+            $user = User::where('email', $email)->first();
             if ($user) {
                 $user->name = $request->name;
                 $user->save();
