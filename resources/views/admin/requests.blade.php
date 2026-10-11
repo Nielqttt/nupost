@@ -463,15 +463,23 @@ function loadMessages(reqId, silent = false) {
     })
     .catch(() => { if (!silent) box.innerHTML = '<div class="chat-empty-state"><p>Could not load messages.</p></div>'; });
 }
+<<<<<<< HEAD
 let isSendingAdminChat = false;
 async function sendMessage() {
     if (isSendingAdminChat) return;
+=======
+async function sendMessage() {
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
     const input = document.getElementById('chat-input');
     const msg   = input.value.trim();
     if (!msg || !cid) return;
     const btn = document.querySelector('.chat-panel__send');
+<<<<<<< HEAD
     isSendingAdminChat = true;
     if (btn) btn.disabled = true;
+=======
+    btn.disabled = true;
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
     try {
         const res = await fetch('/admin/requests/comment', {
             method: 'POST',
@@ -482,10 +490,14 @@ async function sendMessage() {
         if (d.success) { input.value = ''; loadMessages(cid); }
         else alert('Failed: ' + (d.message || 'Unknown error'));
     } catch(e) { alert('Connection error.'); }
+<<<<<<< HEAD
     finally {
         isSendingAdminChat = false;
         if (btn) btn.disabled = false;
     }
+=======
+    btn.disabled = false;
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
 }
 function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
 

@@ -356,6 +356,7 @@ class RequestController extends Controller
 
         $message = trim($request->input('chat_message', ''));
         if ($message !== '') {
+<<<<<<< HEAD
             // Deduplication guard: ignore duplicate message submitted within 5 seconds
             $duplicate = RequestComment::where('request_id', $id)
                 ->where('sender_role', 'requestor')
@@ -368,6 +369,8 @@ class RequestController extends Controller
                 return redirect()->route('requestor.requests.chat', $id);
             }
 
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
             RequestComment::create([
                 'request_id'  => $id,
                 'sender_role' => 'requestor',

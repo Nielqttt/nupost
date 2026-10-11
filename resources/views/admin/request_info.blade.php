@@ -778,6 +778,7 @@ async function generateAllCaptions() {
     showToast('All captions generated!', 'success');
 }
 
+<<<<<<< HEAD
 let isSendingComment = false;
 async function sendComment() {
     if (isSendingComment) return;
@@ -791,6 +792,11 @@ async function sendComment() {
         btn.style.opacity = '0.5';
         btn.style.cursor = 'not-allowed';
     }
+=======
+async function sendComment() {
+    const input = document.getElementById('comment-input');
+    const msg   = input.value.trim(); if (!msg) return;
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
     try {
         const res  = await fetch('/admin/requests/comment', {
             method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
@@ -804,11 +810,16 @@ async function sendComment() {
                 <div class="comment-av comment-av--admin">A</div>
                 <div class="comment-bubble comment-bubble--admin">${esc(msg)}<div class="comment-meta">Admin · Just now</div></div>
             </div>`;
+<<<<<<< HEAD
             if (list.querySelector('p')) list.innerHTML = '';
+=======
+            if (list.querySelector('[style]')) list.innerHTML = '';
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
             list.insertAdjacentHTML('beforeend', html);
             list.scrollTop = list.scrollHeight;
         }
     } catch {}
+<<<<<<< HEAD
     finally {
         isSendingComment = false;
         if (btn) {
@@ -817,6 +828,8 @@ async function sendComment() {
             btn.style.cursor = '';
         }
     }
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
 }
 document.getElementById('comment-input')?.addEventListener('keydown', e => { if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();sendComment();} });
 

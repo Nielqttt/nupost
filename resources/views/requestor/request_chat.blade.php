@@ -149,13 +149,21 @@
             @endforelse
         </div>
 
+<<<<<<< HEAD
         <form method="POST" action="{{ route('requestor.requests.chat.send', $req->id) }}" class="chat-input-area" id="chat-form" onsubmit="return handleChatSubmit(event)">
+=======
+        <form method="POST" action="{{ route('requestor.requests.chat.send', $req->id) }}" class="chat-input-area" id="chat-form">
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
             @csrf
             <textarea class="chat-input" name="chat_message" id="chat-input"
                       placeholder="Type your message here..."
                       rows="1"
                       onkeydown="handleChatKey(event)"></textarea>
+<<<<<<< HEAD
             <button type="submit" class="chat-send-btn" id="chat-send-btn">
+=======
+            <button type="submit" class="chat-send-btn">
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
@@ -166,13 +174,17 @@
 
 @section('scripts')
 <script>
+<<<<<<< HEAD
     let isSubmittingChat = false;
 
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
     document.addEventListener('DOMContentLoaded', () => {
         const chatBox = document.getElementById('chat-messages');
         if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     });
 
+<<<<<<< HEAD
     function handleChatSubmit(e) {
         if (isSubmittingChat) {
             if (e) e.preventDefault();
@@ -210,4 +222,14 @@
 <style>
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
+=======
+    function handleChatKey(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const val = document.getElementById('chat-input').value.trim();
+            if (val) document.getElementById('chat-form').submit();
+        }
+    }
+</script>
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
 @endsection

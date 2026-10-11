@@ -3,6 +3,7 @@
 
 @section('head-styles')
 <style>
+<<<<<<< HEAD
 .page-hd { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; }
 .page-hd__title { font-family:var(--font-disp); font-size:22px; color:var(--ink); }
 .page-hd__sub   { font-size:13px; color:var(--ink-soft); margin-top:3px; }
@@ -82,6 +83,12 @@
     flex-shrink: 0;
 }
 
+=======
+.page-hd { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; }
+.page-hd__title { font-family:var(--font-disp); font-size:22px; color:var(--ink); }
+.page-hd__sub   { font-size:13px; color:var(--ink-soft); margin-top:3px; }
+
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
 /* STAT CARDS */
 .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
 .scard {
@@ -395,6 +402,7 @@
     <div style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;font-size:13px;font-weight:500;color:#15803d;margin-bottom:16px;">{{ session('success') }}</div>
 @endif
 
+<<<<<<< HEAD
 {{-- LIVE SEARCH BAR WITH PROPER SPACING --}}
 <div class="vis-search-wrap" id="vis-search-wrap">
     <span class="vis-search-icon">
@@ -415,6 +423,8 @@
     <button type="button" class="vis-search-clear" id="vis-search-clear" onclick="clearVisSearch()" title="Clear search">✕</button>
 </div>
 
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
 {{-- STAT CARDS --}}
 <div class="stats-row">
     <div class="scard" style="border-bottom:3px solid #60a5fa;">
@@ -595,7 +605,11 @@
         <div><div class="pa-title">Recent Published Requests</div><div class="pa-sub">Latest approved & posted</div></div>
     </div>
     <div style="overflow-x:auto;">
+<<<<<<< HEAD
         <table class="rtable" id="vis-recent-table">
+=======
+        <table class="rtable">
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
             <thead>
                 <tr><th>Request</th><th>Requestor</th><th>Category</th><th>Platforms</th><th>Status</th><th>Date</th></tr>
             </thead>
@@ -840,7 +854,11 @@
                 </a>
             </div>
             <div style="overflow-x:auto;">
+<<<<<<< HEAD
                 <table class="rtable" id="vis-fb-table">
+=======
+                <table class="rtable">
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
                     <thead>
                         <tr>
                             <th>Post</th>
@@ -962,6 +980,7 @@
 @section('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
+<<<<<<< HEAD
 /* ── Visualization Live Search ─────────────────────────────────────── */
 let visSearchTimer = null;
 const visInput = document.getElementById('vis-search-input');
@@ -1045,6 +1064,8 @@ if (visInput) {
     });
 }
 
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
 /* ── Internal Trend Chart ─────────────────────────────────────── */
 const months   = @json(array_column($months_data,'label'));
 const totals   = @json(array_column($months_data,'total'));
