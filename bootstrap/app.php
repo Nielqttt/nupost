@@ -18,9 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ]);
 
     $middleware->alias([
-        'guest.nupost' => \App\Http\Middleware\GuestNupost::class,
-        'auth.nupost'  => \App\Http\Middleware\AuthNupost::class,
-        'auth.kaye'    => \App\Http\Middleware\AuthKaye::class,
+        'guest.nupost'          => \App\Http\Middleware\GuestNupost::class,
+        'auth.nupost'           => \App\Http\Middleware\AuthNupost::class,
+        'auth.kaye'             => \App\Http\Middleware\AuthKaye::class,
+        'prevent-back-history'  => \App\Http\Middleware\PreventBackHistory::class,
     ]);
 })
     ->withExceptions(function (Exceptions $exceptions): void {

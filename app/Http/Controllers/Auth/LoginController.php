@@ -150,10 +150,19 @@ class LoginController extends Controller
             RememberedDevice::where('token', $request->cookie('remember_token'))->delete();
             cookie()->queue(cookie()->forget('remember_token'));
         }
-        session()->flush();
-        session()->invalidate();
-        session()->regenerateToken();
-        return redirect()->route('landing');
+
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            \Illuminate\Support\Facades\Auth::logout();
+        }
+
+        $request->session()->flush();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('landing')
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sun, 02 Jan 1990 00:00:00 GMT');
     }
 
     private function maskEmail(string $email): string

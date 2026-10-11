@@ -1043,6 +1043,13 @@
                 closeDetailsModal();
             }
         }
+
+        // Prevent viewing authenticated pages via back button after logout (bfcache)
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
+        });
     </script>
 </body>
 </html>
