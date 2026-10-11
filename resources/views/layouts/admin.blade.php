@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>NUPost Admin – @yield('title', 'Dashboard')</title>
+<link rel="icon" type="image/png" href="{{ asset('assets/clearlogo.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('assets/clearlogo.png') }}">
 
 <!-- Prevent Flash of Unstyled Theme -->
 <script>
