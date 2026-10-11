@@ -249,7 +249,7 @@ Route::post('/api/generate-caption', function (Request $request) {
 
 Route::post('/api/bulldog-chat', function (Illuminate\Http\Request $request) {
 
-    $apiKey = env('GROQ_API_KEY');
+    $apiKey = config('services.groq.key') ?: env('GROQ_API_KEY');
 
     if (!$apiKey) {
         return response()->json([
@@ -263,34 +263,55 @@ Route::post('/api/bulldog-chat', function (Illuminate\Http\Request $request) {
         return response()->json(['error' => 'No messages provided.'], 400);
     }
 
-    try {
-        $response = Illuminate\Support\Facades\Http::withHeaders([
-            'Authorization' => 'Bearer ' . $apiKey,
-            'Content-Type'  => 'application/json',
-        ])
-        ->timeout(30)
-        ->withoutVerifying()
-        ->post('https://api.groq.com/openai/v1/chat/completions', [
-            'model'       => 'llama-3.1-8b-instant',
-            'messages'    => $messages,
-            'max_tokens'  => 300,
-            'temperature' => 0.7,
-        ]);
+    $candidateModels = array_values(array_unique(array_filter([
+        config('services.groq.model'),
+        env('GROQ_MODEL'),
+        'qwen/qwen3.8-27b',
+        'openai/gpt-oss-20b',
+        'openai/gpt-oss-120b',
+        'llama-3.3-70b-versatile',
+        'llama-3.1-8b-instant',
+    ])));
 
-        $data = $response->json();
+    $lastError = null;
 
-        if ($response->successful() && isset($data['choices'][0]['message']['content'])) {
-            return response()->json([
-                'reply' => trim($data['choices'][0]['message']['content'])
+    foreach ($candidateModels as $model) {
+        try {
+            $response = Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type'  => 'application/json',
+            ])
+            ->timeout(25)
+            ->withoutVerifying()
+            ->post('https://api.groq.com/openai/v1/chat/completions', [
+                'model'       => $model,
+                'messages'    => $messages,
+                'max_tokens'  => 350,
+                'temperature' => 0.7,
             ]);
+
+            $data = $response->json();
+
+            if ($response->successful() && !empty($data['choices'][0]['message']['content'])) {
+                return response()->json([
+                    'reply' => trim($data['choices'][0]['message']['content']),
+                    'model' => $model,
+                ]);
+            }
+
+            if (isset($data['error']['message'])) {
+                $lastError = $data['error']['message'];
+                // If model does not exist or was decommissioned, try next candidate
+                if (str_contains(strtolower($lastError), 'does not exist') || str_contains(strtolower($lastError), 'decommissioned')) {
+                    continue;
+                }
+            }
+        } catch (\Exception $e) {
+            $lastError = $e->getMessage();
         }
-
-        $errorMsg = $data['error']['message'] ?? 'Unknown Groq API error';
-        return response()->json(['error' => 'Groq API Error: ' . $errorMsg], 400);
-
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Connection error: ' . $e->getMessage()], 500);
     }
+
+    return response()->json(['error' => 'Groq API Error: ' . ($lastError ?? 'Unknown Groq API error')], 400);
 })->middleware('auth.nupost:admin');
 
 // ─── MS KAYE'S ROUTES ──────────────────────────────────────────────

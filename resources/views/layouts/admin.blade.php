@@ -1808,7 +1808,7 @@ Current Page: ${BD_PAGE.current} | Date: ${BD_PAGE.date} | Time: ${BD_PAGE.time}
             headers: {
                 'Content-Type':  'application/json',
                 'Accept':        'application/json',
-                'X-CSRF-TOKEN':  document.querySelector('meta[name="csrf-token"]')?.content || ''
+                'X-CSRF-TOKEN':  window.CSRF || document.querySelector('meta[name="csrf-token"]')?.content || ''
             },
             body: JSON.stringify({ messages })
         });
