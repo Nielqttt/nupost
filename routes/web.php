@@ -134,13 +134,36 @@ Route::get('/uploads/{filename}', function ($filename) {
         public_path('uploads/' . $filename),
         base_path('public_html/uploads/' . $filename),
         base_path('uploads/' . $filename),
+        storage_path('app/public/uploads/' . $filename),
+        public_path('uploads/' . $filename . '.jpg'),
+        public_path('uploads/' . $filename . '.png'),
+        public_path('uploads/' . $filename . '.jpeg'),
+        public_path('uploads/' . $filename . '.jfif'),
+        public_path('uploads/' . $filename . '.webp'),
+        base_path('public_html/uploads/' . $filename . '.jpg'),
+        base_path('public_html/uploads/' . $filename . '.png'),
+        base_path('public_html/uploads/' . $filename . '.jpeg'),
+        base_path('public_html/uploads/' . $filename . '.jfif'),
+        base_path('public_html/uploads/' . $filename . '.webp'),
+        storage_path('app/public/uploads/' . $filename . '.jpg'),
+        storage_path('app/public/uploads/' . $filename . '.png'),
+        storage_path('app/public/uploads/' . $filename . '.jpeg'),
     ];
 
     $filePath = null;
     foreach ($candidates as $path) {
-        if (file_exists($path)) {
+        if (file_exists($path) && !is_dir($path)) {
             $filePath = $path;
             break;
+        }
+    }
+
+    if (!$filePath) {
+        $matches = glob(public_path('uploads/' . $filename . '*')) 
+                ?: glob(base_path('public_html/uploads/' . $filename . '*'))
+                ?: glob(storage_path('app/public/uploads/' . $filename . '*'));
+        if (!empty($matches) && file_exists($matches[0]) && !is_dir($matches[0])) {
+            $filePath = $matches[0];
         }
     }
 

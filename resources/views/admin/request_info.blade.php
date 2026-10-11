@@ -445,6 +445,7 @@
                             $isImage   = in_array($ext, ['jpg','jpeg','png','gif','webp','jfif','svg']);
                             $caption   = $captions[$filename] ?? '';
                             $fileUrl   = '/uploads/' . $filename;
+                            $apiUrl    = '/api/media.php?file=' . urlencode($filename);
                         @endphp
                         <div class="media-item" id="media-item-{{ $i }}" data-file="{{ $filename }}" data-url="{{ $fileUrl }}" onclick="toggleSelect({{ $i }})">
                             <div class="media-item__check">
@@ -453,7 +454,7 @@
                             <div class="media-img-wrap">
                                 @if($isImage)
                                     <div class="no-img" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:36px;">🖼️</div>
-                                    <img src="{{ $fileUrl }}" alt="{{ $filename }}" style="position:relative;z-index:1;" onerror="this.style.opacity='0';var img=this;setTimeout(function(){img.src=img.src.split('?')[0]+'?r='+Date.now();img.onerror=null;img.onload=function(){img.style.opacity='1'};},2000);">
+                                    <img src="{{ $fileUrl }}" alt="{{ $filename }}" style="position:relative;z-index:1;" onerror="if(!this.dataset.triedApi){this.dataset.triedApi='1';this.src='{{ $apiUrl }}';}else{this.style.opacity='0';}">
                                 @else
                                     <div class="no-img">📄</div>
                                 @endif
