@@ -149,29 +149,13 @@
             @endforelse
         </div>
 
-<<<<<<< HEAD
-        <form method="POST" action="{{ route('requestor.requests.chat.send', $req->id) }}" class="chat-input-area" id="chat-form">
-=======
-<<<<<<< HEAD
         <form method="POST" action="{{ route('requestor.requests.chat.send', $req->id) }}" class="chat-input-area" id="chat-form" onsubmit="return handleChatSubmit(event)">
-=======
-        <form method="POST" action="{{ route('requestor.requests.chat.send', $req->id) }}" class="chat-input-area" id="chat-form">
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
             @csrf
             <textarea class="chat-input" name="chat_message" id="chat-input"
                       placeholder="Type your message here..."
                       rows="1"
                       onkeydown="handleChatKey(event)"></textarea>
-<<<<<<< HEAD
-            <button type="submit" class="chat-send-btn">
-=======
-<<<<<<< HEAD
             <button type="submit" class="chat-send-btn" id="chat-send-btn">
-=======
-            <button type="submit" class="chat-send-btn">
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
@@ -182,22 +166,13 @@
 
 @section('scripts')
 <script>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
     let isSubmittingChat = false;
 
-=======
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
     document.addEventListener('DOMContentLoaded', () => {
         const chatBox = document.getElementById('chat-messages');
         if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     });
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
     function handleChatSubmit(e) {
         if (isSubmittingChat) {
             if (e) e.preventDefault();
@@ -235,18 +210,4 @@
 <style>
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
-=======
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
-    function handleChatKey(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            const val = document.getElementById('chat-input').value.trim();
-            if (val) document.getElementById('chat-form').submit();
-        }
-    }
-</script>
-<<<<<<< HEAD
-=======
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 @endsection

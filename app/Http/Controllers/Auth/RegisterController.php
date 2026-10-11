@@ -37,16 +37,10 @@ class RegisterController extends Controller
         if (!$name || !$email || !$password || !$confirm)
             return back()->withInput()->with('error', 'Please fill in all fields.');
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
         if (!$request->has('terms')) {
             return back()->withInput()->with('error', 'You must agree to the Terms and Conditions to register.');
         }
 
-=======
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
         if ($password !== $confirm)
             return back()->withInput()->with('error', 'Passwords do not match.');
 

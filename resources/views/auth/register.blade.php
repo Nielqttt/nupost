@@ -59,9 +59,6 @@ html, body { height: 100%; font-family: var(--font-inter); }
 }
 .verify-notice svg { flex-shrink: 0; margin-top: 1px; }
 @media(max-width: 768px) { .register__card { width: 92%; padding: 28px 24px; } }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 
 /* Terms & Conditions Row & Modal */
 .terms-row { display: flex; align-items: flex-start; gap: 8px; margin-top: -2px; }
@@ -130,9 +127,6 @@ html, body { height: 100%; font-family: var(--font-inter); }
 .terms-modal__btn--accept:hover { background: #001844; }
 .terms-modal__btn--cancel { background: #e2e8f0; color: #475569; }
 .terms-modal__btn--cancel:hover { background: #cbd5e1; }
-=======
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 </style>
 </head>
 <body>
@@ -192,10 +186,6 @@ html, body { height: 100%; font-family: var(--font-inter); }
                     </button>
                 </div>
             </div>
-<<<<<<< HEAD
-            <button class="register__button" type="submit">CREATE ACCOUNT</button>
-=======
-<<<<<<< HEAD
             {{-- TERMS AND CONDITIONS --}}
             <div class="terms-row">
                 <label class="terms-checkbox-wrap">
@@ -212,19 +202,12 @@ html, body { height: 100%; font-family: var(--font-inter); }
             </div>
 
             <button class="register__button" type="submit" id="reg-submit-btn">CREATE ACCOUNT</button>
-=======
-            <button class="register__button" type="submit">CREATE ACCOUNT</button>
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
         </form>
         <div class="login-link">
             Already have an account? <a href="{{ route('login') }}">Login here</a>
         </div>
     </section>
 </main>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 
 {{-- TERMS & CONDITIONS MODAL --}}
 <div class="terms-modal" id="terms-modal" onclick="closeTermsOnBackdrop(event)">
@@ -265,9 +248,6 @@ html, body { height: 100%; font-family: var(--font-inter); }
     </div>
 </div>
 
-=======
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 <script>
 function togglePassword(id, btn) {
     const input = document.getElementById(id);
@@ -280,9 +260,6 @@ function togglePassword(id, btn) {
         svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
     }
 }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 
 function openTermsModal(e) {
     if (e) e.preventDefault();
@@ -303,9 +280,6 @@ function acceptTermsModal() {
     document.getElementById('terms-checkbox').checked = true;
     closeTermsModal();
 }
-=======
->>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
->>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 </script>
 </body>
 </html>
