@@ -778,9 +778,31 @@ async function generateAllCaptions() {
     showToast('All captions generated!', 'success');
 }
 
+<<<<<<< HEAD
 async function sendComment() {
     const input = document.getElementById('comment-input');
     const msg   = input.value.trim(); if (!msg) return;
+=======
+<<<<<<< HEAD
+let isSendingComment = false;
+async function sendComment() {
+    if (isSendingComment) return;
+    const input = document.getElementById('comment-input');
+    const msg   = input ? input.value.trim() : '';
+    if (!msg) return;
+    const btn   = document.querySelector('.btn-send');
+    isSendingComment = true;
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+    }
+=======
+async function sendComment() {
+    const input = document.getElementById('comment-input');
+    const msg   = input.value.trim(); if (!msg) return;
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
     try {
         const res  = await fetch('/admin/requests/comment', {
             method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
@@ -794,11 +816,33 @@ async function sendComment() {
                 <div class="comment-av comment-av--admin">A</div>
                 <div class="comment-bubble comment-bubble--admin">${esc(msg)}<div class="comment-meta">Admin · Just now</div></div>
             </div>`;
+<<<<<<< HEAD
             if (list.querySelector('[style]')) list.innerHTML = '';
+=======
+<<<<<<< HEAD
+            if (list.querySelector('p')) list.innerHTML = '';
+=======
+            if (list.querySelector('[style]')) list.innerHTML = '';
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
             list.insertAdjacentHTML('beforeend', html);
             list.scrollTop = list.scrollHeight;
         }
     } catch {}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    finally {
+        isSendingComment = false;
+        if (btn) {
+            btn.disabled = false;
+            btn.style.opacity = '';
+            btn.style.cursor = '';
+        }
+    }
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 }
 document.getElementById('comment-input')?.addEventListener('keydown', e => { if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();sendComment();} });
 

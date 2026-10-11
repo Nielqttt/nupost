@@ -320,6 +320,23 @@ class RequestManagementController extends Controller
             return response()->json(['success' => false, 'message' => 'Request not found.']);
         }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        // Deduplication guard: ignore duplicate comment submitted within 5 seconds
+        $duplicate = RequestComment::where('request_id', $id)
+            ->where('sender_role', 'admin')
+            ->where('message', $message)
+            ->where('created_at', '>=', now()->subSeconds(5))
+            ->exists();
+
+        if ($duplicate) {
+            return response()->json(['success' => true, 'message' => 'Comment posted.']);
+        }
+
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
         RequestComment::create([
             'request_id'  => $id,
             'sender_role' => 'admin',

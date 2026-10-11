@@ -3,10 +3,98 @@
 
 @section('head-styles')
 <style>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+.page-hd { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; }
+.page-hd__title { font-family:var(--font-disp); font-size:22px; color:var(--ink); }
+.page-hd__sub   { font-size:13px; color:var(--ink-soft); margin-top:3px; }
+
+/* VISUALIZATION SEARCH BAR */
+.vis-search-wrap {
+    margin: 0 0 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 10px 18px;
+    box-shadow: var(--shadow-sm);
+    transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vis-search-wrap:focus-within {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3.5px rgba(0, 35, 102, 0.1);
+    transform: translateY(-1px);
+}
+.vis-search-icon {
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    transition: color .15s;
+}
+.vis-search-wrap:focus-within .vis-search-icon {
+    color: var(--navy);
+}
+.vis-search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 13.5px;
+    font-family: var(--font);
+    color: var(--ink);
+    outline: none;
+    padding: 0 4px;
+}
+.vis-search-input::placeholder {
+    color: var(--ink-faint);
+}
+.vis-search-clear {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+}
+.vis-search-clear:hover {
+    background: var(--cream-dark);
+    color: var(--ink);
+}
+.vis-search-clear.visible {
+    display: flex;
+}
+.vis-search-pill {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--navy);
+    background: var(--navy-pale);
+    border: 1px solid rgba(0, 35, 102, 0.12);
+    padding: 4px 11px;
+    border-radius: 20px;
+    display: none;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+=======
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 .page-hd { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; }
 .page-hd__title { font-family:var(--font-disp); font-size:22px; color:var(--ink); }
 .page-hd__sub   { font-size:13px; color:var(--ink-soft); margin-top:3px; }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 /* STAT CARDS */
 .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
 .scard {
@@ -320,6 +408,32 @@
     <div style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;font-size:13px;font-weight:500;color:#15803d;margin-bottom:16px;">{{ session('success') }}</div>
 @endif
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+{{-- LIVE SEARCH BAR WITH PROPER SPACING --}}
+<div class="vis-search-wrap" id="vis-search-wrap">
+    <span class="vis-search-icon">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+    </span>
+    <input type="text"
+           id="vis-search-input"
+           class="vis-search-input"
+           placeholder="Search visualization data, published requests, categories, platforms..."
+           autocomplete="off">
+    <span class="vis-search-pill" id="vis-search-pill">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="vis-search-pill-text">0 matches</span>
+    </span>
+    <button type="button" class="vis-search-clear" id="vis-search-clear" onclick="clearVisSearch()" title="Clear search">✕</button>
+</div>
+
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 {{-- STAT CARDS --}}
 <div class="stats-row">
     <div class="scard" style="border-bottom:3px solid #60a5fa;">
@@ -500,7 +614,15 @@
         <div><div class="pa-title">Recent Published Requests</div><div class="pa-sub">Latest approved & posted</div></div>
     </div>
     <div style="overflow-x:auto;">
+<<<<<<< HEAD
         <table class="rtable">
+=======
+<<<<<<< HEAD
+        <table class="rtable" id="vis-recent-table">
+=======
+        <table class="rtable">
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
             <thead>
                 <tr><th>Request</th><th>Requestor</th><th>Category</th><th>Platforms</th><th>Status</th><th>Date</th></tr>
             </thead>
@@ -745,7 +867,15 @@
                 </a>
             </div>
             <div style="overflow-x:auto;">
+<<<<<<< HEAD
                 <table class="rtable">
+=======
+<<<<<<< HEAD
+                <table class="rtable" id="vis-fb-table">
+=======
+                <table class="rtable">
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
                     <thead>
                         <tr>
                             <th>Post</th>
@@ -867,6 +997,95 @@
 @section('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+/* ── Visualization Live Search ─────────────────────────────────────── */
+let visSearchTimer = null;
+const visInput = document.getElementById('vis-search-input');
+const visClear = document.getElementById('vis-search-clear');
+const visPill  = document.getElementById('vis-search-pill');
+const visPillText = document.getElementById('vis-search-pill-text');
+
+function applyVisSearch(rawQuery) {
+    const q = (rawQuery || '').toLowerCase().trim();
+    if (!visInput) return;
+
+    if (q) {
+        visClear.classList.add('visible');
+    } else {
+        visClear.classList.remove('visible');
+        visPill.style.display = 'none';
+    }
+
+    let matchCount = 0;
+
+    // Filter Recent Published Requests table
+    const recTable = document.getElementById('vis-recent-table');
+    if (recTable) {
+        const rows = recTable.querySelectorAll('tbody tr');
+        rows.forEach(tr => {
+            if (tr.querySelector('td[colspan]')) return;
+            if (!q) {
+                tr.style.display = '';
+                matchCount++;
+            } else {
+                const text = tr.textContent.toLowerCase();
+                if (text.includes(q)) {
+                    tr.style.display = '';
+                    matchCount++;
+                } else {
+                    tr.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // Filter Facebook posts table if present
+    const fbTable = document.getElementById('vis-fb-table');
+    if (fbTable) {
+        const fbRows = fbTable.querySelectorAll('tbody tr');
+        fbRows.forEach(tr => {
+            if (tr.querySelector('td[colspan]')) return;
+            if (!q) {
+                tr.style.display = '';
+            } else {
+                const text = tr.textContent.toLowerCase();
+                if (text.includes(q)) {
+                    tr.style.display = '';
+                    matchCount++;
+                } else {
+                    tr.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    if (q) {
+        visPill.style.display = 'inline-flex';
+        visPillText.textContent = `${matchCount} match${matchCount === 1 ? '' : 'es'}`;
+    }
+}
+
+function clearVisSearch() {
+    if (!visInput) return;
+    visInput.value = '';
+    applyVisSearch('');
+    visInput.focus();
+}
+
+if (visInput) {
+    visInput.addEventListener('input', function() {
+        clearTimeout(visSearchTimer);
+        visSearchTimer = setTimeout(() => {
+            applyVisSearch(this.value);
+        }, 120);
+    });
+}
+
+=======
+>>>>>>> 17254f5ee6563630c1564059690085e9dacdc5d0
+>>>>>>> 2d12fccca36fc7cdc88169e0beaf6a7c87a17a01
 /* ── Internal Trend Chart ─────────────────────────────────────── */
 const months   = @json(array_column($months_data,'label'));
 const totals   = @json(array_column($months_data,'total'));
