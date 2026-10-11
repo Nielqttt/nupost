@@ -30,11 +30,33 @@
             padding: 0;
         }
 
+        @keyframes pageFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg);
             color: var(--text);
             min-height: 100vh;
+        }
+
+        .container {
+            animation: pageFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+            will-change: opacity, transform;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .container {
+                animation: none !important;
+            }
         }
 
         /* HEADER */

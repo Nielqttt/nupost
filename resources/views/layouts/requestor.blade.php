@@ -686,58 +686,35 @@ html, body {
     .calendar-grid { min-width: 700px; }
 }
 
-/* ── Reusable Skeleton Shimmer System ────────────────────────────── */
-@keyframes skeleton-shimmer {
-    0%   { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
-
-.skeleton {
-    background: linear-gradient(
-        90deg,
-        rgba(0, 0, 0, 0.06) 25%,
-        rgba(0, 0, 0, 0.12) 37%,
-        rgba(0, 0, 0, 0.06) 63%
-    );
-    background-size: 400% 100%;
-    animation: skeleton-shimmer 1.5s ease-in-out infinite;
-    border-radius: 8px;
-    display: inline-block;
-}
-
-/* Dark mode support */
-[data-theme="dark"] .skeleton {
-    background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.05) 25%,
-        rgba(255, 255, 255, 0.12) 37%,
-        rgba(255, 255, 255, 0.05) 63%
-    );
-    background-size: 400% 100%;
-}
-
-/* Common Skeleton Helpers */
-.skeleton-text       { height: 14px; width: 80%; border-radius: 4px; margin-bottom: 6px; }
-.skeleton-text-sm    { height: 11px; width: 50%; border-radius: 4px; }
-.skeleton-title      { height: 22px; width: 60%; border-radius: 6px; margin-bottom: 10px; }
-.skeleton-badge      { height: 22px; width: 68px; border-radius: 99px; }
-.skeleton-avatar     { width: 42px; height: 42px; border-radius: 50%; }
-.skeleton-card       { width: 100%; height: 110px; border-radius: 16px; margin-bottom: 14px; }
-
-/* ── Smooth GPU Micro-Animations & Page Fades ────────────────────── */
+/* ── Smooth GPU Page Entrance Animations ─────────────────────────── */
 @keyframes pageFadeIn {
-    from {
+    0% {
         opacity: 0;
-        transform: translateY(4px);
+        transform: translateY(5px);
     }
-    to {
+    100% {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-main, .main-content, .content-wrap, .page-content, .page-outer, .create-page, .trk {
-    animation: pageFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+.page-content, main, .main-content, .content-wrap, .page-outer, .create-page, .trk {
+    animation: pageFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: opacity, transform;
+}
+
+/* Polished Turbo Drive progress bar */
+.turbo-progress-bar {
+    height: 3px !important;
+    background: linear-gradient(90deg, #002366 0%, #3b82f6 50%, #ffd700 100%) !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6) !important;
+    z-index: 999999 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-content, main, .main-content, .content-wrap, .page-outer, .create-page, .trk {
+        animation: none !important;
+    }
 }
 </style>
 @yield('head-styles')

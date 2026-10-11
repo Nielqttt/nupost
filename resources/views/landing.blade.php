@@ -102,6 +102,17 @@
             -webkit-text-size-adjust: 100%;
         }
 
+        @keyframes pageFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         body {
             font-family: var(--font-main);
             background-color: var(--bg-page);
@@ -111,6 +122,13 @@
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
             transition: background-color 0.25s ease, color 0.25s ease;
+            animation: pageFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body {
+                animation: none !important;
+            }
         }
 
         /* Ambient Gradients */
@@ -2261,5 +2279,7 @@
             });
         });
     </script>
+    <!-- instant.page: Pre-fetches pages on link hover for 0ms navigation -->
+    <script src="//instant.page/5.2.0" type="module" integrity="sha384-jnZyxPjiipYXnSU0Rck6V38m2BQHTEXv80QwJuJChhxLMgkE4g++aD4IVFzpBc1z"></script>
 </body>
 </html>
