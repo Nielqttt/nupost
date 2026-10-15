@@ -613,6 +613,27 @@ class LegacyMobileApiController extends Controller
                 return $err;
             }
 
+            $table = $this->requestsTable();
+
+            // 🛡️ Exact Duplicate Hash Check (within 24h)
+            $contentHash = md5(strtolower(trim($title)) . '|' . strtolower(trim($description)));
+            if (Schema::hasColumn($table, 'description')) {
+                $recentDuplicates = DB::table($table)
+                    ->where('status', '!=', 'Rejected')
+                    ->where('created_at', '>=', now()->subHours(24))
+                    ->get();
+
+                foreach ($recentDuplicates as $dup) {
+                    $dupHash = md5(strtolower(trim($dup->title ?? '')) . '|' . strtolower(trim($dup->description ?? '')));
+                    if ($dupHash === $contentHash) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Duplicate submission detected. An identical request was submitted within the last 24 hours.',
+                        ], 422);
+                    }
+                }
+            }
+
             $mediaNames = [];
             $files = $request->file('media', []);
             if ($files instanceof UploadedFile) {

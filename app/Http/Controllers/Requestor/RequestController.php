@@ -96,6 +96,27 @@ class RequestController extends Controller
             'post_date'   => 'required|date|after:today',
         ]);
 
+        // 🛡️ Exact Duplicate Hash Check (within 24h)
+        $title = trim((string) $request->input('title', ''));
+        $description = trim((string) $request->input('description', ''));
+        $contentHash = md5(strtolower($title) . '|' . strtolower($description));
+        $recentDuplicates = PostRequest::where('status', '!=', 'Rejected')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->get();
+
+        foreach ($recentDuplicates as $dup) {
+            $dupHash = md5(strtolower(trim($dup->title ?? '')) . '|' . strtolower(trim($dup->description ?? '')));
+            if ($dupHash === $contentHash) {
+                if ($request->expectsJson() || $request->is('api/*')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Duplicate submission detected. An identical request was submitted within the last 24 hours.',
+                    ], 422);
+                }
+                return back()->withInput()->with('error', 'Duplicate submission detected. An identical request was submitted within the last 24 hours.');
+            }
+        }
+
         $media_file = '';
         if ($request->hasFile('media')) {
             $upload_dir    = public_path('uploads');
