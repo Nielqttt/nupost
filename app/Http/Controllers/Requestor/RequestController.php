@@ -363,13 +363,35 @@ class RequestController extends Controller
             // Create notification for requestor
             if ($user_id) {
                 try {
-                    \App\Models\Notification::create([
+                    $reqNotifData = [
                         'user_id' => $user_id,
                         'title'   => 'Request Submitted',
                         'message' => "Your request \"{$req->title}\" has been submitted and is pending review.",
                         'type'    => 'new_request',
                         'is_read' => false,
-                    ]);
+                    ];
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'request_id')) {
+                        $reqNotifData['request_id'] = $req->id;
+                    }
+                    \App\Models\Notification::create($reqNotifData);
+                } catch (\Throwable $e) {}
+            }
+
+            // Create notification for all admins
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                try {
+                    $adminNotifData = [
+                        'user_id' => $admin->id,
+                        'title'   => 'New Request: ' . \Illuminate\Support\Str::limit($req->title, 40),
+                        'message' => ($user_name ?: 'A requestor') . ' submitted a new post request for review.',
+                        'type'    => 'new_request',
+                        'is_read' => false,
+                    ];
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'request_id')) {
+                        $adminNotifData['request_id'] = $req->id;
+                    }
+                    \App\Models\Notification::create($adminNotifData);
                 } catch (\Throwable $e) {}
             }
 
@@ -570,14 +592,19 @@ class RequestController extends Controller
     public function sendChat(Request $request, $id)
     {
         $user_name = session('name');
-        $req       = PostRequest::where('id', $id)->where('requester', $user_name)->firstOrFail();
+        $userId    = session('user_id') ?: auth()->id();
+        $req       = PostRequest::where('id', $id)
+            ->where(function ($q) use ($user_name, $userId) {
+                if ($user_name) $q->where('requester', $user_name);
+                if ($userId)    $q->orWhere('user_id', $userId);
+            })
+            ->firstOrFail();
 
         $message = trim($request->input('chat_message', ''));
         if ($message !== '') {
             // Deduplication guard: duplicate message submitted within 5 seconds
             $duplicate = RequestComment::where('request_id', $id)
                 ->where('sender_role', 'requestor')
-                ->where('sender_name', $user_name)
                 ->where('message', $message)
                 ->where('created_at', '>=', now()->subSeconds(5))
                 ->exists();
@@ -589,22 +616,43 @@ class RequestController extends Controller
             RequestComment::create([
                 'request_id'  => $id,
                 'sender_role' => 'requestor',
-                'sender_name' => $user_name,
+                'sender_name' => $user_name ?: ($req->requester ?: 'Requestor'),
                 'message'     => $message,
+                'admin_seen'  => false,
             ]);
+
+            // Mark post request as needing attention
+            $req->update(['admin_seen' => false]);
 
             RequestActivity::create([
                 'request_id' => $id,
-                'actor'      => $user_name,
+                'actor'      => $user_name ?: ($req->requester ?: 'Requestor'),
                 'action'     => 'Sent a message to admin',
             ]);
 
-            // Send email to all admins
+            // Create notification for all admins
             $admins = \App\Models\User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                try {
+                    $chatNotifData = [
+                        'user_id' => $admin->id,
+                        'title'   => 'New Message from ' . ($user_name ?: $req->requester),
+                        'message' => '"' . \Illuminate\Support\Str::limit($req->title, 35) . '": ' . \Illuminate\Support\Str::limit($message, 80),
+                        'type'    => 'comment',
+                        'is_read' => false,
+                    ];
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'request_id')) {
+                        $chatNotifData['request_id'] = $id;
+                    }
+                    \App\Models\Notification::create($chatNotifData);
+                } catch (\Throwable $e) {}
+            }
+
+            // Send email to all admins
             foreach ($admins as $admin) {
                 if ($admin->email) {
                     try {
-                        $html = $this->getNewChatAdminEmailHtml($admin->name, $req->title, $user_name, $message);
+                        $html = $this->getNewChatAdminEmailHtml($admin->name, $req->title, $user_name ?: $req->requester, $message);
                         \Illuminate\Support\Facades\Mail::send([], [], function ($msg) use ($admin, $req, $html) {
                             $msg->to($admin->email, $admin->name)
                                 ->subject("NUPost Admin: New chat from " . $req->requester)
@@ -620,7 +668,6 @@ class RequestController extends Controller
         return redirect()->route('requestor.requests.chat', $id);
     }
 
-    /**
     /**
      * Calendar View
      */

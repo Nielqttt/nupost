@@ -507,5 +507,167 @@ class AntiSpamAndSettingsTest extends TestCase
         $this->assertNotNull($found);
         $this->assertEquals('AI API Key Updated', $found['title']);
     }
+
+    /**
+     * Test minimal landing page renders successfully with proper links.
+     */
+    public function test_landing_page_renders_successfully()
+    {
+        $response = $this->get(route('landing'));
+        $response->assertStatus(200);
+        $response->assertSee('Social Media Request & Content Portal', false);
+        $response->assertSee('Submit a Post Request', false);
+        $response->assertSee(route('login'), false);
+        $response->assertSee(route('register'), false);
+    }
+
+    /**
+     * Test submitting a new request creates an automatic notification for admin.
+     */
+    public function test_submitting_new_request_creates_admin_notification()
+    {
+        $admin = User::create([
+            'name' => 'Notification Admin',
+            'email' => 'admin_notif@nupost.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        $requestor = User::create([
+            'name' => 'Event Officer',
+            'email' => 'officer@nupost.com',
+            'password' => bcrypt('password'),
+            'is_verified' => true,
+            'role' => 'requestor',
+        ]);
+
+        // Requestor submits new request
+        $response = $this->withSession([
+            'name' => $requestor->name,
+            'role' => 'requestor',
+            'user_id' => $requestor->id,
+        ])->post(route('requestor.requests.store'), [
+            'submission_token' => (string) Str::uuid(),
+            'title' => 'Freshers Welcome Assembly 2026',
+            'description' => 'Orientation and general welcoming ceremony for all first-year freshmen students.',
+            'category' => 'Standard PubMat',
+            'priority' => 'Medium',
+            'platforms' => ['Facebook', 'Instagram'],
+            'post_date' => date('Y-m-d', strtotime('+7 days')),
+        ]);
+
+        $response->assertSessionHas('success');
+
+        // Verify admin notification exists in database
+        $adminNotif = \App\Models\Notification::where('user_id', $admin->id)
+            ->where('type', 'new_request')
+            ->first();
+
+        $this->assertNotNull($adminNotif);
+        $this->assertStringContainsString('Freshers Welcome Assembly 2026', $adminNotif->title);
+
+        // Verify admin fetch includes the new request notification
+        $fetch = $this->withSession([
+            'role' => 'admin',
+            'admin_id' => $admin->id,
+            'admin_email' => $admin->email,
+            'admin_name' => $admin->name,
+        ])->getJson(route('admin.notifications.fetch'));
+
+        $fetch->assertStatus(200);
+        $this->assertTrue($fetch->json('unread_count') >= 1);
+        $found = collect($fetch->json('notifications'))->firstWhere('type', 'new_request');
+        $this->assertNotNull($found);
+        $this->assertStringContainsString('Freshers Welcome Assembly 2026', $found['title']);
+    }
+
+    /**
+     * Test requestor sending chat comment creates an automatic notification for admin.
+     */
+    public function test_requestor_sending_chat_creates_admin_notification()
+    {
+        $admin = User::create([
+            'name' => 'Chat Admin',
+            'email' => 'chat_admin@nupost.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        $requestor = User::create([
+            'name' => 'Student Leader',
+            'email' => 'student_leader@nupost.com',
+            'password' => bcrypt('password'),
+            'is_verified' => true,
+            'role' => 'requestor',
+        ]);
+
+        $post = PostRequest::create([
+            'title' => 'Campus Hackathon 2026',
+            'requester' => $requestor->name,
+            'user_id' => $requestor->id,
+            'description' => 'Annual student hackathon and tech exhibit.',
+            'category' => 'Standard PubMat',
+            'priority' => 'High',
+            'status' => 'Pending Review',
+            'platform' => 'Facebook',
+        ]);
+
+        // Requestor sends a chat message
+        $response = $this->withSession([
+            'name' => $requestor->name,
+            'role' => 'requestor',
+            'user_id' => $requestor->id,
+        ])->post(route('requestor.requests.chat.send', $post->id), [
+            'chat_message' => 'Good day Admin, we uploaded the revised poster version.',
+        ]);
+
+        $response->assertRedirect(route('requestor.requests.chat', $post->id));
+
+        // Verify notification was created for admin
+        $notif = \App\Models\Notification::where('user_id', $admin->id)
+            ->where('type', 'comment')
+            ->first();
+
+        $this->assertNotNull($notif);
+        $this->assertStringContainsString('Student Leader', $notif->title);
+        $this->assertStringContainsString('revised poster version', $notif->message);
+
+        // Verify admin fetch reflects comment notification
+        $fetch = $this->withSession([
+            'role' => 'admin',
+            'admin_id' => $admin->id,
+            'admin_email' => $admin->email,
+            'admin_name' => $admin->name,
+        ])->getJson(route('admin.notifications.fetch'));
+
+        $fetch->assertStatus(200);
+        $this->assertTrue($fetch->json('unread_count') >= 1);
+        $found = collect($fetch->json('notifications'))->firstWhere('type', 'comment');
+        $this->assertNotNull($found);
+        $this->assertStringContainsString('Student Leader', $found['title']);
+
+        // Admin marks notification as read
+        $markRead = $this->withSession([
+            'role' => 'admin',
+            'admin_id' => $admin->id,
+            'admin_email' => $admin->email,
+            'admin_name' => $admin->name,
+        ])->postJson(route('admin.notifications.read'), ['id' => $found['id']]);
+
+        $markRead->assertStatus(200);
+        $this->assertTrue($markRead->json('success'));
+
+        // Verify unread count decreases
+        $fetchAfter = $this->withSession([
+            'role' => 'admin',
+            'admin_id' => $admin->id,
+            'admin_email' => $admin->email,
+            'admin_name' => $admin->name,
+        ])->getJson(route('admin.notifications.fetch'));
+
+        $foundAfter = collect($fetchAfter->json('notifications'))->firstWhere('id', $found['id']);
+        $this->assertTrue((bool)$foundAfter['is_read']);
+    }
 }
+
 

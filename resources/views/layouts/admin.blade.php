@@ -1658,11 +1658,11 @@ function renderNotifications(notifs, unread) {
     }
 
     list.innerHTML = notifs.slice(0, 15).map(n => {
-        let link = '/admin/requests';
+        let link = '{{ route("admin.requests") }}';
         if (n.type === 'api_key' || n.type === 'system') {
             link = '{{ route("admin.settings") }}#ai-keys';
         } else if (n.request_id) {
-            link = `/admin/requests/${n.request_id}`;
+            link = `{{ url('admin/requests') }}/${n.request_id}`;
         }
         return `
             <a href="${link}"

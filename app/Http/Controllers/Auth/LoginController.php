@@ -53,6 +53,7 @@ class LoginController extends Controller
                 session()->regenerate();
                 session([
                     'role'        => 'admin',
+                    'admin_id'    => $user->id,
                     'admin_email' => $user->email,
                     'admin_name'  => $user->name,
                 ]);

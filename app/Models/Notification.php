@@ -10,6 +10,7 @@ class Notification extends Model
 
     protected $fillable = [
         'user_id',
+        'request_id',
         'title',
         'message',
         'type',
@@ -23,5 +24,10 @@ class Notification extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function postRequest()
+    {
+        return $this->belongsTo(PostRequest::class, 'request_id');
     }
 }

@@ -109,6 +109,15 @@ class RequestManagementController extends Controller
 
         $request = $req;
 
+        // Auto-mark as seen by admin when viewing request
+        try {
+            $req->update(['admin_seen' => true]);
+            RequestComment::where('request_id', $id)->where('sender_role', 'requestor')->update(['admin_seen' => true]);
+            if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'request_id')) {
+                Notification::where('request_id', $id)->where('is_read', false)->update(['is_read' => true]);
+            }
+        } catch (\Throwable $e) {}
+
         return view('admin.request_info', compact('req', 'request', 'comments', 'activities'));
     }
 
@@ -361,15 +370,19 @@ class RequestManagementController extends Controller
             'message'     => $message,
         ]);
 
-        $user = User::where('name', $req->requester)->first();
+        $user = ($req->user_id ? User::find($req->user_id) : null) ?: User::where('name', $req->requester)->first();
         if ($user) {
-            Notification::create([
+            $notifData = [
                 'user_id' => $user->id,
                 'title'   => 'New Comment from Admin',
                 'message' => "Admin commented on your request \"{$req->title}\": $message",
                 'type'    => 'comment',
                 'is_read' => false,
-            ]);
+            ];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'request_id')) {
+                $notifData['request_id'] = $id;
+            }
+            Notification::create($notifData);
 
             // Send email notification for admin comment
             if ($user->email) {

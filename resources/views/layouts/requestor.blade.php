@@ -968,7 +968,7 @@ function renderNotifications(notifs, unread) {
     }
 
     list.innerHTML = notifs.slice(0, 12).map(n => {
-        const link = n.request_id ? `/requestor/requests/${n.request_id}/chat` : '/requestor/notifications';
+        const link = n.request_id ? `{{ url('requestor/requests') }}/${n.request_id}/chat` : '{{ route("requestor.notifications") }}';
         return `<a href="${link}" class="notif-item ${!n.is_read ? 'unread' : ''}" onclick="handleRequestorNotifClick(event, ${n.id}, '${link}')">
             ${getIcon(n.type)}
             <div style="flex:1;min-width:0;">
