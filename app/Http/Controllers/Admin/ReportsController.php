@@ -5,12 +5,40 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PostRequest;
 use App\Http\Controllers\Admin\FacebookAnalyticsController;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ReportsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('admin.reports');
+        // 6-month request volume trend
+        $months_data = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $m = Carbon::now()->subMonths($i);
+            $months_data[] = [
+                'label'    => $m->format('M'),
+                'total'    => PostRequest::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->count(),
+                'posted'   => PostRequest::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->where('status', 'Posted')->count(),
+                'approved' => PostRequest::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->where('status', 'Approved')->count(),
+            ];
+        }
+
+        // Selected month for Facebook / Meta
+        $selectedMonth = $request->query('month', Carbon::now()->format('Y-m'));
+        if (!preg_match('/^\d{4}-\d{2}$/', $selectedMonth)) {
+            $selectedMonth = Carbon::now()->format('Y-m');
+        }
+
+        $monthCarbon = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
+
+        $fbController = new FacebookAnalyticsController();
+        $fb = $fbController->getData($selectedMonth);
+        $fb['selected_month']   = $selectedMonth;
+        $fb['month_label']      = $monthCarbon->format('F Y');
+        $fb['available_months'] = FacebookAnalyticsController::getAvailableMonths();
+
+        return view('admin.reports', compact('months_data', 'fb'));
     }
 
     public function export()

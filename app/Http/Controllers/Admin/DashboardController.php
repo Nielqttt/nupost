@@ -19,7 +19,10 @@ class DashboardController extends Controller
         $users    = User::count();
 
         // Calculate SLA urgency
-        $slackSql = "DATEDIFF(COALESCE(preferred_date, DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)), CURRENT_DATE) - (CASE category WHEN 'Event Documentation' THEN 30 WHEN 'New Campaign / Creative Concept' THEN 10 WHEN 'Multiple Collaterals / Tarpaulins' THEN 5 WHEN 'Standard PubMat' THEN 3 WHEN 'Template-Based PubMat' THEN 2 ELSE 1 END)";
+        $isSqlite = \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite';
+        $slackSql = $isSqlite
+            ? "(julianday(COALESCE(preferred_date, date('now', '+3 days'))) - julianday('now')) - (CASE category WHEN 'Event Documentation' THEN 30 WHEN 'New Campaign / Creative Concept' THEN 10 WHEN 'Multiple Collaterals / Tarpaulins' THEN 5 WHEN 'Standard PubMat' THEN 3 WHEN 'Template-Based PubMat' THEN 2 ELSE 1 END)"
+            : "DATEDIFF(COALESCE(preferred_date, DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)), CURRENT_DATE) - (CASE category WHEN 'Event Documentation' THEN 30 WHEN 'New Campaign / Creative Concept' THEN 10 WHEN 'Multiple Collaterals / Tarpaulins' THEN 5 WHEN 'Standard PubMat' THEN 3 WHEN 'Template-Based PubMat' THEN 2 ELSE 1 END)";
         $at_risk = PostRequest::whereIn('status', ['Pending', 'Pending Review', 'Under Review'])
             ->whereRaw("($slackSql) < 0")
             ->count();
@@ -46,12 +49,8 @@ class DashboardController extends Controller
                 ->get()
             : collect();
 
-        // Fetch Facebook / Meta Graph API data
-        $fbController = new FacebookAnalyticsController();
-        $fb = $fbController->getData();
-
         return view('admin.dashboard', compact(
-            'total', 'pending', 'review', 'approved', 'posted', 'rejected', 'users', 'recent', 'fb', 'at_risk', 'due_soon', 'recentActivities'
+            'total', 'pending', 'review', 'approved', 'posted', 'rejected', 'users', 'recent', 'at_risk', 'due_soon', 'recentActivities'
         ));
     }
 }

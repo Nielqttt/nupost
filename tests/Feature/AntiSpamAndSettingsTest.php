@@ -668,6 +668,59 @@ class AntiSpamAndSettingsTest extends TestCase
         $foundAfter = collect($fetchAfter->json('notifications'))->firstWhere('id', $found['id']);
         $this->assertTrue((bool)$foundAfter['is_read']);
     }
+
+    /**
+     * Test Reports module creation and Visualization/Dashboard FB refactoring.
+     */
+    public function test_reports_module_and_visualization_refactor()
+    {
+        $admin = User::create([
+            'name' => 'Report Admin',
+            'email' => 'report_admin@nupost.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        $session = [
+            'role' => 'admin',
+            'admin_id' => $admin->id,
+            'admin_email' => $admin->email,
+            'admin_name' => $admin->name,
+        ];
+
+        // 1. Dashboard: Facebook / Meta removed
+        $dashRes = $this->withSession($session)->get(route('admin.dashboard'));
+        $dashRes->assertStatus(200);
+        $dashContent = $dashRes->getContent();
+        $this->assertStringNotContainsString('fbInsightsChart', $dashContent);
+        $this->assertStringNotContainsString('META FB SECTION', $dashContent);
+
+        // 2. Visualization: FB and Request Volume Trend removed
+        $visRes = $this->withSession($session)->get(route('admin.analytics'));
+        $visRes->assertStatus(200);
+        $visContent = $visRes->getContent();
+        $this->assertStringContainsString('Platform Breakdown', $visContent);
+        $this->assertStringNotContainsString('Facebook & Meta Visualization', $visContent);
+        $this->assertStringNotContainsString('Request Volume Trend', $visContent);
+        $this->assertStringNotContainsString('Refresh FB Data', $visContent);
+        $this->assertStringNotContainsString('fbAnalyticsChart', $visContent);
+
+        // 3. Reports: Request Volume Trend & FB visualization & Refresh FB button present
+        $repRes = $this->withSession($session)->get(route('admin.reports'));
+        $repRes->assertStatus(200);
+        $repContent = $repRes->getContent();
+        $this->assertStringContainsString('Request Volume Trend', $repContent);
+        $this->assertStringContainsString('Facebook & Meta Visualization', $repContent);
+        $this->assertStringContainsString('trendChart', $repContent);
+        if (!empty(env('FB_PAGE_ID')) && !empty(env('FB_PAGE_ACCESS_TOKEN'))) {
+            $this->assertStringContainsString('Refresh FB Data', $repContent);
+        }
+
+        // 4. Reports refresh route
+        $refRes = $this->withSession($session)->from(route('admin.reports'))->get(route('admin.reports.refresh'));
+        $refRes->assertRedirect(route('admin.reports'));
+        $refRes->assertSessionHas('success');
+    }
 }
 
 

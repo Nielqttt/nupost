@@ -37,22 +37,7 @@ class FacebookAnalyticsController extends Controller
 
     public function index(Request $request)
     {
-        // Default to current month
-        $selectedMonth = $request->query('month', Carbon::now()->format('Y-m'));
-
-        // Validate format (YYYY-MM)
-        if (!preg_match('/^\d{4}-\d{2}$/', $selectedMonth)) {
-            $selectedMonth = Carbon::now()->format('Y-m');
-        }
-
-        $monthCarbon = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
-
-        $fb = $this->getData($selectedMonth);
-        $fb['selected_month']    = $selectedMonth;
-        $fb['month_label']       = $monthCarbon->format('F Y');
-        $fb['available_months']  = self::getAvailableMonths();
-
-        return view('admin.analytics', compact('fb'));
+        return view('admin.analytics');
     }
 
     /**

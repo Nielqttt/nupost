@@ -107,6 +107,8 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     Route::get('/analytics/refresh',  [FacebookAnalyticsController::class, 'refresh'])->name('analytics.refresh');
     Route::get('/analytics/export',   [FacebookAnalyticsController::class, 'exportCsv'])->name('analytics.export');
     Route::get('/reports',            [ReportsController::class, 'index'])->name('reports');
+    Route::get('/reports/refresh',    [FacebookAnalyticsController::class, 'refresh'])->name('reports.refresh');
+    Route::get('/reports/fb-export',  [FacebookAnalyticsController::class, 'exportCsv'])->name('reports.fb-export');
     Route::get('/reports/export',     [ReportsController::class, 'export'])->name('reports.export');
     Route::get('/settings',           [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings/profile',  [SettingsController::class, 'updateProfile'])->name('settings.profile');
