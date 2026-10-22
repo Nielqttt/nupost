@@ -421,15 +421,13 @@
         }
 
         .section-alt {
-            background-color: rgba(255, 255, 255, 0.55);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background-color: rgba(255, 255, 255, 0.65);
             border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
         }
 
         [data-theme="dark"] .section-alt {
-            background-color: rgba(17, 28, 56, 0.50);
+            background-color: rgba(17, 28, 56, 0.60);
             border-top: 1px solid rgba(255, 255, 255, 0.08);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -468,9 +466,7 @@
         }
 
         .step-card {
-            background-color: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 24px;
@@ -485,7 +481,7 @@
         }
 
         [data-theme="dark"] .step-card {
-            background-color: rgba(17, 28, 56, 0.82);
+            background-color: var(--bg-card);
             border-color: rgba(255, 255, 255, 0.08);
         }
 
@@ -528,9 +524,7 @@
         }
 
         .category-card {
-            background-color: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 20px;
@@ -545,7 +539,7 @@
         }
 
         [data-theme="dark"] .category-card {
-            background-color: rgba(17, 28, 56, 0.82);
+            background-color: var(--bg-card);
             border-color: rgba(255, 255, 255, 0.08);
         }
 
@@ -568,9 +562,7 @@
 
         /* ── Guidelines Section ── */
         .guidelines-card {
-            background-color: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 28px;
@@ -578,7 +570,7 @@
         }
 
         [data-theme="dark"] .guidelines-card {
-            background-color: rgba(17, 28, 56, 0.82);
+            background-color: var(--bg-card);
             border-color: rgba(255, 255, 255, 0.08);
         }
 
@@ -622,16 +614,14 @@
 
         /* ── FAQ Section ── */
         .faq-accordion {
-            background-color: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             overflow: hidden;
         }
 
         [data-theme="dark"] .faq-accordion {
-            background-color: rgba(17, 28, 56, 0.82);
+            background-color: var(--bg-card);
             border-color: rgba(255, 255, 255, 0.08);
         }
 
@@ -739,15 +729,13 @@
 
         /* ── Footer ── */
         .site-footer {
-            background-color: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background-color: rgba(255, 255, 255, 0.90);
             border-top: 1px solid var(--border);
             padding: 40px 0 30px;
         }
 
         [data-theme="dark"] .site-footer {
-            background-color: rgba(4, 12, 30, 0.80);
+            background-color: rgba(4, 12, 30, 0.90);
             border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
@@ -865,15 +853,8 @@
 
     <div id="np-page-progress"></div>
 
-    <!-- ── Ambient Yellow & Blue Background Glows (Light & Dark Mode) ── -->
-    <div class="ambient-bg" aria-hidden="true">
-        <div class="ambient-glow glow-top-blue"></div>
-        <div class="ambient-glow glow-top-gold"></div>
-        <div class="ambient-glow glow-mid-blue"></div>
-        <div class="ambient-glow glow-mid-gold"></div>
-        <div class="ambient-glow glow-bottom-blue"></div>
-        <div class="ambient-glow glow-bottom-gold"></div>
-    </div>
+    <!-- ── Ambient Yellow & Blue Background (Light & Dark Mode) ── -->
+    <div class="ambient-bg" aria-hidden="true"></div>
 
     <!-- ── Header ── -->
     <header class="site-header">
