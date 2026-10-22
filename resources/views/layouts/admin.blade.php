@@ -1298,7 +1298,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
 
             {{-- ── NOTIFICATION BELL ── --}}
             <div class="notif-wrap" id="notif-wrap">
-                <button class="notif-btn" id="notif-btn" onclick="toggleNotif(event)">
+                <button class="notif-btn" id="notif-btn" type="button" aria-label="Notifications" onclick="toggleNotif(event)">
                     <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -1312,7 +1312,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
                             Notifications
                             <span id="notif-unread-label" style="font-size:11px;color:var(--ink-soft);font-weight:400;margin-left:4px;"></span>
                         </div>
-                        <button class="notif-head__mark" onclick="markAllRead()">Mark all read</button>
+                        <button type="button" class="notif-head__mark" onclick="markAllRead(event)">Mark all read</button>
                     </div>
                     <div class="notif-list" id="notif-list">
                         <div class="notif-empty">
@@ -1570,28 +1570,37 @@ if(chip && dd){
 
 // ── NOTIFICATION SYSTEM ───────────────────────────────────────────
 const NOTIF_FETCH_URL = '{{ route("admin.notifications.fetch") }}';
+const NOTIF_READ_URL  = '{{ route("admin.notifications.read") }}';
 var CSRF = window.CSRF || document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 window.CSRF = CSRF;
 
-let notifOpen = false;
-
 function toggleNotif(e) {
-    e.stopPropagation();
-    notifOpen = !notifOpen;
-    document.getElementById('notif-dropdown').classList.toggle('open', notifOpen);
-    if (notifOpen) loadNotifications();
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    const dd = document.getElementById('notif-dropdown');
+    if (!dd) return;
+    const willOpen = !dd.classList.contains('open');
+    dd.classList.toggle('open', willOpen);
+    if (willOpen) {
+        loadNotifications();
+    }
 }
 
 document.addEventListener('click', function(e) {
     const wrap = document.getElementById('notif-wrap');
-    if (wrap && !wrap.contains(e.target)) {
-        notifOpen = false;
-        document.getElementById('notif-dropdown')?.classList.remove('open');
+    const dd = document.getElementById('notif-dropdown');
+    if (wrap && dd && !wrap.contains(e.target)) {
+        dd.classList.remove('open');
     }
 });
 
 function timeAgo(dateStr) {
-    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (!dateStr) return 'Just now';
+    const parsed = new Date(String(dateStr).replace(' ', 'T'));
+    if (isNaN(parsed.getTime())) return 'Recently';
+    const diff = Math.floor((Date.now() - parsed.getTime()) / 1000);
     if (diff < 60)    return 'Just now';
     if (diff < 3600)  return Math.floor(diff / 60) + 'm ago';
     if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
@@ -1601,6 +1610,8 @@ function timeAgo(dateStr) {
 function getIcon(type) {
     if (type === 'new_request') return '<div class="notif-icon notif-icon--request">📄</div>';
     if (type === 'comment')     return '<div class="notif-icon notif-icon--comment">💬</div>';
+    if (type === 'api_key')     return '<div class="notif-icon notif-icon--api" style="background:#ede9fe;">🔑</div>';
+    if (type === 'system')      return '<div class="notif-icon notif-icon--system" style="background:#e0f2fe;">⚙️</div>';
     return '<div class="notif-icon notif-icon--default">🔔</div>';
 }
 
@@ -1619,17 +1630,21 @@ function loadNotifications() {
 
 function renderNotifications(notifs, unread) {
     const badge = document.getElementById('notif-badge');
-    if (unread > 0) {
-        badge.textContent = unread > 99 ? '99+' : unread;
-        badge.classList.add('has-count');
-    } else {
-        badge.classList.remove('has-count');
+    if (badge) {
+        if (unread > 0) {
+            badge.textContent = unread > 99 ? '99+' : unread;
+            badge.classList.add('has-count');
+        } else {
+            badge.classList.remove('has-count');
+        }
     }
 
     const label = document.getElementById('notif-unread-label');
     if (label) label.textContent = unread > 0 ? `(${unread} new)` : '';
 
     const list = document.getElementById('notif-list');
+    if (!list) return;
+
     if (!notifs.length) {
         list.innerHTML = `
             <div class="notif-empty">
@@ -1643,11 +1658,16 @@ function renderNotifications(notifs, unread) {
     }
 
     list.innerHTML = notifs.slice(0, 15).map(n => {
-        const link = n.request_id ? `/admin/requests/${n.request_id}` : '/admin/requests';
+        let link = '/admin/requests';
+        if (n.type === 'api_key' || n.type === 'system') {
+            link = '{{ route("admin.settings") }}#ai-keys';
+        } else if (n.request_id) {
+            link = `/admin/requests/${n.request_id}`;
+        }
         return `
             <a href="${link}"
                class="notif-item ${!n.is_read ? 'unread' : ''}"
-               onclick="markRead('${esc(String(n.id))}', this)">
+               onclick="handleAdminNotifClick(event, '${esc(String(n.id))}', '${link}')">
                 ${getIcon(n.type)}
                 <div style="flex:1;min-width:0;">
                     <div class="notif-title">${esc(n.title)}</div>
@@ -1658,6 +1678,24 @@ function renderNotifications(notifs, unread) {
     }).join('');
 }
 
+function handleAdminNotifClick(e, id, url) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    fetch(NOTIF_READ_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': CSRF,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ id: id })
+    }).catch(() => {}).finally(() => {
+        if (url) window.location.href = url;
+    });
+}
+
 function markRead(id, el) {
     fetch(NOTIF_READ_URL, {
         method: 'POST',
@@ -1666,14 +1704,18 @@ function markRead(id, el) {
             'X-CSRF-TOKEN': CSRF,
             'Accept': 'application/json'
         },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id: id })
     }).then(() => {
         if (el) el.classList.remove('unread');
         loadNotifications();
     }).catch(() => {});
 }
 
-function markAllRead() {
+function markAllRead(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
     fetch(NOTIF_READ_URL, {
         method: 'POST',
         headers: {

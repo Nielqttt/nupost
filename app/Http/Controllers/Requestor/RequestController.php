@@ -360,6 +360,19 @@ class RequestController extends Controller
                 'action'     => 'Request submitted',
             ]);
 
+            // Create notification for requestor
+            if ($user_id) {
+                try {
+                    \App\Models\Notification::create([
+                        'user_id' => $user_id,
+                        'title'   => 'Request Submitted',
+                        'message' => "Your request \"{$req->title}\" has been submitted and is pending review.",
+                        'type'    => 'new_request',
+                        'is_read' => false,
+                    ]);
+                } catch (\Throwable $e) {}
+            }
+
             // Send email to all admins
             $admins = \App\Models\User::where('role', 'admin')->get();
             foreach ($admins as $admin) {

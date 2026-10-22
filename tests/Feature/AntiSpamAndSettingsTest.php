@@ -379,5 +379,133 @@ class AntiSpamAndSettingsTest extends TestCase
         $response->assertSessionHas('error');
         $this->assertEquals(1, PostRequest::where('requester', $user->name)->count());
     }
+
+    /**
+     * Test notification fetching and marking as read for both admin and requestor.
+     */
+    public function test_admin_and_requestor_notification_fetch_and_mark_read()
+    {
+        $admin = User::create([
+            'name' => 'Notification Admin',
+            'email' => 'admin_notif@nupost.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        $requestor = User::create([
+            'name' => 'Notification Requestor',
+            'email' => 'requestor_notif@nupost.com',
+            'password' => bcrypt('password'),
+            'is_verified' => true,
+            'role' => 'requestor',
+        ]);
+
+        $post = PostRequest::create([
+            'title' => 'Sample Request for Notification',
+            'requester' => $requestor->name,
+            'user_id' => $requestor->id,
+            'description' => 'Detailed description for testing notifications.',
+            'category' => 'Standard PubMat',
+            'priority' => 'Medium',
+            'status' => 'Pending Review',
+            'admin_seen' => false,
+            'platform' => 'Facebook',
+        ]);
+
+        \App\Models\Notification::create([
+            'user_id' => $requestor->id,
+            'title' => 'Request Submitted',
+            'message' => 'Your request has been submitted.',
+            'type' => 'new_request',
+            'is_read' => false,
+        ]);
+
+        // 1. Admin Fetch Test
+        $adminFetch = $this->withSession([
+            'role' => 'admin',
+            'admin_email' => $admin->email,
+            'admin_name' => $admin->name,
+        ])->getJson(route('admin.notifications.fetch'));
+
+        $adminFetch->assertStatus(200);
+        $this->assertTrue($adminFetch->json('unread_count') >= 1);
+        $notifs = $adminFetch->json('notifications');
+        $this->assertNotEmpty($notifs);
+
+        // 2. Admin Mark Read Test
+        $adminRead = $this->withSession([
+            'role' => 'admin',
+            'admin_email' => $admin->email,
+            'admin_name' => $admin->name,
+        ])->postJson(route('admin.notifications.read'), ['all' => true]);
+
+        $adminRead->assertStatus(200);
+        $this->assertTrue($adminRead->json('success'));
+
+        // 3. Requestor Fetch Test
+        $reqFetch = $this->withSession([
+            'role' => 'requestor',
+            'user_id' => $requestor->id,
+            'name' => $requestor->name,
+        ])->getJson(route('requestor.notifications.fetch'));
+
+        $reqFetch->assertStatus(200);
+        $this->assertEquals(1, $reqFetch->json('unread_count'));
+
+        // 4. Requestor Mark Read Test
+        $reqRead = $this->withSession([
+            'role' => 'requestor',
+            'user_id' => $requestor->id,
+            'name' => $requestor->name,
+        ])->postJson(route('requestor.notifications.markread'), ['all' => true]);
+
+        $reqRead->assertStatus(200);
+        $this->assertTrue($reqRead->json('success'));
+        $this->assertEquals(0, \App\Models\Notification::where('user_id', $requestor->id)->where('is_read', false)->count());
+    }
+
+    /**
+     * Test changing AI API key generates an automatic notification for admin.
+     */
+    public function test_api_key_update_creates_automatic_notification_for_admin()
+    {
+        $admin = User::create([
+            'name' => 'API Admin',
+            'email' => 'api_admin@nupost.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        // Submit new API keys
+        $response = $this->withSession([
+            'role' => 'admin',
+            'admin_email' => $admin->email,
+            'admin_name' => $admin->name,
+        ])->post(route('admin.settings.ai-keys'), [
+            'gemini_api_key' => 'AIzaSyTestGeminiKey12345',
+            'groq_api_key' => 'gsk_TestGroqKey67890',
+        ]);
+
+        $response->assertSessionHas('success');
+
+        // Verify notification exists in database
+        $notif = \App\Models\Notification::where('type', 'api_key')->first();
+        $this->assertNotNull($notif);
+        $this->assertEquals('AI API Key Updated', $notif->title);
+        $this->assertStringContainsString('Google Gemini', $notif->message);
+        $this->assertStringContainsString('Groq', $notif->message);
+
+        // Verify admin notifications fetch includes the new API key notification
+        $fetch = $this->withSession([
+            'role' => 'admin',
+            'admin_email' => $admin->email,
+            'admin_name' => $admin->name,
+        ])->getJson(route('admin.notifications.fetch'));
+
+        $fetch->assertStatus(200);
+        $found = collect($fetch->json('notifications'))->firstWhere('type', 'api_key');
+        $this->assertNotNull($found);
+        $this->assertEquals('AI API Key Updated', $found['title']);
+    }
 }
 

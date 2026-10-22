@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Setting;
 use App\Models\KayeToken;
 use App\Models\User;
+use App\Models\Notification;
 
 class SettingsController extends Controller
 {
@@ -45,11 +46,49 @@ class SettingsController extends Controller
         $geminiKey = trim((string) $request->input('gemini_api_key', ''));
         $groqKey   = trim((string) $request->input('groq_api_key', ''));
 
-        if ($geminiKey !== '') {
+        $oldGemini = (string) Setting::get('gemini_api_key', '');
+        $oldGroq   = (string) Setting::get('groq_api_key', '');
+
+        $adminName = session('admin_name') ?: (session('admin_email') ?: 'Administrator');
+        $changedKeys = [];
+
+        if ($geminiKey !== '' && $geminiKey !== $oldGemini) {
             Setting::set('gemini_api_key', $geminiKey);
+            $changedKeys[] = 'Google Gemini (Caption Generation)';
         }
-        if ($groqKey !== '') {
+        if ($groqKey !== '' && $groqKey !== $oldGroq) {
             Setting::set('groq_api_key', $groqKey);
+            $changedKeys[] = 'Groq (Bulldog AI Assistant)';
+        }
+
+        if (!empty($changedKeys)) {
+            $keyNames = implode(' and ', $changedKeys);
+            $title = 'AI API Key Updated';
+            $message = "The API key for {$keyNames} was updated by {$adminName}.";
+
+            // Automatically notify admins
+            $admins = User::where('role', 'admin')->get();
+            if ($admins->isNotEmpty()) {
+                foreach ($admins as $adm) {
+                    Notification::create([
+                        'user_id' => $adm->id,
+                        'title'   => $title,
+                        'message' => $message,
+                        'type'    => 'api_key',
+                        'is_read' => false,
+                    ]);
+                }
+            } else {
+                Notification::create([
+                    'user_id' => 0,
+                    'title'   => $title,
+                    'message' => $message,
+                    'type'    => 'api_key',
+                    'is_read' => false,
+                ]);
+            }
+
+            \App\Models\AuditLog::record('api_key_updated');
         }
 
         return back()->with('success', 'AI API configuration saved successfully to database!');

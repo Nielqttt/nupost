@@ -4,26 +4,34 @@ namespace App\Http\Controllers\Requestor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
+    private function resolveUserId(): ?int
+    {
+        $id = session('user_id') ?: auth()->id();
+        if (!$id && session('name')) {
+            $id = User::where('name', session('name'))->value('id');
+        }
+        return $id ? (int) $id : null;
+    }
+
     /**
      * Display the notifications page with pagination
      */
     public function index()
     {
-        $user_id = session('user_id');
+        $user_id = $this->resolveUserId();
 
-        // Paginate 5 items per page gaya ng request mo
         $notifications = Notification::where('user_id', $user_id)
             ->orderBy('created_at', 'desc')
-            ->paginate(5);
+            ->paginate(10);
 
-        // Para sa badge count sa sidebar/header
-        $unread_count = Notification::where('user_id', $user_id)
+        $unread_count = $user_id ? Notification::where('user_id', $user_id)
             ->where('is_read', false)
-            ->count();
+            ->count() : 0;
 
         return view('requestor.notifications', compact('notifications', 'unread_count'));
     }
@@ -33,7 +41,14 @@ class NotificationController extends Controller
      */
     public function fetch()
     {
-        $user_id = session('user_id');
+        $user_id = $this->resolveUserId();
+
+        if (!$user_id) {
+            return response()->json([
+                'notifications' => [],
+                'unread_count'  => 0,
+            ]);
+        }
 
         $notifications = Notification::where('user_id', $user_id)
             ->orderBy('created_at', 'desc')
@@ -55,12 +70,16 @@ class NotificationController extends Controller
      */
     public function markRead(Request $request)
     {
-        $user_id = session('user_id');
+        $user_id = $this->resolveUserId();
+        if (!$user_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+
         $id = $request->input('id');
 
         if ($request->input('all')) {
             Notification::where('user_id', $user_id)->update(['is_read' => true]);
-        } else {
+        } elseif ($id) {
             Notification::where('id', $id)
                 ->where('user_id', $user_id)
                 ->update(['is_read' => true]);
