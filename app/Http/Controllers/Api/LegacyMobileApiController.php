@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -601,38 +602,81 @@ class LegacyMobileApiController extends Controller
                 ], 422);
             }
 
-            $user = DB::table('users')->where('id', $userId)->first();
-            if (!$user) {
+            // Anti-spam cooldown check (prevents rapid-fire API request spamming)
+            $cooldownKey = 'post_req_cooldown_api_' . $userId;
+            if (!app()->runningUnitTests() && Cache::has($cooldownKey)) {
+                $expiresAt = (int) Cache::get($cooldownKey);
+                $remaining = max(1, $expiresAt - time());
                 return response()->json([
                     'success' => false,
-                    'message' => 'User not found',
-                ], 404);
+                    'message' => "Anti-spam protection: Please wait {$remaining} second(s) before submitting another request.",
+                ], 429);
             }
 
-            if ($err = $this->ensureRequestsTableExists()) {
-                return $err;
+            // Concurrency lock (prevents concurrent race conditions when clicking submit rapidly)
+            $lockKey = 'post_req_lock_api_' . $userId;
+            if (!Cache::add($lockKey, time(), now()->addSeconds(15))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'A request submission is already in progress. Please wait a moment.',
+                ], 429);
             }
 
-            $table = $this->requestsTable();
+            try {
+                $user = DB::table('users')->where('id', $userId)->first();
+                if (!$user) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'User not found',
+                    ], 404);
+                }
 
-            // 🛡️ Exact Duplicate Hash Check (within 24h)
-            $contentHash = md5(strtolower(trim($title)) . '|' . strtolower(trim($description)));
-            if (Schema::hasColumn($table, 'description')) {
-                $recentDuplicates = DB::table($table)
+                if ($err = $this->ensureRequestsTableExists()) {
+                    return $err;
+                }
+
+                $table = $this->requestsTable();
+                $normalizedTitle = strtolower($title);
+
+                // Check for existing non-rejected request with identical title by this user in the last 24h
+                $sameTitleExists = DB::table($table)
                     ->where('status', '!=', 'Rejected')
                     ->where('created_at', '>=', now()->subHours(24))
-                    ->get();
+                    ->where(function ($q) use ($userId, $user, $table) {
+                        if (Schema::hasColumn($table, 'user_id')) {
+                            $q->where('user_id', $userId)->orWhere('requester', (string) ($user->name ?? ''));
+                        } else {
+                            $q->where('requester', (string) ($user->name ?? ''));
+                        }
+                    })
+                    ->whereRaw('LOWER(TRIM(title)) = ?', [$normalizedTitle])
+                    ->exists();
 
-                foreach ($recentDuplicates as $dup) {
-                    $dupHash = md5(strtolower(trim($dup->title ?? '')) . '|' . strtolower(trim($dup->description ?? '')));
-                    if ($dupHash === $contentHash) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Duplicate submission detected. An identical request was submitted within the last 24 hours.',
-                        ], 422);
+                if ($sameTitleExists) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Duplicate request detected: You already submitted an active request with this title within the last 24 hours.',
+                    ], 422);
+                }
+
+                // 🛡️ Exact Duplicate Hash Check (within 24h)
+                $contentHash = md5($normalizedTitle . '|' . strtolower(trim($description)));
+                if (Schema::hasColumn($table, 'description')) {
+                    $recentDuplicates = DB::table($table)
+                        ->where('status', '!=', 'Rejected')
+                        ->where('created_at', '>=', now()->subHours(24))
+                        ->get();
+
+                    foreach ($recentDuplicates as $dup) {
+                        $dupHash = md5(strtolower(trim($dup->title ?? '')) . '|' . strtolower(trim($dup->description ?? '')));
+                        if ($dupHash === $contentHash) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Duplicate submission detected. An identical request was submitted within the last 24 hours.',
+                            ], 422);
+                        }
                     }
                 }
-            }
 
             $mediaNames = [];
             $files = $request->file('media', []);
@@ -788,6 +832,10 @@ class LegacyMobileApiController extends Controller
                 DB::table('notifications')->insert($userNotifPayload);
             }
 
+            if (!app()->runningUnitTests()) {
+                Cache::put($cooldownKey, time() + 8, now()->addSeconds(8));
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -796,12 +844,15 @@ class LegacyMobileApiController extends Controller
                     'status' => 'Pending Review',
                 ],
             ], 201);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Request creation failed: ' . $e->getMessage(),
-            ], 500);
+        } finally {
+            Cache::forget($lockKey);
         }
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Request creation failed: ' . $e->getMessage(),
+        ], 500);
+    }
     }
 
     public function updateRequest(Request $request): JsonResponse

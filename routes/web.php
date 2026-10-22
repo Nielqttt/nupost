@@ -61,7 +61,7 @@ Route::middleware('auth.nupost:requestor')->prefix('requestor')->name('requestor
     // Request Management
     Route::get('/requests',             [RequestController::class, 'index'])->name('requests');
     Route::get('/requests/create',      [RequestController::class, 'create'])->name('requests.create');
-    Route::post('/requests',            [RequestController::class, 'store'])->name('requests.store');
+    Route::post('/requests',            [RequestController::class, 'store'])->middleware('throttle:15,1')->name('requests.store');
 
     Route::get('/requests/{id}',        [RequestController::class, 'show'])->name('requests.show');
 

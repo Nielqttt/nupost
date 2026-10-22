@@ -8,6 +8,7 @@ use App\Models\RequestComment;
 use App\Models\RequestActivity;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class RequestController extends Controller
 {
@@ -86,118 +87,185 @@ class RequestController extends Controller
     public function store(Request $request)
     {
         $user_name = session('name');
-        
-        $request->validate([
-            'title'       => 'required|string|min:5|max:255',
-            'description' => 'required|string|min:15',
-            'category'    => 'required|in:Checking of Materials,Posting with Ready-Made PubMat,Template-Based PubMat,Standard PubMat,Multiple Collaterals / Tarpaulins,New Campaign / Creative Concept,Event Documentation',
-            'priority'    => 'required|in:Low,Medium,High,Urgent',
-            'platforms'   => 'required|array|min:1',
-            'post_date'   => 'required|date|after:today',
-        ]);
+        $user_id   = session('user_id');
 
-        // 🛡️ Exact Duplicate Hash Check (within 24h)
-        $title = trim((string) $request->input('title', ''));
-        $description = trim((string) $request->input('description', ''));
-        $contentHash = md5(strtolower($title) . '|' . strtolower($description));
-        $recentDuplicates = PostRequest::where('status', '!=', 'Rejected')
-            ->where('created_at', '>=', now()->subHours(24))
-            ->get();
+        $userIdentifier = $user_id ? "id_{$user_id}" : ($user_name ? "name_{$user_name}" : 'ip_' . $request->ip());
 
-        foreach ($recentDuplicates as $dup) {
-            $dupHash = md5(strtolower(trim($dup->title ?? '')) . '|' . strtolower(trim($dup->description ?? '')));
-            if ($dupHash === $contentHash) {
-                if ($request->expectsJson() || $request->is('api/*')) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Duplicate submission detected. An identical request was submitted within the last 24 hours.',
-                    ], 422);
-                }
-                return back()->withInput()->with('error', 'Duplicate submission detected. An identical request was submitted within the last 24 hours.');
+        // 1. One-time idempotency token check (prevents browser double-submits / refresh duplicates)
+        $submissionToken = $request->input('submission_token');
+        if (!empty($submissionToken)) {
+            $tokenKey = 'post_req_token_' . md5($submissionToken);
+            if (!Cache::add($tokenKey, true, now()->addHours(2))) {
+                return redirect()->route('requestor.requests')->with('success', 'Your request has already been submitted successfully!');
             }
         }
 
-        $media_file = '';
-        if ($request->hasFile('media')) {
-            $upload_dir    = public_path('uploads');
-            $altUploadDir  = base_path('public_html/uploads');
-            $mirrorNeeded  = is_dir($altUploadDir) && realpath($altUploadDir) !== realpath($upload_dir);
+        // 2. Anti-spam submission cooldown (prevents rapid-fire request flooding)
+        $cooldownKey = 'post_req_cooldown_' . md5($userIdentifier);
+        if (!app()->runningUnitTests() && Cache::has($cooldownKey)) {
+            $expiresAt = (int) Cache::get($cooldownKey);
+            $remaining = max(1, $expiresAt - time());
+            $msg = "Anti-spam protection: Please wait {$remaining} second(s) before submitting another request.";
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['success' => false, 'message' => $msg], 429);
+            }
+            return back()->withInput()->with('error', $msg);
+        }
 
-            foreach (array_slice($request->file('media'), 0, 10) as $file) {
-                if (!$file->isValid()) continue;
-                $origExt   = strtolower($file->getClientOriginalExtension());
-                // Normalize jfif to standard jpg so web templates and web servers serve it as image/jpeg
-                $saveExt   = ($origExt === 'jfif') ? 'jpg' : $origExt;
-                $filename  = 'media_' . uniqid() . '.' . $saveExt;
-                $file->move($upload_dir, $filename);
+        // 3. Concurrency lock (prevents concurrent race conditions when clicking submit rapidly)
+        $lockKey = 'post_req_lock_' . md5($userIdentifier);
+        if (!Cache::add($lockKey, time(), now()->addSeconds(15))) {
+            $msg = 'A request submission is already in progress. Please wait a moment.';
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['success' => false, 'message' => $msg], 429);
+            }
+            return back()->withInput()->with('error', $msg);
+        }
 
-                // If public_html/uploads exists and is separate from public_path('uploads'), mirror file
-                if ($mirrorNeeded) {
-                    @copy($upload_dir . '/' . $filename, $altUploadDir . '/' . $filename);
+        try {
+            $request->validate([
+                'title'       => 'required|string|min:5|max:255',
+                'description' => 'required|string|min:15',
+                'category'    => 'required|in:Checking of Materials,Posting with Ready-Made PubMat,Template-Based PubMat,Standard PubMat,Multiple Collaterals / Tarpaulins,New Campaign / Creative Concept,Event Documentation',
+                'priority'    => 'required|in:Low,Medium,High,Urgent',
+                'platforms'   => 'required|array|min:1',
+                'post_date'   => 'required|date|after:today',
+            ]);
+
+            $title = trim((string) $request->input('title', ''));
+            $description = trim((string) $request->input('description', ''));
+            $normalizedTitle = strtolower($title);
+
+            // 4. Duplicate title check for the user within 24 hours
+            $duplicateTitleExists = PostRequest::where('status', '!=', 'Rejected')
+                ->where('created_at', '>=', now()->subHours(24))
+                ->where(function ($q) use ($user_id, $user_name) {
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'user_id') && $user_id) {
+                        $q->where('user_id', $user_id)->orWhere('requester', $user_name);
+                    } else {
+                        $q->where('requester', $user_name);
+                    }
+                })
+                ->whereRaw('LOWER(TRIM(title)) = ?', [$normalizedTitle])
+                ->exists();
+
+            if ($duplicateTitleExists) {
+                $msg = 'Duplicate request detected: You have already submitted an active request with this title within the last 24 hours.';
+                if ($request->expectsJson() || $request->is('api/*')) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
                 }
+                return back()->withInput()->with('error', $msg);
+            }
 
-                // Image Optimization
-                if (in_array($saveExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                    \App\Services\ImageOptimizer::optimize($upload_dir . '/' . $filename);
+            // 5. Exact content hash duplicate check (title + description within 24h)
+            $contentHash = md5($normalizedTitle . '|' . strtolower($description));
+            $recentDuplicates = PostRequest::where('status', '!=', 'Rejected')
+                ->where('created_at', '>=', now()->subHours(24))
+                ->select('title', 'description')
+                ->get();
+
+            foreach ($recentDuplicates as $dup) {
+                $dupHash = md5(strtolower(trim($dup->title ?? '')) . '|' . strtolower(trim($dup->description ?? '')));
+                if ($dupHash === $contentHash) {
+                    $msg = 'Duplicate submission detected: An identical request was submitted within the last 24 hours.';
+                    if ($request->expectsJson() || $request->is('api/*')) {
+                        return response()->json(['success' => false, 'message' => $msg], 422);
+                    }
+                    return back()->withInput()->with('error', $msg);
+                }
+            }
+
+            $media_file = '';
+            if ($request->hasFile('media')) {
+                $upload_dir    = public_path('uploads');
+                $altUploadDir  = base_path('public_html/uploads');
+                $mirrorNeeded  = is_dir($altUploadDir) && realpath($altUploadDir) !== realpath($upload_dir);
+                $uploaded      = [];
+
+                foreach (array_slice($request->file('media'), 0, 10) as $file) {
+                    if (!$file->isValid()) continue;
+                    $origExt   = strtolower($file->getClientOriginalExtension());
+                    // Normalize jfif to standard jpg so web templates and web servers serve it as image/jpeg
+                    $saveExt   = ($origExt === 'jfif') ? 'jpg' : $origExt;
+                    $filename  = 'media_' . uniqid() . '.' . $saveExt;
+                    $file->move($upload_dir, $filename);
+
+                    // If public_html/uploads exists and is separate from public_path('uploads'), mirror file
                     if ($mirrorNeeded) {
                         @copy($upload_dir . '/' . $filename, $altUploadDir . '/' . $filename);
                     }
+
+                    // Image Optimization
+                    if (in_array($saveExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                        \App\Services\ImageOptimizer::optimize($upload_dir . '/' . $filename);
+                        if ($mirrorNeeded) {
+                            @copy($upload_dir . '/' . $filename, $altUploadDir . '/' . $filename);
+                        }
+                    }
+
+                    $uploaded[] = $filename;
                 }
-
-                $uploaded[] = $filename;
+                $media_file = implode(',', $uploaded);
             }
-            $media_file = implode(',', $uploaded);
-        }
 
-        $payload = [
-            'title'          => $request->title,
-            'requester'      => $user_name,
-            'category'       => $request->category,
-            'priority'       => $request->priority,
-            'status'         => 'Pending Review',
-            'description'    => $request->description,
-            'platform'       => implode(',', $request->input('platforms', [])),
-            'caption'        => $request->caption,
-            'preferred_date' => $request->post_date ?: null,
-            'media_file'     => $media_file,
-        ];
-        if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'user_id') && session('user_id')) {
-            $payload['user_id'] = session('user_id');
-        }
+            $payload = [
+                'title'          => $request->title,
+                'requester'      => $user_name,
+                'category'       => $request->category,
+                'priority'       => $request->priority,
+                'status'         => 'Pending Review',
+                'description'    => $request->description,
+                'platform'       => implode(',', $request->input('platforms', [])),
+                'caption'        => $request->caption,
+                'preferred_date' => $request->post_date ?: null,
+                'media_file'     => $media_file,
+            ];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'user_id') && session('user_id')) {
+                $payload['user_id'] = session('user_id');
+            }
 
-        $req = PostRequest::create($payload);
+            $req = PostRequest::create($payload);
 
-        if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'request_id') && empty($req->request_id)) {
-            $reqCode = 'REQ-' . str_pad((string) $req->id, 5, '0', STR_PAD_LEFT);
-            $req->update(['request_id' => $reqCode]);
-        }
+            if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'request_id') && empty($req->request_id)) {
+                $reqCode = 'REQ-' . str_pad((string) $req->id, 5, '0', STR_PAD_LEFT);
+                $req->update(['request_id' => $reqCode]);
+            }
 
-        \App\Models\AuditLog::record('post_request_created');
+            // Set 8-second cooldown after successful creation to prevent rapid spam flooding
+            if (!app()->runningUnitTests()) {
+                Cache::put($cooldownKey, time() + 8, now()->addSeconds(8));
+            }
 
-        RequestActivity::create([
-            'request_id' => $req->id,
-            'actor'      => $user_name,
-            'action'     => 'Request submitted',
-        ]);
+            \App\Models\AuditLog::record('post_request_created');
 
-        // Send email to all admins
-        $admins = \App\Models\User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
-            if ($admin->email) {
-                try {
-                    $html = $this->getNewRequestAdminEmailHtml($admin->name, $req->title, $user_name);
-                    \Illuminate\Support\Facades\Mail::send([], [], function ($msg) use ($admin, $html) {
-                        $msg->to($admin->email, $admin->name)
-                            ->subject("NUPost Admin: New Request Submitted")
-                            ->html($html);
-                    });
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('[NUPost] New request admin email failed: ' . $e->getMessage());
+            RequestActivity::create([
+                'request_id' => $req->id,
+                'actor'      => $user_name,
+                'action'     => 'Request submitted',
+            ]);
+
+            // Send email to all admins
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    try {
+                        $html = $this->getNewRequestAdminEmailHtml($admin->name, $req->title, $user_name);
+                        \Illuminate\Support\Facades\Mail::send([], [], function ($msg) use ($admin, $html) {
+                            $msg->to($admin->email, $admin->name)
+                                ->subject("NUPost Admin: New Request Submitted")
+                                ->html($html);
+                        });
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('[NUPost] New request admin email failed: ' . $e->getMessage());
+                    }
                 }
             }
-        }
 
-        return redirect()->route('requestor.requests')->with('success', 'Request submitted successfully!');
+            return redirect()->route('requestor.requests')->with('success', 'Request submitted successfully!');
+
+        } finally {
+            Cache::forget($lockKey);
+        }
     }
 
     /**

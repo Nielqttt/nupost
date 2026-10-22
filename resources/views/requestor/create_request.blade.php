@@ -885,6 +885,7 @@
 
     <form method="POST" action="{{ route('requestor.requests.store') }}" enctype="multipart/form-data" id="create-form" class="form-body">
         @csrf
+        <input type="hidden" name="submission_token" id="submission-token" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
 
         {{-- SECTION 1: BASIC INFO --}}
         <div class="form-section">
@@ -1054,7 +1055,7 @@
             <div class="form-actions__left">Fields marked <span>*</span> are required</div>
             <div class="actions-right">
                 <button type="button" class="btn-cancel" onclick="history.back()">Cancel</button>
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-submit" id="btn-submit-request">
                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     Submit Request
                 </button>
@@ -1127,7 +1128,7 @@ const FIXED_FOOTER = "\n\nApply now and secure your place for the upcoming acade
 document.getElementById('create-form').addEventListener('submit', function(e) {
     const submitBtn = this.querySelector('.btn-submit');
 
-    // Prevent double submission
+    // Prevent double submission / spam clicks
     if (submitBtn.dataset.submitted === 'true') {
         e.preventDefault();
         return;
@@ -1179,18 +1180,32 @@ document.getElementById('create-form').addEventListener('submit', function(e) {
         box.value = current + FIXED_FOOTER;
     }
 
-    // Lock the button
+    // Lock the button and prevent repeated clicks during file upload & processing
     submitBtn.dataset.submitted = 'true';
     submitBtn.disabled = true;
-    submitBtn.style.opacity = '0.6';
+    submitBtn.style.opacity = '0.7';
     submitBtn.style.cursor = 'not-allowed';
     submitBtn.innerHTML = `
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" 
-             viewBox="0 0 24 24" style="animation:spin 1s linear infinite;display:inline-block;">
+             viewBox="0 0 24 24" style="animation:spin 1s linear infinite;display:inline-block;margin-right:6px;">
             <polyline points="23 4 23 10 17 10"/>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
         </svg>
-        Submitting...`;
+        Submitting Request...`;
+});
+
+// Reset submit button state on back/forward browser navigation (bfcache)
+window.addEventListener('pageshow', function() {
+    const btn = document.getElementById('btn-submit-request');
+    if (btn) {
+        btn.dataset.submitted = 'false';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.innerHTML = `
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Submit Request`;
+    }
 });
 
 // ── PLATFORM BUTTONS ──────────────────────────────────────────────
