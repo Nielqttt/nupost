@@ -30,3 +30,4 @@ Route::get('/media/{file}', [LegacyMobileApiController::class, 'getMedia']);
 Route::get('/admin_requests.php', [LegacyMobileApiController::class, 'adminRequests']);
 Route::post('/update_request_status.php', [LegacyMobileApiController::class, 'updateRequestStatus']);
 Route::get('/admin_stats.php', [LegacyMobileApiController::class, 'adminStats']);
+Route::get('/admin_audit_logs.php', [LegacyMobileApiController::class, 'adminAuditLogs']);

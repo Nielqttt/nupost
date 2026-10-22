@@ -171,6 +171,10 @@ class LegacyMobileApiController extends Controller
             ], 403);
         }
 
+        if (class_exists(\App\Models\AuditLog::class)) {
+            \App\Models\AuditLog::record($userRole === 'admin' ? 'admin_login' : 'user_login', $uId);
+        }
+
         return response()->json([
             'success' => true,
             'id' => $uId,
@@ -920,6 +924,10 @@ class LegacyMobileApiController extends Controller
 
             if (!app()->runningUnitTests()) {
                 Cache::put($cooldownKey, time() + 8, now()->addSeconds(8));
+            }
+
+            if (class_exists(\App\Models\AuditLog::class)) {
+                \App\Models\AuditLog::record('post_request_created', $userId);
             }
 
             return response()->json([
@@ -2354,6 +2362,13 @@ class LegacyMobileApiController extends Controller
                 }
             }
 
+            if (class_exists(\App\Models\AuditLog::class)) {
+                $auditAction = ($newStatus === 'Approved' || $newStatus === 'Posted')
+                    ? 'post_request_approved'
+                    : ($newStatus === 'Rejected' ? 'post_request_rejected' : 'post_request_status_updated');
+                \App\Models\AuditLog::record($auditAction);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => "Status updated to $newStatus",
@@ -2443,6 +2458,114 @@ class LegacyMobileApiController extends Controller
                 'rejected' => $rejected,
                 'users' => $usersCount,
                 'monthly' => $monthly,
+            ],
+        ], 200);
+    }
+
+    public function adminAuditLogs(Request $request): JsonResponse
+    {
+        $userId = (int) $request->query('user_id', 0);
+        $search = trim((string) $request->query('search', ''));
+        $category = trim((string) $request->query('category', 'all'));
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 20;
+
+        if ($userId <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'user_id is required',
+            ], 422);
+        }
+
+        $user = DB::table('users')->where('id', $userId)->first();
+        if (!$user || strtolower(trim((string) ($user->role ?? ''))) !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Admin access required.',
+            ], 403);
+        }
+
+        if (!Schema::hasTable('audit_logs')) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => 0,
+                ],
+            ], 200);
+        }
+
+        $query = DB::table('audit_logs')
+            ->leftJoin('users', 'audit_logs.user_id', '=', 'users.id')
+            ->select([
+                'audit_logs.id',
+                'audit_logs.action_type',
+                'audit_logs.created_at',
+                'users.name as user_name',
+                'users.email as user_email',
+                'users.role as user_role',
+            ])
+            ->orderByDesc('audit_logs.created_at');
+
+        if ($category !== 'all' && $category !== '') {
+            if ($category === 'auth') {
+                $query->whereIn('audit_logs.action_type', ['user_login', 'admin_login', 'user_logout', 'admin_logout']);
+            } elseif ($category === 'requests') {
+                $query->whereIn('audit_logs.action_type', ['post_request_created', 'post_request_edited', 'post_request_approved', 'post_request_rejected']);
+            } elseif ($category === 'system') {
+                $query->whereIn('audit_logs.action_type', ['api_key_updated', 'settings_updated']);
+            }
+        }
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('audit_logs.action_type', 'like', "%{$search}%")
+                  ->orWhere('users.name', 'like', "%{$search}%")
+                  ->orWhere('users.email', 'like', "%{$search}%");
+            });
+        }
+
+        $total = $query->count();
+        $rows = $query->forPage($page, $perPage)->get();
+
+        $data = $rows->map(function ($row) {
+            $action = (string) ($row->action_type ?? 'action');
+            $label = ucwords(str_replace('_', ' ', $action));
+            if (str_contains($action, 'approved')) {
+                $label = 'Approved Post Request';
+            } elseif (str_contains($action, 'rejected')) {
+                $label = 'Rejected Post Request';
+            } elseif ($action === 'user_login' || $action === 'admin_login') {
+                $label = 'User Logged In';
+            } elseif ($action === 'post_request_created') {
+                $label = 'Submitted Post Request';
+            } elseif ($action === 'post_request_edited') {
+                $label = 'Edited Post Request';
+            }
+
+            $createdAt = $row->created_at ? \Carbon\Carbon::parse($row->created_at) : now();
+
+            return [
+                'id' => (int) $row->id,
+                'action_type' => $action,
+                'action_label' => $label,
+                'user_name' => (string) ($row->user_name ?: 'System User'),
+                'user_email' => (string) ($row->user_email ?: ''),
+                'user_role' => ucfirst((string) ($row->user_role ?: 'user')),
+                'created_at' => $createdAt->format('M d, Y • h:i A'),
+                'time_ago' => $createdAt->diffForHumans(),
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'meta' => [
+                'current_page' => $page,
+                'last_page' => max(1, (int) ceil($total / $perPage)),
+                'total' => $total,
             ],
         ], 200);
     }

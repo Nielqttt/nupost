@@ -116,6 +116,9 @@ Route::middleware('auth.nupost:admin')->prefix('admin')->name('admin.')->group(f
     Route::post('/settings/test-gemini', [SettingsController::class, 'testGeminiKey'])->name('settings.test-gemini');
     Route::post('/settings/test-groq',   [SettingsController::class, 'testGroqKey'])->name('settings.test-groq');
 
+    // Audit Logs
+    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs');
+
     // Notifications
     Route::get('/notifications',        [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/fetch',  [\App\Http\Controllers\Admin\NotificationController::class, 'fetch'])->name('notifications.fetch');
