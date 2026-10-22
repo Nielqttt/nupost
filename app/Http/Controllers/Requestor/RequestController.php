@@ -197,9 +197,14 @@ class RequestController extends Controller
             $cleanDesc  = $this->cleanTextForComparison($description);
 
             // 4. Smart Fuzzy & Semantic Duplicate Detection (within 24h)
+            $selectCols = ['id', 'title', 'description', 'status', 'requester'];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'user_id')) {
+                $selectCols[] = 'user_id';
+            }
+
             $recentDuplicates = PostRequest::where('status', '!=', 'Rejected')
                 ->where('created_at', '>=', now()->subHours(24))
-                ->select('id', 'title', 'description', 'status', 'requester', 'user_id')
+                ->select($selectCols)
                 ->get();
 
             foreach ($recentDuplicates as $dup) {
@@ -209,7 +214,7 @@ class RequestController extends Controller
                 $cleanDupDesc  = $this->cleanTextForComparison($dupDescRaw);
 
                 $isSameUser = false;
-                if ($user_id && !empty($dup->user_id)) {
+                if ($user_id && isset($dup->user_id) && !empty($dup->user_id)) {
                     $isSameUser = ((int) $dup->user_id === (int) $user_id);
                 }
                 if (!$isSameUser && !empty($user_name) && !empty($dup->requester)) {
@@ -596,7 +601,9 @@ class RequestController extends Controller
         $req       = PostRequest::where('id', $id)
             ->where(function ($q) use ($user_name, $userId) {
                 if ($user_name) $q->where('requester', $user_name);
-                if ($userId)    $q->orWhere('user_id', $userId);
+                if ($userId && \Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'user_id')) {
+                    $q->orWhere('user_id', $userId);
+                }
             })
             ->firstOrFail();
 
