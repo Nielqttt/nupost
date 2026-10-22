@@ -1389,9 +1389,10 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
             <span class="sb-label">Calendar</span>
         </a>
         <a href="{{ route('admin.analytics') }}"
-           class="sb-item sb-item--analytics {{ request()->routeIs('admin.analytics*') ? 'active' : '' }}">
+           class="sb-item sb-item--analytics {{ request()->routeIs('admin.analytics*') ? 'active' : '' }}"
+           title="Request Analytics">
             <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            <span class="sb-label">Visualization</span>
+            <span class="sb-label">Request Analytics</span>
         </a>
         <a href="{{ route('admin.reports') }}"
            class="sb-item sb-item--reports {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
@@ -2292,7 +2293,7 @@ ${ctx}
 YOUR CAPABILITIES:
 - Answer anything about the request queue (pending, approved, rejected, high priority, requestors, titles)
 - Analyze Facebook/Meta performance: ${hasMeta ? 'you have live analytics data above — use it' : 'no Meta data on this page, tell user to visit the Analytics page for that info'}
-- Explain visualization trends: reach vs impressions, engagement rate, best days/hours to post, top content patterns
+- Explain request analytics trends: reach vs impressions, engagement rate, best days/hours to post, top content patterns
 - Give clear, actionable recommendations based on real data
 - Help the admin prioritize and plan their day
 

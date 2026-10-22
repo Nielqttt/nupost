@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Visualization')
+@section('title', 'Request Analytics')
 
 @section('head-styles')
 <style>
@@ -7,7 +7,7 @@
 .page-hd__title { font-family:var(--font-disp); font-size:22px; color:var(--ink); }
 .page-hd__sub   { font-size:13px; color:var(--ink-soft); margin-top:3px; }
 
-/* VISUALIZATION SEARCH BAR */
+/* REQUEST ANALYTICS SEARCH BAR */
 .vis-search-wrap {
     margin: 0 0 24px 0;
     display: flex;
@@ -201,7 +201,7 @@
 
 <div class="page-hd">
     <div>
-        <div class="page-hd__title">Visualization</div>
+        <div class="page-hd__title">Request Analytics</div>
         <div class="page-hd__sub">Platform breakdown, category distribution & requestor insights</div>
     </div>
 </div>
@@ -221,7 +221,7 @@
     <input type="text"
            id="vis-search-input"
            class="vis-search-input"
-           placeholder="Search visualization data, published requests, categories, platforms..."
+           placeholder="Search request analytics data, published requests, categories, platforms..."
            autocomplete="off">
     <span class="vis-search-pill" id="vis-search-pill">
         <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -442,7 +442,7 @@
 @section('scripts')
 <script>
 (function() {
-    /* ── Visualization Live Search ─────────────────────────────────────── */
+    /* ── Request Analytics Live Search ─────────────────────────────────── */
     let visSearchTimer = null;
     const visInput = document.getElementById('vis-search-input');
     const visClear = document.getElementById('vis-search-clear');
