@@ -24,6 +24,48 @@ class LegacyMobileApiController extends Controller
         return 'requests';
     }
 
+    private function cleanTextForComparison(string $text): string
+    {
+        $text = strtolower(trim($text));
+        $text = (string) preg_replace('/\b20[2-3]\d\b/', '', $text);
+        $text = (string) preg_replace('/\b(v\d+|part\s*\d+|copy|new|draft|edit|final)\b/i', '', $text);
+        $text = (string) preg_replace('/[^\p{L}\p{N}\s]/u', ' ', $text);
+        return trim((string) preg_replace('/\s+/', ' ', $text));
+    }
+
+    private function extractWordTokens(string $text): array
+    {
+        $clean = $this->cleanTextForComparison($text);
+        if ($clean === '') {
+            return [];
+        }
+        $stopWords = ['the', 'of', 'and', 'for', 'in', 'on', 'at', 'to', 'a', 'an', 'with', 'by'];
+        $words = array_values(array_filter(explode(' ', $clean), function ($w) use ($stopWords) {
+            return $w !== '' && !in_array($w, $stopWords);
+        }));
+        if (empty($words)) {
+            $words = array_values(array_filter(explode(' ', $clean)));
+        }
+        return $words;
+    }
+
+    private function tokenSortedText(string $text): string
+    {
+        $words = $this->extractWordTokens($text);
+        sort($words);
+        return implode(' ', $words);
+    }
+
+    private function tokenOverlapRatio(array $wordsA, array $wordsB): float
+    {
+        if (empty($wordsA) || empty($wordsB)) {
+            return 0.0;
+        }
+        $intersect = array_intersect($wordsA, $wordsB);
+        $maxCount = max(count($wordsA), count($wordsB));
+        return $maxCount > 0 ? (count($intersect) / $maxCount) * 100.0 : 0.0;
+    }
+
     private function ensureRequestsTableExists(): ?JsonResponse
     {
         $table = $this->requestsTable();
@@ -636,45 +678,89 @@ class LegacyMobileApiController extends Controller
                 }
 
                 $table = $this->requestsTable();
-                $normalizedTitle = strtolower($title);
+                $cleanTitle = $this->cleanTextForComparison($title);
+                $cleanDesc  = $this->cleanTextForComparison($description);
 
-                // Check for existing non-rejected request with identical title by this user in the last 24h
-                $sameTitleExists = DB::table($table)
+                // 4. Smart Fuzzy & Semantic Duplicate Detection (within 24h)
+                $recentDuplicates = DB::table($table)
                     ->where('status', '!=', 'Rejected')
                     ->where('created_at', '>=', now()->subHours(24))
-                    ->where(function ($q) use ($userId, $user, $table) {
-                        if (Schema::hasColumn($table, 'user_id')) {
-                            $q->where('user_id', $userId)->orWhere('requester', (string) ($user->name ?? ''));
+                    ->get();
+
+                foreach ($recentDuplicates as $dup) {
+                    $dupTitleRaw = trim((string) ($dup->title ?? ''));
+                    $dupDescRaw  = trim((string) ($dup->description ?? ''));
+                    $cleanDupTitle = $this->cleanTextForComparison($dupTitleRaw);
+                    $cleanDupDesc  = $this->cleanTextForComparison($dupDescRaw);
+
+                    $isSameUser = false;
+                    if (isset($dup->user_id) && $dup->user_id !== null) {
+                        $isSameUser = ((int) $dup->user_id === $userId);
+                    }
+                    if (!$isSameUser && !empty($user->name) && !empty($dup->requester)) {
+                        $isSameUser = (strcasecmp($dup->requester, $user->name) === 0);
+                    }
+
+                    // Token-sorted strings (handles word permutation / reordering, e.g. "College Week Ceremony" vs "College Ceremony Week")
+                    $sortedTitle = $this->tokenSortedText($title);
+                    $sortedDupTitle = $this->tokenSortedText($dupTitleRaw);
+                    $sortedMatch = ($sortedTitle !== '' && $sortedTitle === $sortedDupTitle);
+
+                    // Word tokens & overlap ratio
+                    $wordsTitle = $this->extractWordTokens($title);
+                    $wordsDupTitle = $this->extractWordTokens($dupTitleRaw);
+                    $tokenOverlap = $this->tokenOverlapRatio($wordsTitle, $wordsDupTitle);
+
+                    // Title normalized match (e.g. "College Week Ceremony 2026" vs "College Week Ceremony" OR "College Ceremony Week")
+                    $titleNormalizedMatch = ($cleanTitle !== '' && $cleanTitle === $cleanDupTitle) || $sortedMatch;
+
+                    $titleSim = 0.0;
+                    if (!$titleNormalizedMatch && $cleanTitle !== '' && $cleanDupTitle !== '') {
+                        $simRaw = 0.0;
+                        $simSorted = 0.0;
+                        similar_text($cleanTitle, $cleanDupTitle, $simRaw);
+                        similar_text($sortedTitle, $sortedDupTitle, $simSorted);
+                        $titleSim = max($simRaw, $simSorted, $tokenOverlap);
+                    } elseif ($titleNormalizedMatch) {
+                        $titleSim = 100.0;
+                    }
+
+                    $descSim = 0.0;
+                    if ($cleanDesc !== '' && $cleanDupDesc !== '') {
+                        if ($cleanDesc === $cleanDupDesc) {
+                            $descSim = 100.0;
                         } else {
-                            $q->where('requester', (string) ($user->name ?? ''));
+                            similar_text($cleanDesc, $cleanDupDesc, $descSim);
                         }
-                    })
-                    ->whereRaw('LOWER(TRIM(title)) = ?', [$normalizedTitle])
-                    ->exists();
+                    }
 
-                if ($sameTitleExists) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Duplicate request detected: You already submitted an active request with this title within the last 24 hours.',
-                    ], 422);
-                }
+                    $isUserDuplicate = $isSameUser && (
+                        $titleNormalizedMatch ||
+                        $sortedMatch ||
+                        $titleSim >= 75.0 ||
+                        $tokenOverlap >= 75.0 ||
+                        $descSim >= 80.0 ||
+                        ($titleSim >= 60.0 && $descSim >= 60.0)
+                    );
 
-                // 🛡️ Exact Duplicate Hash Check (within 24h)
-                $contentHash = md5($normalizedTitle . '|' . strtolower(trim($description)));
-                if (Schema::hasColumn($table, 'description')) {
-                    $recentDuplicates = DB::table($table)
-                        ->where('status', '!=', 'Rejected')
-                        ->where('created_at', '>=', now()->subHours(24))
-                        ->get();
+                    $isSystemDuplicate = (
+                        (($titleNormalizedMatch || $sortedMatch) && $descSim >= 75.0) ||
+                        (md5(strtolower($title) . '|' . strtolower($description)) === md5(strtolower($dupTitleRaw) . '|' . strtolower($dupDescRaw)))
+                    );
 
-                    foreach ($recentDuplicates as $dup) {
-                        $dupHash = md5(strtolower(trim($dup->title ?? '')) . '|' . strtolower(trim($dup->description ?? '')));
-                        if ($dupHash === $contentHash) {
-                            return response()->json([
-                                'success' => false,
-                                'message' => 'Duplicate submission detected. An identical request was submitted within the last 24 hours.',
-                            ], 422);
+                    if ($isUserDuplicate || $isSystemDuplicate) {
+                        $statusLabel = $dup->status ?: 'Pending Review';
+                        $existingTitleSnippet = strlen($dupTitleRaw) > 35 ? substr($dupTitleRaw, 0, 35) . '…' : $dupTitleRaw;
+
+                        $msg = "Duplicate request detected: A very similar request (\"{$existingTitleSnippet}\") was already submitted recently (Status: {$statusLabel}).";
+                        if ($isSameUser && in_array(strtolower($statusLabel), ['pending', 'pending review'])) {
+                            $msg .= " If you need to make changes, please edit your existing pending request instead of submitting a duplicate.";
                         }
+
+                        return response()->json([
+                            'success' => false,
+                            'message' => $msg,
+                        ], 422);
                     }
                 }
 

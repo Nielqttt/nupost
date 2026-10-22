@@ -251,10 +251,8 @@ class AntiSpamAndSettingsTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertJson([
-            'success' => false,
-            'message' => 'Duplicate request detected: You already submitted an active request with this title within the last 24 hours.',
-        ]);
+        $this->assertFalse($response->json('success'));
+        $this->assertStringContainsString('Duplicate request detected', $response->json('message'));
     }
 
     /**
@@ -289,10 +287,97 @@ class AntiSpamAndSettingsTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertJson([
-            'success' => false,
-            'message' => 'Duplicate submission detected. An identical request was submitted within the last 24 hours.',
+        $this->assertFalse($response->json('success'));
+        $this->assertStringContainsString('Duplicate request detected', $response->json('message'));
+    }
+
+    /**
+     * Test submitting a request with just a year appended (e.g. "College Week Ceremony 2026")
+     * when "College Week Ceremony" already exists is detected and rejected as a duplicate.
+     */
+    public function test_fuzzy_duplicate_with_year_suffix_is_rejected()
+    {
+        $user = User::create([
+            'name' => 'Grace Requestor',
+            'email' => 'grace@nupost.com',
+            'password' => bcrypt('password'),
+            'is_verified' => true,
+            'role' => 'requestor',
         ]);
+
+        PostRequest::create([
+            'title' => 'College Week Ceremony',
+            'requester' => $user->name,
+            'user_id' => $user->id,
+            'description' => 'College Week Ceremony opening details and stage preparation schedule.',
+            'category' => 'Posting with Ready-Made PubMat',
+            'priority' => 'Medium',
+            'status' => 'Pending Review',
+            'platform' => 'Facebook',
+            'preferred_date' => date('Y-m-d', strtotime('+3 days')),
+        ]);
+
+        // Attempt to submit "College Week Ceremony 2026"
+        $response = $this->withSession([
+            'name' => $user->name,
+            'role' => 'requestor',
+            'user_id' => $user->id,
+        ])->post(route('requestor.requests.store'), [
+            'submission_token' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'College Week Ceremony 2026',
+            'description' => 'College Week Ceremony opening details and stage preparation schedule.',
+            'category' => 'Posting with Ready-Made PubMat',
+            'priority' => 'Low',
+            'platforms' => ['Facebook'],
+            'post_date' => date('Y-m-d', strtotime('+3 days')),
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertEquals(1, PostRequest::count());
+    }
+
+    /**
+     * Test that permuted word order (e.g. "College Ceremony Week" vs "College Week Ceremony") is rejected.
+     */
+    public function test_permuted_word_order_duplicate_title_is_rejected()
+    {
+        $user = User::create([
+            'name' => 'Henry Requestor',
+            'email' => 'henry@nupost.com',
+            'password' => bcrypt('password'),
+            'is_verified' => true,
+            'role' => 'requestor',
+        ]);
+
+        PostRequest::create([
+            'title' => 'College Week Ceremony',
+            'requester' => $user->name,
+            'user_id' => $user->id,
+            'description' => 'College Week Ceremony details and student program.',
+            'category' => 'Posting with Ready-Made PubMat',
+            'priority' => 'Medium',
+            'status' => 'Pending Review',
+            'platform' => 'Facebook',
+            'preferred_date' => date('Y-m-d', strtotime('+3 days')),
+        ]);
+
+        // Attempt to submit "College Ceremony Week"
+        $response = $this->withSession([
+            'name' => $user->name,
+            'role' => 'requestor',
+            'user_id' => $user->id,
+        ])->post(route('requestor.requests.store'), [
+            'submission_token' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'College Ceremony Week',
+            'description' => 'College Ceremony Week details and student program.',
+            'category' => 'Posting with Ready-Made PubMat',
+            'priority' => 'Low',
+            'platforms' => ['Facebook'],
+            'post_date' => date('Y-m-d', strtotime('+3 days')),
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertEquals(1, PostRequest::where('requester', $user->name)->count());
     }
 }
 

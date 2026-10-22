@@ -23,6 +23,65 @@ class RequestController extends Controller
     }
 
     /**
+     * Normalize text for fuzzy duplicate & anti-spam detection:
+     * - Lowercase
+     * - Strips 4-digit years (e.g. 2024, 2025, 2026, 2027)
+     * - Strips version/edition tags (e.g. v2, part 1, copy, new, draft)
+     * - Strips punctuation/symbols and collapses whitespace
+     */
+    private function cleanTextForComparison(string $text): string
+    {
+        $text = strtolower(trim($text));
+        $text = (string) preg_replace('/\b20[2-3]\d\b/', '', $text);
+        $text = (string) preg_replace('/\b(v\d+|part\s*\d+|copy|new|draft|edit|final)\b/i', '', $text);
+        $text = (string) preg_replace('/[^\p{L}\p{N}\s]/u', ' ', $text);
+        return trim((string) preg_replace('/\s+/', ' ', $text));
+    }
+
+    /**
+     * Extract normalized word tokens (filtering minor stop-words)
+     */
+    private function extractWordTokens(string $text): array
+    {
+        $clean = $this->cleanTextForComparison($text);
+        if ($clean === '') {
+            return [];
+        }
+        $stopWords = ['the', 'of', 'and', 'for', 'in', 'on', 'at', 'to', 'a', 'an', 'with', 'by'];
+        $words = array_values(array_filter(explode(' ', $clean), function ($w) use ($stopWords) {
+            return $w !== '' && !in_array($w, $stopWords);
+        }));
+        if (empty($words)) {
+            $words = array_values(array_filter(explode(' ', $clean)));
+        }
+        return $words;
+    }
+
+    /**
+     * Token-sort text: sorts words alphabetically so word-order variations
+     * (e.g. "College Week Ceremony" vs "College Ceremony Week") produce identical strings.
+     */
+    private function tokenSortedText(string $text): string
+    {
+        $words = $this->extractWordTokens($text);
+        sort($words);
+        return implode(' ', $words);
+    }
+
+    /**
+     * Calculate token overlap ratio (percentage of matching words between two texts)
+     */
+    private function tokenOverlapRatio(array $wordsA, array $wordsB): float
+    {
+        if (empty($wordsA) || empty($wordsB)) {
+            return 0.0;
+        }
+        $intersect = array_intersect($wordsA, $wordsB);
+        $maxCount = max(count($wordsA), count($wordsB));
+        return $maxCount > 0 ? (count($intersect) / $maxCount) * 100.0 : 0.0;
+    }
+
+    /**
      * Display list of requests
      */
     public function index(Request $request)
@@ -134,40 +193,97 @@ class RequestController extends Controller
 
             $title = trim((string) $request->input('title', ''));
             $description = trim((string) $request->input('description', ''));
-            $normalizedTitle = strtolower($title);
+            $cleanTitle = $this->cleanTextForComparison($title);
+            $cleanDesc  = $this->cleanTextForComparison($description);
 
-            // 4. Duplicate title check for the user within 24 hours
-            $duplicateTitleExists = PostRequest::where('status', '!=', 'Rejected')
-                ->where('created_at', '>=', now()->subHours(24))
-                ->where(function ($q) use ($user_id, $user_name) {
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('post_requests', 'user_id') && $user_id) {
-                        $q->where('user_id', $user_id)->orWhere('requester', $user_name);
-                    } else {
-                        $q->where('requester', $user_name);
-                    }
-                })
-                ->whereRaw('LOWER(TRIM(title)) = ?', [$normalizedTitle])
-                ->exists();
-
-            if ($duplicateTitleExists) {
-                $msg = 'Duplicate request detected: You have already submitted an active request with this title within the last 24 hours.';
-                if ($request->expectsJson() || $request->is('api/*')) {
-                    return response()->json(['success' => false, 'message' => $msg], 422);
-                }
-                return back()->withInput()->with('error', $msg);
-            }
-
-            // 5. Exact content hash duplicate check (title + description within 24h)
-            $contentHash = md5($normalizedTitle . '|' . strtolower($description));
+            // 4. Smart Fuzzy & Semantic Duplicate Detection (within 24h)
             $recentDuplicates = PostRequest::where('status', '!=', 'Rejected')
                 ->where('created_at', '>=', now()->subHours(24))
-                ->select('title', 'description')
+                ->select('id', 'title', 'description', 'status', 'requester', 'user_id')
                 ->get();
 
             foreach ($recentDuplicates as $dup) {
-                $dupHash = md5(strtolower(trim($dup->title ?? '')) . '|' . strtolower(trim($dup->description ?? '')));
-                if ($dupHash === $contentHash) {
-                    $msg = 'Duplicate submission detected: An identical request was submitted within the last 24 hours.';
+                $dupTitleRaw = trim((string) ($dup->title ?? ''));
+                $dupDescRaw  = trim((string) ($dup->description ?? ''));
+                $cleanDupTitle = $this->cleanTextForComparison($dupTitleRaw);
+                $cleanDupDesc  = $this->cleanTextForComparison($dupDescRaw);
+
+                $isSameUser = false;
+                if ($user_id && !empty($dup->user_id)) {
+                    $isSameUser = ((int) $dup->user_id === (int) $user_id);
+                }
+                if (!$isSameUser && !empty($user_name) && !empty($dup->requester)) {
+                    $isSameUser = (strcasecmp($dup->requester, $user_name) === 0);
+                }
+
+                // Token-sorted strings (handles word permutation / reordering, e.g. "College Week Ceremony" vs "College Ceremony Week")
+                $sortedTitle = $this->tokenSortedText($title);
+                $sortedDupTitle = $this->tokenSortedText($dupTitleRaw);
+                $sortedMatch = ($sortedTitle !== '' && $sortedTitle === $sortedDupTitle);
+
+                // Word tokens & overlap ratio
+                $wordsTitle = $this->extractWordTokens($title);
+                $wordsDupTitle = $this->extractWordTokens($dupTitleRaw);
+                $tokenOverlap = $this->tokenOverlapRatio($wordsTitle, $wordsDupTitle);
+
+                // Title normalized match (e.g. "College Week Ceremony 2026" vs "College Week Ceremony" OR "College Ceremony Week")
+                $titleNormalizedMatch = ($cleanTitle !== '' && $cleanTitle === $cleanDupTitle) || $sortedMatch;
+
+                // Title fuzzy similarity (taking the best of sequential similarity, token-sorted similarity, and word overlap)
+                $titleSim = 0.0;
+                if (!$titleNormalizedMatch && $cleanTitle !== '' && $cleanDupTitle !== '') {
+                    $simRaw = 0.0;
+                    $simSorted = 0.0;
+                    similar_text($cleanTitle, $cleanDupTitle, $simRaw);
+                    similar_text($sortedTitle, $sortedDupTitle, $simSorted);
+                    $titleSim = max($simRaw, $simSorted, $tokenOverlap);
+                } elseif ($titleNormalizedMatch) {
+                    $titleSim = 100.0;
+                }
+
+                // Description fuzzy similarity
+                $descSim = 0.0;
+                if ($cleanDesc !== '' && $cleanDupDesc !== '') {
+                    if ($cleanDesc === $cleanDupDesc) {
+                        $descSim = 100.0;
+                    } else {
+                        similar_text($cleanDesc, $cleanDupDesc, $descSim);
+                    }
+                }
+
+                // Detection rules:
+                // Rule A (Same user):
+                // - Title match (ignoring years like 2026, version tags, punctuation, or word-order permutation)
+                // - OR Title similarity >= 75%
+                // - OR Token overlap >= 75% (e.g. 3 of 4 words match)
+                // - OR Description is identical or nearly identical (>= 80%)
+                // - OR Both title >= 60% and description >= 60%
+                $isUserDuplicate = $isSameUser && (
+                    $titleNormalizedMatch ||
+                    $sortedMatch ||
+                    $titleSim >= 75.0 ||
+                    $tokenOverlap >= 75.0 ||
+                    $descSim >= 80.0 ||
+                    ($titleSim >= 60.0 && $descSim >= 60.0)
+                );
+
+                // Rule B (System-wide):
+                // - Exact or normalized/token-sorted title match WITH identical/high description (>= 75%)
+                // - OR Content hash match
+                $isSystemDuplicate = (
+                    (($titleNormalizedMatch || $sortedMatch) && $descSim >= 75.0) ||
+                    (md5(strtolower($title) . '|' . strtolower($description)) === md5(strtolower($dupTitleRaw) . '|' . strtolower($dupDescRaw)))
+                );
+
+                if ($isUserDuplicate || $isSystemDuplicate) {
+                    $statusLabel = $dup->status ?: 'Pending Review';
+                    $existingTitleSnippet = strlen($dupTitleRaw) > 35 ? substr($dupTitleRaw, 0, 35) . '…' : $dupTitleRaw;
+
+                    $msg = "Duplicate request detected: A very similar request (\"{$existingTitleSnippet}\") was already submitted recently (Status: {$statusLabel}).";
+                    if ($isSameUser && in_array(strtolower($statusLabel), ['pending', 'pending review'])) {
+                        $msg .= " If you need to make changes, please edit your existing pending request instead of submitting a duplicate.";
+                    }
+
                     if ($request->expectsJson() || $request->is('api/*')) {
                         return response()->json(['success' => false, 'message' => $msg], 422);
                     }
