@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Audit Logs')
+@section('title', 'Activity History')
 
 @section('head-styles')
 <style>
@@ -249,27 +249,27 @@
         {{-- HEADER --}}
         <div class="audit-header">
             <div class="audit-header__left">
-                <h1>System Audit Logs</h1>
-                <p>Immutable record of administrative reviews, user authentications, and system actions.</p>
+                <h1>Activity History</h1>
+                <p>A clear timeline of user actions, logins, and request updates across NUPost.</p>
             </div>
         </div>
 
         {{-- STATS ROW --}}
         <div class="audit-stats-grid">
             <div class="stat-box">
-                <div class="stat-box-label">Total Logged Events</div>
+                <div class="stat-box-label">Total Activities</div>
                 <div class="stat-box-val">{{ number_format($stats['total'] ?? 0) }}</div>
             </div>
             <div class="stat-box">
-                <div class="stat-box-label">Approvals Logged</div>
+                <div class="stat-box-label">Approvals</div>
                 <div class="stat-box-val" style="color:#059669;">{{ number_format($stats['approvals'] ?? 0) }}</div>
             </div>
             <div class="stat-box">
-                <div class="stat-box-label">Rejections Logged</div>
+                <div class="stat-box-label">Rejections</div>
                 <div class="stat-box-val" style="color:#dc2626;">{{ number_format($stats['rejections'] ?? 0) }}</div>
             </div>
             <div class="stat-box">
-                <div class="stat-box-label">Authentications</div>
+                <div class="stat-box-label">Sign-ins</div>
                 <div class="stat-box-val" style="color:#2563eb;">{{ number_format($stats['logins'] ?? 0) }}</div>
             </div>
         </div>
@@ -278,18 +278,18 @@
         <div class="audit-controls">
             <div class="filter-tabs">
                 <a href="{{ route('admin.audit-logs', ['category' => 'all', 'search' => $search]) }}" 
-                   class="filter-tab {{ $category === 'all' || !$category ? 'active' : '' }}">All Events</a>
+                   class="filter-tab {{ $category === 'all' || !$category ? 'active' : '' }}">All Activities</a>
                 <a href="{{ route('admin.audit-logs', ['category' => 'requests', 'search' => $search]) }}" 
                    class="filter-tab {{ $category === 'requests' ? 'active' : '' }}">Post Requests</a>
                 <a href="{{ route('admin.audit-logs', ['category' => 'auth', 'search' => $search]) }}" 
-                   class="filter-tab {{ $category === 'auth' ? 'active' : '' }}">Logins</a>
+                   class="filter-tab {{ $category === 'auth' ? 'active' : '' }}">Sign-ins</a>
                 <a href="{{ route('admin.audit-logs', ['category' => 'system', 'search' => $search]) }}" 
-                   class="filter-tab {{ $category === 'system' ? 'active' : '' }}">System / Keys</a>
+                   class="filter-tab {{ $category === 'system' ? 'active' : '' }}">System Updates</a>
             </div>
 
             <form action="{{ route('admin.audit-logs') }}" method="GET" class="search-form">
                 <input type="hidden" name="category" value="{{ $category }}">
-                <input type="text" name="search" value="{{ $search }}" placeholder="Search actor or action..." class="search-input">
+                <input type="text" name="search" value="{{ $search }}" placeholder="Search user, action, or date..." class="search-input">
                 <button type="submit" class="btn-search">Search</button>
             </form>
         </div>
@@ -299,8 +299,8 @@
             <table class="audit-table">
                 <thead>
                     <tr>
-                        <th style="width: 220px;">Timestamp</th>
-                        <th>Actor</th>
+                        <th style="width: 220px;">Date & Time</th>
+                        <th>User</th>
                         <th>Role</th>
                         <th>Action Performed</th>
                     </tr>
@@ -361,7 +361,7 @@
                         <tr>
                             <td colspan="4" style="text-align:center; padding:48px 20px; color:var(--ink-soft, #64748b);">
                                 <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom:8px; opacity:0.5;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                                <div>No audit records found matching your query.</div>
+                                <div>No activity records found matching your query.</div>
                             </td>
                         </tr>
                     @endforelse
