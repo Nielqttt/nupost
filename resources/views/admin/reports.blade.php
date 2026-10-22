@@ -202,6 +202,42 @@
 .fb-ph-block p { font-size: 10.5px; color: #93c5fd; font-weight: 500; }
 
 /* ═══════════════════════════════════════════════════
+   REPORTS & DOWNLOADS
+═══════════════════════════════════════════════════ */
+.reports-row {
+    display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;
+}
+.rep-row-item {
+    background: var(--card, #fff);
+    border: 1.5px solid var(--card-border, #e5e7eb);
+    border-radius: 14px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    transition: transform .15s, box-shadow .15s;
+    text-decoration: none;
+}
+.rep-row-item:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+.rep-row-item__icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rep-row-item__name { font-size: 13.5px; font-weight: 700; color: var(--ink, #1a1a1a); width: 160px; flex-shrink: 0; }
+.rep-row-item__desc { font-size: 12px; color: var(--ink-soft, #7a7672); flex: 1; line-height: 1.5; }
+.rep-row-item__use  { font-size: 11px; color: var(--ink-faint, #9ca3af); width: 260px; flex-shrink: 0; text-align: right; }
+.rep-row-item__rows { font-size: 11.5px; font-weight: 700; padding: 4px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-left: 12px; }
+.rep-row-item__dl {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 10px; border: none;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: var(--font, sans-serif); transition: opacity .15s, transform .15s; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0; margin-left: 10px;
+}
+.rep-row-item__dl:hover { opacity: 0.88; transform: translateY(-1px); }
+
+@media (max-width: 900px) {
+    .rep-row-item { flex-wrap: wrap; }
+    .rep-row-item__name { width: auto; flex: 1; }
+    .rep-row-item__desc { width: 100%; order: 3; }
+    .rep-row-item__use  { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════
    REQUEST FILTER & RECORDS
 ═══════════════════════════════════════════════════ */
 .filter-panel {
@@ -278,7 +314,8 @@ table.main-table td { padding: 12px 16px; font-size: 12.5px; vertical-align: mid
 [data-theme="dark"] .table-panel,
 [data-theme="dark"] .fb-mcard,
 [data-theme="dark"] .fb-chart-panel,
-[data-theme="dark"] .fb-ph-card {
+[data-theme="dark"] .fb-ph-card,
+[data-theme="dark"] .rep-row-item {
     background: var(--card) !important;
     border-color: var(--card-border) !important;
     color: var(--ink) !important;
@@ -293,6 +330,7 @@ table.main-table td { padding: 12px 16px; font-size: 12.5px; vertical-align: mid
 [data-theme="dark"] .fb-mcard__value,
 [data-theme="dark"] .filter-panel__title,
 [data-theme="dark"] .table-panel__title,
+[data-theme="dark"] .rep-row-item__name,
 [data-theme="dark"] .page-header h1 {
     color: var(--ink) !important;
 }
@@ -300,8 +338,12 @@ table.main-table td { padding: 12px 16px; font-size: 12.5px; vertical-align: mid
 [data-theme="dark"] .fb-banner__sub,
 [data-theme="dark"] .fb-mcard__label,
 [data-theme="dark"] .table-panel__meta,
+[data-theme="dark"] .rep-row-item__desc,
 [data-theme="dark"] .page-header p {
     color: var(--ink-soft) !important;
+}
+[data-theme="dark"] .rep-row-item__use {
+    color: var(--ink-faint) !important;
 }
 [data-theme="dark"] .fb-banner {
     background: rgba(0, 35, 102, 0.25) !important;
@@ -400,6 +442,32 @@ table.main-table td { padding: 12px 16px; font-size: 12.5px; vertical-align: mid
     $r_rejected = $requests->where('status','Rejected')->count();
 
     $categories = \App\Models\PostRequest::selectRaw('category')->distinct()->orderBy('category')->pluck('category');
+
+    /* ── Preset Reports & Downloads Data ── */
+    $rep_total_all       = \App\Models\PostRequest::count();
+    $rep_approved_posted = \App\Models\PostRequest::whereIn('status', ['Approved', 'Posted'])->count();
+    $rep_pending_review  = \App\Models\PostRequest::whereIn('status', ['Pending', 'Pending Review', 'Under Review'])->count();
+    $rep_rejected_count  = \App\Models\PostRequest::where('status', 'Rejected')->count();
+    $rep_this_month      = \App\Models\PostRequest::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count();
+    $rep_high_prio       = \App\Models\PostRequest::whereIn('priority', ['High', 'Urgent'])->count();
+
+    $rep_items = [
+        ['name'=>'All Requests',     'desc'=>'Complete list of every request — all statuses, categories, users.',          'use'=>'Full data export for records or analysis',         'icon_bg'=>'#eff6ff','icon_c'=>'#2563eb','btn_c'=>'#2563eb','rows'=>$rep_total_all,       'url'=>route('admin.reports.export')],
+        ['name'=>'Approved & Posted','desc'=>'Only requests approved or published to social media platforms.',              'use'=>'Performance review & content calendar reference',   'icon_bg'=>'#f0fdf4','icon_c'=>'#10b981','btn_c'=>'#10b981','rows'=>$rep_approved_posted,  'url'=>route('admin.reports.export').'?status=approved'],
+        ['name'=>'Pending Review',   'desc'=>'Requests waiting for admin action — needs to be reviewed or approved.',      'use'=>'Monitor backlog & follow up with requestors',       'icon_bg'=>'#fffbeb','icon_c'=>'#d97706','btn_c'=>'#f59e0b','rows'=>$rep_pending_review,   'url'=>route('admin.reports.export').'?status=pending'],
+        ['name'=>'Rejected',         'desc'=>'Requests that were not approved — useful for quality analysis.',             'use'=>'Identify common rejection patterns',                'icon_bg'=>'#fef2f2','icon_c'=>'#ef4444','btn_c'=>'#ef4444','rows'=>$rep_rejected_count,   'url'=>route('admin.reports.export').'?status=rejected'],
+        ['name'=>'This Month',       'desc'=>'All requests submitted this month — '.now()->format('F Y').'.',              'use'=>'Monthly reporting & management updates',            'icon_bg'=>'#faf5ff','icon_c'=>'#7c3aed','btn_c'=>'#8b5cf6','rows'=>$rep_this_month,       'url'=>route('admin.reports.export').'?date_from='.now()->startOfMonth()->format('Y-m-d').'&date_to='.now()->endOfMonth()->format('Y-m-d')],
+        ['name'=>'High Priority',    'desc'=>'Urgent and High priority requests — time-sensitive items.',                  'use'=>'Escalation tracking & urgent handling',             'icon_bg'=>'#fff7ed','icon_c'=>'#f97316','btn_c'=>'#f97316','rows'=>$rep_high_prio,        'url'=>route('admin.reports.export').'?priority=high'],
+    ];
+
+    $rep_icons = [
+        '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+        '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+        '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+        '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+        '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+        '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    ];
 @endphp
 
 {{-- PAGE HEADER --}}
@@ -708,7 +776,7 @@ table.main-table td { padding: 12px 16px; font-size: 12.5px; vertical-align: mid
                             @if(!empty($post['permalink_url']))
                             <a href="{{ $post['permalink_url'] }}" target="_blank"
                                style="font-size:11.5px;color:var(--navy,#002366);font-weight:600;text-decoration:none;display:flex;align-items:center;gap:4px;">
-                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                                 View
                             </a>
                             @endif
@@ -757,6 +825,33 @@ table.main-table td { padding: 12px 16px; font-size: 12.5px; vertical-align: mid
         @endforeach
     </div>
 @endif
+
+{{-- ═══════════════════════════════════════════════
+     REPORTS & DOWNLOADS
+════════════════════════════════════════════════ --}}
+<div class="fb-divider">
+    <div class="fb-divider__line"></div>
+    <div class="fb-divider__label">📥 Reports & Downloads</div>
+    <div class="fb-divider__line"></div>
+</div>
+
+<div class="reports-row">
+    @foreach($rep_items as $ri => $rep)
+    <div class="rep-row-item">
+        <div class="rep-row-item__icon" style="background:{{ $rep['icon_bg'] }};">
+            <svg width="18" height="18" fill="none" stroke="{{ $rep['icon_c'] }}" stroke-width="2" viewBox="0 0 24 24">{!! $rep_icons[$ri] !!}</svg>
+        </div>
+        <div class="rep-row-item__name">{{ $rep['name'] }}</div>
+        <div class="rep-row-item__desc">{{ $rep['desc'] }}</div>
+        <div class="rep-row-item__use">Use for: {{ $rep['use'] }}</div>
+        <span class="rep-row-item__rows" style="background:{{ $rep['icon_bg'] }};color:{{ $rep['icon_c'] }};">{{ $rep['rows'] }} rows</span>
+        <a href="{{ $rep['url'] }}" class="rep-row-item__dl" style="background:{{ $rep['btn_c'] }};color:white;">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+        </a>
+    </div>
+    @endforeach
+</div>
 
 {{-- ═══════════════════════════════════════════════
      REQUEST RECORDS & FILTER

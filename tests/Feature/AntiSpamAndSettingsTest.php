@@ -688,12 +688,13 @@ class AntiSpamAndSettingsTest extends TestCase
             'admin_name' => $admin->name,
         ];
 
-        // 1. Dashboard: Facebook / Meta removed
+        // 1. Dashboard: Facebook / Meta & Reports and Downloads removed
         $dashRes = $this->withSession($session)->get(route('admin.dashboard'));
         $dashRes->assertStatus(200);
         $dashContent = $dashRes->getContent();
         $this->assertStringNotContainsString('fbInsightsChart', $dashContent);
         $this->assertStringNotContainsString('META FB SECTION', $dashContent);
+        $this->assertStringNotContainsString('Reports & Downloads', $dashContent);
 
         // 2. Visualization: FB and Request Volume Trend removed
         $visRes = $this->withSession($session)->get(route('admin.analytics'));
@@ -705,12 +706,13 @@ class AntiSpamAndSettingsTest extends TestCase
         $this->assertStringNotContainsString('Refresh FB Data', $visContent);
         $this->assertStringNotContainsString('fbAnalyticsChart', $visContent);
 
-        // 3. Reports: Request Volume Trend & FB visualization & Refresh FB button present
+        // 3. Reports: Request Volume Trend, FB visualization, Reports & Downloads, & Refresh FB button present
         $repRes = $this->withSession($session)->get(route('admin.reports'));
         $repRes->assertStatus(200);
         $repContent = $repRes->getContent();
         $this->assertStringContainsString('Request Volume Trend', $repContent);
         $this->assertStringContainsString('Facebook & Meta Visualization', $repContent);
+        $this->assertStringContainsString('Reports & Downloads', $repContent);
         $this->assertStringContainsString('trendChart', $repContent);
         if (!empty(env('FB_PAGE_ID')) && !empty(env('FB_PAGE_ACCESS_TOKEN'))) {
             $this->assertStringContainsString('Refresh FB Data', $repContent);
