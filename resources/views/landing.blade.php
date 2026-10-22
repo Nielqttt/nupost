@@ -102,10 +102,131 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-page);
+            background-image:
+                radial-gradient(ellipse 70% 50% at 85% -5%, rgba(245, 158, 11, 0.22) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 45% at 10% 20%, rgba(0, 35, 102, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 70% 50% at 90% 65%, rgba(0, 35, 102, 0.14) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 45% at 8% 88%, rgba(245, 158, 11, 0.20) 0%, transparent 60%);
+            background-attachment: fixed;
             color: var(--text-main);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             transition: background-color 0.2s ease, color 0.2s ease;
+            min-height: 100vh;
+        }
+
+        [data-theme="dark"] body {
+            background-color: #040c1e;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 85% -5%, rgba(245, 158, 11, 0.26) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 45% at 10% 20%, rgba(29, 78, 216, 0.32) 0%, transparent 60%),
+                radial-gradient(ellipse 70% 50% at 90% 65%, rgba(29, 78, 216, 0.26) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 45% at 8% 88%, rgba(245, 158, 11, 0.22) 0%, transparent 60%);
+            background-attachment: fixed;
+        }
+
+        /* ── Ambient Yellow & Blue Background Glows ── */
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-glow {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(85px);
+            -webkit-filter: blur(85px);
+            opacity: 0.95;
+            transform: translateZ(0);
+        }
+
+        /* Non-Dark Mode (Light Mode): Yellow & Blue Glows */
+        .glow-top-blue {
+            top: -120px;
+            left: -80px;
+            width: 660px;
+            height: 660px;
+            background: radial-gradient(circle, rgba(0, 35, 102, 0.25) 0%, rgba(29, 78, 216, 0.15) 45%, transparent 75%);
+        }
+
+        .glow-top-gold {
+            top: -60px;
+            right: -60px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.28) 0%, rgba(217, 119, 6, 0.14) 45%, transparent 75%);
+        }
+
+        .glow-mid-blue {
+            top: 40%;
+            right: -100px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(29, 78, 216, 0.18) 0%, rgba(0, 35, 102, 0.12) 45%, transparent 75%);
+        }
+
+        .glow-mid-gold {
+            top: 46%;
+            left: -80px;
+            width: 560px;
+            height: 560px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, rgba(251, 191, 36, 0.12) 45%, transparent 75%);
+        }
+
+        .glow-bottom-blue {
+            bottom: -80px;
+            left: 15%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 35, 102, 0.22) 0%, rgba(29, 78, 216, 0.14) 45%, transparent 75%);
+        }
+
+        .glow-bottom-gold {
+            bottom: -50px;
+            right: 5%;
+            width: 540px;
+            height: 540px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.14) 45%, transparent 75%);
+        }
+
+        /* Dark Mode: Yellow & Blue Glows */
+        [data-theme="dark"] .glow-top-blue {
+            background: radial-gradient(circle, rgba(29, 78, 216, 0.38) 0%, rgba(13, 56, 140, 0.22) 45%, transparent 75%);
+        }
+
+        [data-theme="dark"] .glow-top-gold {
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.30) 0%, rgba(217, 119, 6, 0.16) 45%, transparent 75%);
+        }
+
+        [data-theme="dark"] .glow-mid-blue {
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.32) 0%, rgba(29, 78, 216, 0.18) 45%, transparent 75%);
+        }
+
+        [data-theme="dark"] .glow-mid-gold {
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.26) 0%, rgba(251, 191, 36, 0.14) 45%, transparent 75%);
+        }
+
+        [data-theme="dark"] .glow-bottom-blue {
+            background: radial-gradient(circle, rgba(29, 78, 216, 0.34) 0%, transparent 75%);
+        }
+
+        [data-theme="dark"] .glow-bottom-gold {
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.28) 0%, rgba(217, 119, 6, 0.14) 45%, transparent 75%);
+        }
+
+        /* Page Stacking */
+        .site-header,
+        main,
+        .site-footer {
+            position: relative;
+            z-index: 1;
         }
 
         /* Page Loading Indicator */
@@ -115,7 +236,8 @@
             left: 0;
             height: 3px;
             width: 0%;
-            background: #002366;
+            background: linear-gradient(90deg, #002366 0%, #1d4ed8 50%, #f59e0b 100%);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
             z-index: 99999;
             pointer-events: none;
             transition: width 0.2s ease, opacity 0.2s ease;
@@ -131,11 +253,18 @@
 
         /* ── Header & Navigation ── */
         .site-header {
-            background-color: var(--bg-card);
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+
+        [data-theme="dark"] .site-header {
+            background-color: rgba(4, 12, 30, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .header-inner {
@@ -274,16 +403,17 @@
 
         /* ── Hero Section ── */
         .hero-section {
-            padding: 64px 0 54px;
+            padding: 72px 0 60px;
             border-bottom: 1px solid var(--border);
-            background-color: var(--bg-card);
+            background-color: transparent;
         }
 
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 48px;
-            align-items: center;
+        [data-theme="dark"] .hero-section {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .hero-content {
+            max-width: 820px;
         }
 
         .institution-badge {
@@ -306,41 +436,44 @@
         }
 
         .hero-title {
-            font-size: 38px;
+            font-size: 40px;
             font-weight: 800;
-            line-height: 1.22;
+            line-height: 1.2;
             color: var(--text-main);
             letter-spacing: -0.6px;
             margin-bottom: 18px;
         }
 
         .hero-desc {
-            font-size: 16px;
+            font-size: 16.5px;
             color: var(--text-muted);
             line-height: 1.65;
-            margin-bottom: 28px;
-            max-width: 540px;
+            margin-bottom: 30px;
+            max-width: 700px;
         }
 
         .hero-actions {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 32px;
+            margin-bottom: 34px;
             flex-wrap: wrap;
         }
 
         .hero-features-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            max-width: 700px;
         }
 
         .feature-check-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 13px;
+            gap: 10px;
+            font-size: 13.5px;
             color: var(--text-mid);
         }
 
@@ -350,106 +483,24 @@
             font-size: 14px;
         }
 
-        /* ── Sample Request Preview Card (Honest & Clean) ── */
-        .preview-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-md);
-            overflow: hidden;
-        }
-
-        .preview-card-header {
-            padding: 14px 18px;
-            background-color: var(--bg-subtle);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .preview-card-header-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .preview-card-body {
-            padding: 20px;
-        }
-
-        .status-chip {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 10px;
-            border-radius: var(--radius-sm);
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
-        .status-approved {
-            background-color: var(--status-green-bg);
-            color: var(--status-green-text);
-            border: 1px solid var(--status-green-border);
-        }
-
-        .preview-item-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-main);
-            margin: 12px 0 6px;
-            line-height: 1.4;
-        }
-
-        .preview-item-sub {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-        }
-
-        .preview-data-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            padding: 14px 0;
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 16px;
-        }
-
-        .data-label {
-            font-size: 11px;
-            color: var(--text-faint);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .data-val {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-mid);
-        }
-
-        .preview-note-box {
-            background-color: var(--bg-subtle);
-            border-left: 3px solid var(--nu-navy);
-            padding: 10px 14px;
-            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-            font-size: 12.5px;
-            color: var(--text-mid);
-            line-height: 1.5;
-        }
-
         /* ── Steps / Process Section ── */
         .section-block {
             padding: 64px 0;
+            background-color: transparent;
+        }
+
+        .section-alt {
+            background-color: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        [data-theme="dark"] .section-alt {
+            background-color: rgba(17, 28, 56, 0.50);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .section-header {
@@ -486,11 +537,29 @@
         }
 
         .step-card {
-            background-color: var(--bg-card);
+            background-color: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 24px;
             box-shadow: var(--shadow-sm);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(217, 119, 6, 0.35);
+        }
+
+        [data-theme="dark"] .step-card {
+            background-color: rgba(17, 28, 56, 0.82);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="dark"] .step-card:hover {
+            border-color: rgba(245, 158, 11, 0.4);
         }
 
         .step-num {
@@ -528,11 +597,29 @@
         }
 
         .category-card {
-            background-color: var(--bg-card);
+            background-color: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 20px;
             box-shadow: var(--shadow-sm);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(0, 35, 102, 0.3);
+        }
+
+        [data-theme="dark"] .category-card {
+            background-color: rgba(17, 28, 56, 0.82);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="dark"] .category-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
         }
 
         .category-card h4 {
@@ -550,11 +637,18 @@
 
         /* ── Guidelines Section ── */
         .guidelines-card {
-            background-color: var(--bg-card);
+            background-color: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 28px;
             box-shadow: var(--shadow-sm);
+        }
+
+        [data-theme="dark"] .guidelines-card {
+            background-color: rgba(17, 28, 56, 0.82);
+            border-color: rgba(255, 255, 255, 0.08);
         }
 
         .guidelines-grid {
@@ -597,10 +691,17 @@
 
         /* ── FAQ Section ── */
         .faq-accordion {
-            background-color: var(--bg-card);
+            background-color: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             overflow: hidden;
+        }
+
+        [data-theme="dark"] .faq-accordion {
+            background-color: rgba(17, 28, 56, 0.82);
+            border-color: rgba(255, 255, 255, 0.08);
         }
 
         .faq-item {
@@ -656,7 +757,7 @@
 
         /* ── Call to Action Banner ── */
         .cta-banner {
-            background-color: #002366;
+            background: linear-gradient(135deg, #002366 0%, #0a358c 60%, #001a4e 100%);
             color: #ffffff;
             border-radius: var(--radius-lg);
             padding: 44px 36px;
@@ -664,13 +765,15 @@
             align-items: center;
             justify-content: space-between;
             gap: 32px;
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 10px 30px rgba(0, 35, 102, 0.25);
             margin: 40px 0 60px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
         [data-theme="dark"] .cta-banner {
-            background-color: #0f1c3f;
-            border: 1px solid #1e2c4f;
+            background: linear-gradient(135deg, #091a42 0%, #0f2b6b 60%, #040c1e 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .cta-text h3 {
@@ -705,9 +808,16 @@
 
         /* ── Footer ── */
         .site-footer {
-            background-color: var(--bg-card);
+            background-color: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-top: 1px solid var(--border);
             padding: 40px 0 30px;
+        }
+
+        [data-theme="dark"] .site-footer {
+            background-color: rgba(4, 12, 30, 0.80);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .footer-grid {
@@ -781,10 +891,6 @@
 
         /* ── Responsive ── */
         @media (max-width: 900px) {
-            .hero-grid {
-                grid-template-columns: 1fr;
-                gap: 36px;
-            }
             .hero-title {
                 font-size: 32px;
             }
@@ -814,9 +920,6 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-            .preview-data-grid {
-                grid-template-columns: 1fr;
-            }
             .cta-actions {
                 flex-direction: column;
                 width: 100%;
@@ -830,6 +933,16 @@
 <body>
 
     <div id="np-page-progress"></div>
+
+    <!-- ── Ambient Yellow & Blue Background Glows (Light & Dark Mode) ── -->
+    <div class="ambient-bg" aria-hidden="true">
+        <div class="ambient-glow glow-top-blue"></div>
+        <div class="ambient-glow glow-top-gold"></div>
+        <div class="ambient-glow glow-mid-blue"></div>
+        <div class="ambient-glow glow-mid-gold"></div>
+        <div class="ambient-glow glow-bottom-blue"></div>
+        <div class="ambient-glow glow-bottom-gold"></div>
+    </div>
 
     <!-- ── Header ── -->
     <header class="site-header">
@@ -860,7 +973,7 @@
     <main>
         <!-- ── Hero Section ── -->
         <section class="hero-section">
-            <div class="container hero-grid">
+            <div class="container">
                 <div class="hero-content">
                     <div class="institution-badge">
                         <span>National University Lipa</span> &bull; <span>Marketing Office</span>
@@ -899,48 +1012,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Realistic Request Ticket Preview (Clean & Grounded) -->
-                <div class="preview-wrapper">
-                    <div class="preview-card">
-                        <div class="preview-card-header">
-                            <div class="preview-card-header-left">
-                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                <span>REQUEST TICKET #REQ-00248</span>
-                            </div>
-                            <span class="status-chip status-approved">Approved</span>
-                        </div>
-
-                        <div class="preview-card-body">
-                            <div class="data-label">Event / Activity Title</div>
-                            <div class="preview-item-title">NU Lipa College Week 2026: General Assembly & Opening</div>
-                            <div class="preview-item-sub">Requester: Central Student Government &bull; Office of Student Affairs</div>
-
-                            <div class="preview-data-grid">
-                                <div>
-                                    <div class="data-label">Category</div>
-                                    <div class="data-val">Posting with Ready-Made PubMat</div>
-                                </div>
-                                <div>
-                                    <div class="data-label">Target Channels</div>
-                                    <div class="data-val">Facebook, Instagram</div>
-                                </div>
-                                <div>
-                                    <div class="data-label">Preferred Date</div>
-                                    <div class="data-val">October 28, 2026 &bull; 2:00 PM</div>
-                                </div>
-                                <div>
-                                    <div class="data-label">Attached Media</div>
-                                    <div class="data-val">2 Graphics (PNG, 1080x1080)</div>
-                                </div>
-                            </div>
-
-                            <div class="preview-note-box">
-                                <strong>Marketing Note:</strong> "Pubmat passed brand verification. Content is queued for publication on scheduled release date."
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -976,7 +1047,7 @@
         </section>
 
         <!-- ── Request Categories ── -->
-        <section class="section-block" id="categories" style="background-color: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <section class="section-block section-alt" id="categories">
             <div class="container">
                 <div class="section-header">
                     <div class="section-tag">Categories</div>
@@ -1045,7 +1116,7 @@
         </section>
 
         <!-- ── FAQ Section ── -->
-        <section class="section-block" id="faq" style="background-color: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <section class="section-block section-alt" id="faq">
             <div class="container">
                 <div class="section-header">
                     <div class="section-tag">FAQ</div>
